@@ -25,11 +25,17 @@ export default function LoginPage() {
             const { error } = await supabase.auth.signInWithPassword({ email, password });
             if (error) setError(error.message);
         } else {
-            const { error } = await supabase.auth.signUp({ email, password });
+            const { data, error } = await supabase.auth.signUp({ email, password });
             if (error) {
                 setError(error.message);
+            } else if (data.session) {
+                // Auto-confirmed — session created, app will redirect
             } else {
-                setSuccess('Conta criada! Verifica o teu email para confirmar.');
+                // Email confirmation required — auto-login
+                const { error: loginErr } = await supabase.auth.signInWithPassword({ email, password });
+                if (loginErr) {
+                    setSuccess('Conta criada! Verifica o teu email para confirmar.');
+                }
             }
         }
 
