@@ -1,3 +1,4 @@
+'use client';
 import React, { useState } from 'react';
 import { Sparkles, Command, Send, RefreshCw, Layout, Smartphone, Monitor, Code, Plus } from 'lucide-react';
 import GenerativeWidget from '@/components/visionary/GenerativeWidget';
