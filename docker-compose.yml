@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: pulse-redis
+    ports:
+      - "6380:6379"
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: pulse-api
+    environment:
+      DATABASE_URL: postgresql://postgres:Acainaboah2018%40@db.maettbueysvonubqpmhv.supabase.co:5432/postgres
+      REDIS_URL: redis://redis:6379/0
+      SUPABASE_URL: https://maettbueysvonubqpmhv.supabase.co
+      SUPABASE_KEY: sb_publishable_B2Z34G1Q0LCraqzlfMUmcA_GmAPy2Pg
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./apps/api:/app
+    depends_on:
+      - redis
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: pulse-web
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_SUPABASE_URL: https://maettbueysvonubqpmhv.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_B2Z34G1Q0LCraqzlfMUmcA_GmAPy2Pg
+    depends_on:
+      - api

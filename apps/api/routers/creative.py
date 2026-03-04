@@ -1,0 +1,110 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlmodel import Session, select
+from db import get_session
+from models import MediaAsset, PromptArtifact, PersonaProfile, KnowledgePack, AvatarProfile, VoiceProfile, AvatarScene
+from pydantic import BaseModel
+from typing import List, Optional, Dict
+import uuid
+from datetime import datetime
+
+router = APIRouter(prefix="/creative", tags=["creative"])
+
+class PromptGenRequest(BaseModel):
+    persona_id: str
+    knowledge_id: str
+    job_type: str
+    user_input: str
+
+@router.post("/generate-prompt")
+async def generate_prompt(req: PromptGenRequest, db: Session = Depends(get_session)):
+    persona = db.get(PersonaProfile, req.persona_id)
+    knowledge = db.get(KnowledgePack, req.knowledge_id)
+    
+    if not persona: raise HTTPException(status_code=404, detail="Persona not found")
+
+    # Jarvis Multi-stage Prompt Synthesis (Mock)
+    system_directive = f"Act as {persona.name}. Tone: {persona.tone_json.get('primary', 'Professional')}"
+    knowledge_context = f"Use context from: {knowledge.name if knowledge else 'General Knowledge'}"
+    
+    synthesized_prompt = f"[STYLIZED] {system_directive}. {knowledge_context}. Input: {req.user_input}. Output specialized for {req.job_type}."
+    
+    artifact = PromptArtifact(
+        id=f"prm_{uuid.uuid4().hex[:6]}",
+        tenant_id="t1",
+        prompt_type="text_to_image", # Fixed for mock
+        model_provider="Midjourney",
+        model_name="v6.1",
+        prompt_text=synthesized_prompt,
+        qa_status="pending",
+        risk_score=0.05
+    )
+    db.add(artifact)
+    db.commit()
+    db.refresh(artifact)
+    return artifact
+
+@router.get("/assets")
+async def list_assets(asset_type: Optional[str] = None, db: Session = Depends(get_session)):
+    statement = select(MediaAsset)
+    if asset_type:
+        statement = statement.where(MediaAsset.asset_type == asset_type)
+    return db.exec(statement.order_by(MediaAsset.created_at.desc())).all()
+
+@router.post("/assets/{asset_id}/qa")
+async def run_asset_qa(asset_id: str, db: Session = Depends(get_session)):
+    asset = db.get(MediaAsset, asset_id)
+    if not asset: raise HTTPException(status_code=404, detail="Asset not found")
+    
+    # Mock AI Brand Safety Check
+    asset.qa_status = "approved"
+    asset.risk_score = 0.01
+    db.add(asset)
+    db.commit()
+    return {"status": "success", "asset_id": asset_id, "qa_result": "approved"}
+
+# --- IMAGE LAB & MEME SPRINT ---
+
+@router.post("/image-lab/product-to-scene")
+async def generate_product_scene(
+    product_image_url: str,
+    preset: str, # studio, lifestyle, outdoor, cyberpunk
+    db: Session = Depends(get_session)
+):
+    asset_id = f"ast_{uuid.uuid4().hex[:6]}"
+    # Mock generation process
+    new_asset = MediaAsset(
+        id=asset_id,
+        tenant_id="t1",
+        asset_type="image",
+        title=f"Product Scene: {preset.capitalize()}",
+        storage_url=f"https://cdn.pulse.ai/generated/{asset_id}.png",
+        provenance_json={"model": "Pulse Vision v2", "preset": preset},
+        status="approved"
+    )
+    db.add(new_asset)
+    db.commit()
+    return new_asset
+
+@router.get("/trends/viral")
+async def get_viral_trends():
+    return [
+        {"id": "tr_1", "name": "Quiet Luxury Aesthetics", "reach": "high", "sentiment": "positive"},
+        {"id": "tr_2", "name": "Cyberpunk 2077 Resurgence", "reach": "medium", "sentiment": "neutral"},
+        {"id": "tr_3", "name": "Eco-Minimalism", "reach": "viral", "sentiment": "positive"}
+    ]
+
+@router.post("/meme/generate")
+async def generate_meme(trend_id: str, db: Session = Depends(get_session)):
+    asset_id = f"meme_{uuid.uuid4().hex[:6]}"
+    new_asset = MediaAsset(
+        id=asset_id,
+        tenant_id="t1",
+        asset_type="image",
+        title=f"Meme for Trend {trend_id}",
+        storage_url=f"https://cdn.pulse.ai/memes/{asset_id}.jpg",
+        provenance_json={"type": "Meme Gen", "trend_id": trend_id},
+        status="approved"
+    )
+    db.add(new_asset)
+    db.commit()
+    return new_asset

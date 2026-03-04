@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-0: #05060A;
+  --bg-1: #070B14;
+  --surface-1: #0B1220;
+  --surface-2: #0E172A;
+  --stroke: #1C263A;
+  --text-1: #E6EAF2;
+  --text-2: #AAB3C5;
+  --text-3: #7C879D;
+  --primary: #7B61FF;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  --secondary: #1E3A8A;
+  --ai-accent: #2DD4BF;
+  --ai: #2DD4BF;
+  --critical: #EF4444;
+  --success: #22C55E;
+  --warning: #F59E0B;
+}
+
+@media (max-width: 768px) {
+
+  html,
+  body {
+    overflow-x: hidden;
+    position: relative;
+    height: 100%;
+  }
+}
+
+body {
+  background-color: var(--bg-0);
+  color: var(--text-1);
+}
+
+.jarvis-gradient {
+  background: linear-gradient(135deg, #7B61FF 0%, #1E3A8A 50%, #2DD4BF 100%);
+}
+
+.jarvis-glow {
+  box-shadow: 0 0 20px rgba(123, 97, 255, 0.15);
+}
+
+.surface-glass {
+  background: rgba(11, 18, 32, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--stroke);
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--stroke) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--stroke);
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--text-3);
+}

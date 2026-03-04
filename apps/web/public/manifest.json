@@ -1,0 +1,22 @@
+{
+    "name": "Naboah Pulse",
+    "short_name": "Pulse",
+    "description": "Omnichannel AI Command Center",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#05060A",
+    "theme_color": "#0066FF",
+    "icons": [
+        {
+            "src": "/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
