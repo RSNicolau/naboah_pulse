@@ -1,3 +1,4 @@
+'use client';
 import React, { useState } from 'react';
 import ReportingDashboard from '@/components/analytics/ReportingDashboard';
 import ExportModal from '@/components/analytics/ExportModal';
