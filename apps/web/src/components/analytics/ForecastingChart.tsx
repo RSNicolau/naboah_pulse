@@ -15,7 +15,7 @@ export default function ForecastingChart() {
                     </div>
                     <div className="flex flex-col">
                         <h2 className="text-2xl font-black text-white tracking-tight uppercase tracking-wider">Forecasting Pro</h2>
-                        <p className="text-text-3 text-sm font-medium">Projeções de receita via Jarvis Predictive Intelligence.</p>
+                        <p className="text-text-3 text-sm font-medium">Projeções de receita via Pulse Predictive Intelligence.</p>
                     </div>
                 </div>
                 <div className="flex gap-2">
@@ -77,7 +77,7 @@ export default function ForecastingChart() {
                 <div className="absolute right-8 top-1/2 -translate-y-1/2 flex flex-col items-end gap-2">
                     <div className="flex items-center gap-2 px-4 py-2 bg-primary/20 border border-primary/40 rounded-full">
                         <Zap size={12} className="text-primary fill-primary" />
-                        <span className="text-[9px] font-black text-primary uppercase tracking-widest">Predição Jarvis</span>
+                        <span className="text-[9px] font-black text-primary uppercase tracking-widest">Predição Pulse AI</span>
                     </div>
                 </div>
             </div>
@@ -85,7 +85,7 @@ export default function ForecastingChart() {
             <div className="flex items-center gap-3 p-6 bg-surface-1 border border-stroke rounded-2xl">
                 <Info size={16} className="text-primary" />
                 <p className="text-[11px] text-text-2 font-medium">
-                    <span className="font-bold text-white uppercase tracking-tighter">Insight do Jarvis:</span> O forecasting indica um pico de demanda na próxima quinzena. Sugerimos reforçar a "AI Squad" de Vendas VIP para capturar o aumento de leads projetado.
+                    <span className="font-bold text-white uppercase tracking-tighter">Insight do Pulse AI:</span> O forecasting indica um pico de demanda na próxima quinzena. Sugerimos reforçar a "AI Squad" de Vendas VIP para capturar o aumento de leads projetado.
                 </p>
             </div>
 

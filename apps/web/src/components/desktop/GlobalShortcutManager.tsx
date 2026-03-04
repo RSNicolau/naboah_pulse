@@ -3,10 +3,10 @@ import { Command, Zap, Keyboard, Monitor, Bell, ShieldCheck } from 'lucide-react
 
 export default function GlobalShortcutManager() {
     const shortcuts = [
-        { id: '1', name: 'Invocação Jarvis', keys: '⌘ ⇧ P', description: 'Abre a overlay do Jarvis sobre qualquer app.' },
+        { id: '1', name: 'Invocação Pulse AI', keys: '⌘ ⇧ P', description: 'Abre a overlay do Pulse AI sobre qualquer app.' },
         { id: '2', name: 'Captura Rápida', keys: '⌘ ⇧ K', description: 'Cria uma nota ou lead instantaneamente.' },
         { id: '3', name: 'Toggle Huddle', keys: '⌘ ⇧ H', description: 'Entra/Sai da sala de áudio ativa.' },
-        { id: '4', name: 'Modo Foco', keys: '⌘ ⇧ F', description: 'Silencia notificações e ativa Jarvis auto-reply.' },
+        { id: '4', name: 'Modo Foco', keys: '⌘ ⇧ F', description: 'Silencia notificações e ativa Pulse AI auto-reply.' },
     ];
 
     return (

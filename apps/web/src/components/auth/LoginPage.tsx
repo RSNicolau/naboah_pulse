@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Eye, EyeOff, Loader2, Zap } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 type Mode = 'login' | 'signup';
 
@@ -52,11 +52,15 @@ export default function LoginPage() {
                 {/* Logo mark */}
                 <div className="flex flex-col items-center gap-3">
                     <div className="w-11 h-11 rounded-2xl jarvis-gradient flex items-center justify-center shadow-glow-primary">
-                        <Zap className="w-5 h-5 text-white" strokeWidth={2.5} />
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L4 7v10l8 5 8-5V7l-8-5z" stroke="white" strokeWidth="1.5" strokeLinejoin="round" fill="white" fillOpacity="0.1"/>
+                            <path d="M12 6l-4 2.5v5L12 16l4-2.5v-5L12 6z" stroke="white" strokeWidth="1.5" strokeLinejoin="round" fill="white" fillOpacity="0.25"/>
+                            <circle cx="12" cy="11" r="2" fill="white" fillOpacity="0.9"/>
+                        </svg>
                     </div>
                     <div className="text-center">
                         <h2 className="text-lg font-bold text-text-1 tracking-tight">Naboah Pulse</h2>
-                        <p className="text-xs text-text-3 mt-0.5">Jarvis ChannelHub</p>
+                        <p className="text-[10px] text-text-3/60 mt-1 tracking-widest uppercase">Omnichannel Command Center</p>
                     </div>
                 </div>
 
@@ -69,7 +73,7 @@ export default function LoginPage() {
                         <p className="text-xs text-text-3 mt-1">
                             {mode === 'login'
                                 ? 'Entra na tua conta para continuar'
-                                : 'Junta-te ao Jarvis ChannelHub'}
+                                : 'Junta-te ao Naboah Pulse'}
                         </p>
                     </div>
 
@@ -142,8 +146,8 @@ export default function LoginPage() {
                     </div>
                 </div>
 
-                <p className="text-center text-[10px] text-text-3/40 tracking-widest uppercase">
-                    Naboah Pulse · Omnichannel Command Center
+                <p className="text-center text-[10px] text-text-3/30 tracking-wider">
+                    Powered by <span className="text-text-3/50">Naboah Tech</span>
                 </p>
             </div>
         </div>

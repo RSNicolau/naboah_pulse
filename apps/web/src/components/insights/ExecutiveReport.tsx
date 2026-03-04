@@ -13,7 +13,7 @@ export default function ExecutiveReport() {
                     <h3 className="text-xl font-black text-white uppercase tracking-tighter italic flex items-center gap-3">
                         <BookOpen size={24} className="text-primary" /> Narrativa Executiva
                     </h3>
-                    <p className="text-xs text-text-3 font-medium uppercase tracking-widest">Fevereiro 2024 • Gerado por Jarvis v3</p>
+                    <p className="text-xs text-text-3 font-medium uppercase tracking-widest">Fevereiro 2024 • Gerado por Pulse AI</p>
                 </div>
                 <div className="p-3 bg-white/5 border border-white/5 rounded-2xl text-text-3">
                     <Sparkles size={20} />

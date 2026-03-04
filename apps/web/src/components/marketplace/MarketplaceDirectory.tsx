@@ -2,12 +2,12 @@
 import React, { useState } from 'react';
 import { LayoutGrid, Puzzle, ExternalLink, Download, ShieldCheck, Box, Search, Filter, Star, Info, CheckCircle2 } from 'lucide-react';
 
-const categories = ['Todos', 'AI & Jarvis', 'Messaging', 'CRM', 'Support', 'Developer'];
+const categories = ['Todos', 'AI & Pulse', 'Messaging', 'CRM', 'Support', 'Developer'];
 
 const apps = [
     { id: 'app_1', name: 'WhatsApp Business Pro', developer: 'Meta', category: 'Messaging', installs: '1.2k', rating: 4.8, description: 'Integração oficial com API de nuvem da Meta.', isOfficial: true, icon: 'WA' },
     { id: 'app_2', name: 'Slack Connect', developer: 'Slack', category: 'Collaboration', installs: '850', rating: 4.5, description: 'Transfira tickets do Suporte direto para canais do Slack.', isOfficial: false, icon: 'SL' },
-    { id: 'app_3', name: 'Jarvis Turbo Writer', developer: 'Pulse Corp', category: 'AI & Jarvis', installs: '3.4k', rating: 4.9, description: 'Geração de conteúdo em massa com a nova API Pulse AI.', isOfficial: true, icon: 'JT' },
+    { id: 'app_3', name: 'Pulse Turbo Writer', developer: 'Pulse Corp', category: 'AI & Pulse', installs: '3.4k', rating: 4.9, description: 'Geração de conteúdo em massa com a nova API Pulse AI.', isOfficial: true, icon: 'PT' },
     { id: 'app_4', name: 'Stripe Billing Connect', developer: 'Stripe', category: 'Payments', installs: '2.1k', rating: 4.7, description: 'Sincronize assinaturas e faturas com o Pulse Billing.', isOfficial: true, icon: 'ST' },
     { id: 'app_5', name: 'Google Sheets Export', developer: 'DevCommunity', category: 'Developer', installs: '500', rating: 4.2, description: 'Exportação programada de dados para planilhas.', isOfficial: false, icon: 'GS' },
     { id: 'app_6', name: 'Zendesk Bridge', developer: 'HelpDesk Inc', category: 'Support', installs: '150', rating: 4.0, description: 'Migração bidirecional de dados entre plataformas.', isOfficial: false, icon: 'ZD' },

@@ -266,7 +266,7 @@ export default function MessageThread({ conversationId, contactName, channel, on
                 {messages.map((msg) => {
                     const isOutbound = msg.direction === 'outbound';
                     const isAgent = msg.sender_type === 'agent';
-                    const senderLabel = isAgent ? 'Jarvis (Agent)' : isOutbound ? 'Eu' : contactName;
+                    const senderLabel = isAgent ? 'Pulse AI (Agent)' : isOutbound ? 'Eu' : contactName;
 
                     return (
                         <div

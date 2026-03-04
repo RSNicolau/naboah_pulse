@@ -18,7 +18,7 @@ export default function MemeSprint() {
                     <h3 className="text-xl font-black text-white uppercase tracking-tighter italic flex items-center gap-3">
                         <TrendingUp size={24} className="text-success" /> Viral Meme Sprint
                     </h3>
-                    <p className="text-[10px] text-text-3 font-bold uppercase tracking-[0.2em]">Jarvis Trend Detection v4</p>
+                    <p className="text-[10px] text-text-3 font-bold uppercase tracking-[0.2em]">Pulse Trend Detection v4</p>
                 </div>
                 <div className="px-4 py-1.5 bg-success/10 border border-success/20 rounded-full flex items-center gap-2">
                     <Zap size={10} className="text-success" />

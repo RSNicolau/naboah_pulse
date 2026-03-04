@@ -17,7 +17,7 @@ export default function GrowthPage() {
                             </div>
                             Growth Intelligence
                         </h1>
-                        <p className="text-text-3 font-medium">B.I. Preditivo: O Jarvis antecipa o comportamento do seu mercado.</p>
+                        <p className="text-text-3 font-medium">B.I. Preditivo: O Pulse AI antecipa o comportamento do seu mercado.</p>
                     </div>
 
                     <button className="bg-bg-1 border border-stroke px-8 py-3 rounded-2xl text-[10px] font-black text-white hover:border-primary transition-all uppercase tracking-widest flex items-center gap-3">
@@ -63,7 +63,7 @@ export default function GrowthPage() {
                                 <Zap size={18} fill="white" /> Growth Strategy
                             </h4>
                             <p className="text-xs font-bold leading-relaxed opacity-90">
-                                O Jarvis detectou uma oportunidade de expansão no segmento Enterprise. Sugerimos realocar 15% do budget de marketing para retargeting preditivo.
+                                O Pulse AI detectou uma oportunidade de expansão no segmento Enterprise. Sugerimos realocar 15% do budget de marketing para retargeting preditivo.
                             </p>
                             <button className="w-full py-4 bg-white text-primary font-black text-[10px] uppercase tracking-widest rounded-2xl hover:bg-opacity-90 transition-all">
                                 APLICAR ESTRATÉGIA AGORA

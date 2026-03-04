@@ -78,7 +78,7 @@ export default function InventoryManager() {
             <div className="p-6 bg-secondary/5 border border-secondary/10 rounded-2xl flex items-center gap-4">
                 <AlertCircle size={20} className="text-secondary" />
                 <p className="text-[10px] text-text-2 leading-relaxed italic">
-                    **Jarvis Insight**: O consumo de `Neural Mug` subiu em Porto Hub. Sugiro mover 20 unidades do armazém Central SP amanha.
+                    **Pulse Insight**: O consumo de `Neural Mug` subiu em Porto Hub. Sugiro mover 20 unidades do armazém Central SP amanha.
                 </p>
             </div>
 

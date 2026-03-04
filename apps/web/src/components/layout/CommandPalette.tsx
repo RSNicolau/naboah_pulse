@@ -286,7 +286,7 @@ export default function CommandPalette() {
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="text-[9px] text-text-3 font-bold uppercase tracking-widest">Powered by Jarvis</span>
+                        <span className="text-[9px] text-text-3 font-bold uppercase tracking-widest">Powered by Naboah Tech</span>
                         <Command size={12} className="text-primary" />
                     </div>
                 </div>

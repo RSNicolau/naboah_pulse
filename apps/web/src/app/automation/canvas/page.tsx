@@ -51,7 +51,7 @@ export default function AutomationCanvasPage() {
                     </div>
                     <div className="flex items-center gap-2">
                         <Sparkles size={12} className="text-primary" />
-                        <span className="text-[9px] font-bold text-text-2">Jarvis otimizou 3 conexões neste fluxo.</span>
+                        <span className="text-[9px] font-bold text-text-2">Pulse AI otimizou 3 conexões neste fluxo.</span>
                     </div>
                 </div>
                 <div className="text-[9px] font-black text-text-3 uppercase tracking-widest">

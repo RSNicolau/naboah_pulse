@@ -5,7 +5,7 @@ import { MousePointer2, GitBranch, Zap, MessageSquare, Plus, Save, Play, Setting
 export default function FlowCanvas() {
     const [nodes, setNodes] = useState([
         { id: '1', type: 'trigger', label: 'Instagram Message', pos: { x: 50, y: 150 } },
-        { id: '2', type: 'ai', label: 'Jarvis Sentiment', pos: { x: 300, y: 150 } },
+        { id: '2', type: 'ai', label: 'Pulse AI Sentiment', pos: { x: 300, y: 150 } },
         { id: '3', type: 'logic', label: 'Positive?', pos: { x: 550, y: 150 } },
         { id: '4', type: 'action', label: 'Send Coupon', pos: { x: 800, y: 50 } },
         { id: '5', type: 'action', label: 'Alert Agent', pos: { x: 800, y: 250 } },
@@ -53,7 +53,7 @@ export default function FlowCanvas() {
                             </div>
                             <div className="flex flex-col gap-1">
                                 <span className="text-xs font-bold text-white">{node.label}</span>
-                                <p className="text-[9px] text-text-3 leading-tight">Configurado via Jarvis Engine v4</p>
+                                <p className="text-[9px] text-text-3 leading-tight">Configurado via Pulse Engine v4</p>
                             </div>
 
                             {/* Connection Points */}

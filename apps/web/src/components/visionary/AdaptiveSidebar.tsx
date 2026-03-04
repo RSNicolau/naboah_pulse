@@ -72,7 +72,7 @@ export default function AdaptiveSidebar({ context = 'sales' }: { context?: 'sale
                         <span className="text-[9px] font-black uppercase tracking-widest">IA Auto-Action</span>
                     </div>
                     <p className="text-[10px] text-text-2 leading-relaxed">
-                        Com base nesta conversa, o Jarvis sugere abrir o <strong>Calculador de Margem</strong> para facilitar a negociação de desconto.
+                        Com base nesta conversa, o Pulse AI sugere abrir o <strong>Calculador de Margem</strong> para facilitar a negociação de desconto.
                     </p>
                     <button className="w-full py-3 bg-bg-1 border border-stroke rounded-xl text-[9px] font-black text-white uppercase tracking-widest hover:bg-ai-accent hover:border-ai-accent transition-all">
                         EXECUTAR AGORA

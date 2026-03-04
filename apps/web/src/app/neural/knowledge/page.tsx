@@ -67,7 +67,7 @@ export default function NeuralKnowledgePage() {
                         <span className="text-[10px] font-black text-text-2 uppercase tracking-widest">Testar Cérebro:</span>
                         <input
                             type="text"
-                            placeholder="Faça uma pergunta difícil para testar o conhecimento do Jarvis..."
+                            placeholder="Faça uma pergunta difícil para testar o conhecimento do Pulse AI..."
                             className="w-[400px] bg-transparent border-none text-[10px] font-bold text-white focus:ring-0 outline-none placeholder:text-text-3"
                         />
                     </div>

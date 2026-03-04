@@ -6,7 +6,7 @@ import { LayoutDashboard, Inbox, PenTool, Bot, BarChart3 } from 'lucide-react';
 const mobileNavItems = [
     { icon: LayoutDashboard, label: 'Home', href: '/' },
     { icon: Inbox, label: 'Inbox', href: '/inbox' },
-    { icon: Bot, label: 'Jarvis', href: '#' }, // Trigger jarvis rail
+    { icon: Bot, label: 'Pulse AI', href: '#' }, // Trigger pulse AI rail
     { icon: PenTool, label: 'Post', href: '/content' },
     { icon: BarChart3, label: 'Analytics', href: '/analytics/reports' },
 ];

@@ -253,7 +253,7 @@ export default function AgentGrid() {
                         <div className="flex flex-col gap-4">
                             <div className="flex flex-col gap-1.5">
                                 <label className="text-[10px] font-bold text-text-3 uppercase tracking-widest">Agent Name *</label>
-                                <input type="text" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Ex: Jarvis Finance"
+                                <input type="text" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Ex: Pulse Finance"
                                     className="bg-surface-1 border border-stroke rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-text-3 focus:outline-none focus:border-primary/50 transition-colors" />
                             </div>
                             <div className="flex flex-col gap-1.5">

@@ -52,7 +52,7 @@ export default function VisualInsightOverlay({ labels, ocrText, summary }: Visua
 
             <div className="mt-4 flex items-center gap-2">
                 <CheckCircle size={10} className="text-success" />
-                <span className="text-[8px] text-text-3 font-bold uppercase">Validado pelo Jarvis Vision v4</span>
+                <span className="text-[8px] text-text-3 font-bold uppercase">Validado pelo Pulse AI Vision v4</span>
             </div>
         </div>
     );

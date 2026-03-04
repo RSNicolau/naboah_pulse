@@ -27,7 +27,7 @@ export default function SystemTrayPreview() {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Brain size={16} className="text-primary" />
-                        <span className="text-xs font-bold text-white">Jarvis Thinking</span>
+                        <span className="text-xs font-bold text-white">Pulse AI Thinking</span>
                     </div>
                     <div className="flex gap-1">
                         {[1, 2, 3].map(i => <Circle key={i} size={4} className="text-primary fill-primary animate-bounce" style={{ animationDelay: `${i * 0.2}s` }} />)}

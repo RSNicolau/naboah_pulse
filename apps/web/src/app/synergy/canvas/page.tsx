@@ -48,7 +48,7 @@ export default function SynergyPage() {
                     <div className="flex flex-col gap-4">
                         {[
                             { user: 'Rodrigo', msg: 'Acho que esse fluxo de checkout pode ser simplificado.', time: 'agora' },
-                            { user: 'Sasha (Jarvis)', msg: 'Sugestão Neural: Adicionar confirmação em dois fatores no nó 4.', time: '1m' },
+                            { user: 'Sasha (Pulse AI)', msg: 'Sugestão Neural: Adicionar confirmação em dois fatores no nó 4.', time: '1m' },
                         ].map((c, i) => (
                             <div key={i} className="flex flex-col gap-1">
                                 <div className="flex items-center justify-between">

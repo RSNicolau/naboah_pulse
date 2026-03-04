@@ -14,7 +14,7 @@ export default function SourceManager() {
             <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-1">
                     <h3 className="text-xl font-black text-white uppercase tracking-tighter italic">Neural Sources</h3>
-                    <p className="text-xs text-text-3 font-medium">Conecte fontes de dados para o cérebro do Jarvis.</p>
+                    <p className="text-xs text-text-3 font-medium">Conecte fontes de dados para o cérebro do Pulse AI.</p>
                 </div>
                 <div className="flex gap-4">
                     <button className="flex items-center gap-2 px-6 py-3 bg-bg-0 border border-stroke rounded-2xl text-[10px] font-black text-white uppercase tracking-widest hover:border-primary transition-all">
@@ -65,9 +65,9 @@ export default function SourceManager() {
                     <RefreshCw size={24} className="text-white animate-spin-slow" />
                 </div>
                 <div className="flex flex-col gap-1 relative z-10">
-                    <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Jarvis Autopilot sync</span>
+                    <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Pulse AI Autopilot sync</span>
                     <p className="text-xs text-text-2 font-medium leading-relaxed">
-                        O Jarvis está programado para re-indexar sua Central de Ajuda toda madrugada às 03:00 AM para garantir que as respostas no **Pulse Horizon** estejam sempre atualizadas.
+                        O Pulse AI está programado para re-indexar sua Central de Ajuda toda madrugada às 03:00 AM para garantir que as respostas no **Pulse Horizon** estejam sempre atualizadas.
                     </p>
                 </div>
             </div>

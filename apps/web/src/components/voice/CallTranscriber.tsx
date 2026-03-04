@@ -25,7 +25,7 @@ export default function CallTranscriber() {
                     </div>
                     <div className="flex flex-col gap-0.5">
                         <h3 className="text-sm font-bold text-white tracking-tight uppercase tracking-widest">Pulse Voice Transcriber</h3>
-                        <span className="text-[9px] text-text-3 font-medium uppercase tracking-tighter">Powered by Jarvis Audio Intelligence</span>
+                        <span className="text-[9px] text-text-3 font-medium uppercase tracking-tighter">Powered by Naboah Tech</span>
                     </div>
                 </div>
 
@@ -63,7 +63,7 @@ export default function CallTranscriber() {
                 {/* Real-time listening indicator */}
                 <div className="flex items-center gap-3 text-text-3 italic text-[10px] animate-pulse py-4">
                     <Sparkles size={12} className="text-ai-accent" />
-                    <span>Jarvis está ouvindo e transcrevendo...</span>
+                    <span>Pulse AI está ouvindo e transcrevendo...</span>
                 </div>
             </div>
 
@@ -71,7 +71,7 @@ export default function CallTranscriber() {
             <div className="p-6 bg-gradient-to-r from-ai-accent/5 to-primary/5 border border-ai-accent/20 rounded-[1.5rem] flex flex-col gap-4">
                 <div className="flex items-center gap-3 text-ai-accent">
                     <Zap size={16} className="fill-ai-accent" />
-                    <span className="text-[11px] font-black uppercase tracking-widest">Insights ao vivo (Jarvis)</span>
+                    <span className="text-[11px] font-black uppercase tracking-widest">Insights ao vivo (Pulse AI)</span>
                 </div>
                 <div className="flex flex-col gap-3">
                     <div className="flex gap-4 p-3 bg-bg-0/50 rounded-xl border border-stroke">

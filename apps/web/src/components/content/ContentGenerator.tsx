@@ -151,7 +151,7 @@ export default function ContentGenerator() {
                         <div className="w-10 h-10 rounded-xl jarvis-gradient flex items-center justify-center shadow-lg shadow-primary/20">
                             <Wand2 className="text-white w-6 h-6" />
                         </div>
-                        Jarvis Content Studio
+                        Pulse Content Studio
                     </h2>
                     <p className="text-text-3 text-sm">Gere scripts, legendas e variações de campanha com IA.</p>
                 </div>
@@ -188,7 +188,7 @@ export default function ContentGenerator() {
                         >
                             {generating
                                 ? <><Loader2 className="w-4 h-4 animate-spin" /> A gerar...</>
-                                : <><Wand2 className="w-4 h-4" /> Gerar com Jarvis</>}
+                                : <><Wand2 className="w-4 h-4" /> Gerar com Pulse AI</>}
                         </button>
                     </div>
                 </div>
@@ -244,7 +244,7 @@ export default function ContentGenerator() {
 
                         {/* QA Panel */}
                         <div className="flex flex-col gap-3">
-                            <h3 className="text-[10px] font-bold text-text-3 uppercase tracking-widest pl-2">Jarvis QA & Compliance</h3>
+                            <h3 className="text-[10px] font-bold text-text-3 uppercase tracking-widest pl-2">Pulse AI QA & Compliance</h3>
                             <div className="bg-bg-1 border border-stroke rounded-2xl p-5 flex flex-col gap-5">
                                 {generating ? (
                                     <div className="flex flex-col gap-4 animate-pulse">

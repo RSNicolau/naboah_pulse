@@ -47,7 +47,7 @@ export default function VisionaryLabPage() {
                             </div>
                             <input
                                 type="text"
-                                placeholder="Jarvis, mude a interface para modo vendas e crie um gráfico de projeção..."
+                                placeholder="Pulse AI, mude a interface para modo vendas e crie um gráfico de projeção..."
                                 className="flex-1 bg-transparent border-none text-white font-bold placeholder:text-text-3 text-lg focus:ring-0 outline-none px-2"
                                 value={prompt}
                                 onChange={(e) => setPrompt(e.target.value)}
@@ -74,7 +74,7 @@ export default function VisionaryLabPage() {
                         />
                         <GenerativeWidget
                             type="suggested_action"
-                            title="Jarvis Suggestion"
+                            title="Pulse AI Suggestion"
                             data={{}}
                         />
                         <GenerativeWidget
@@ -104,7 +104,7 @@ export default function VisionaryLabPage() {
                     <span className="text-[9px] font-bold text-text-2">Latência de Geração: 420ms</span>
                 </div>
                 <div className="text-[9px] font-black text-text-3 uppercase tracking-widest flex items-center gap-2">
-                    <Layout size={12} /> Jarvis Sync Active
+                    <Layout size={12} /> Pulse AI Sync Active
                 </div>
             </div>
 

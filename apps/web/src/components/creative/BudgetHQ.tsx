@@ -58,7 +58,7 @@ export default function BudgetHQ() {
                 <div className="flex flex-col gap-6 relative z-10">
                     <div className="flex items-center gap-3">
                         <Target size={20} className="text-primary" />
-                        <h4 className="text-sm font-black text-white uppercase tracking-widest italic">Jarvis Scaling Recommendation</h4>
+                        <h4 className="text-sm font-black text-white uppercase tracking-widest italic">Pulse AI Scaling Recommendation</h4>
                     </div>
                     <p className="text-xs text-text-3 font-medium leading-relaxed max-w-xl">
                         "Meta creatives are currently generating 20% higher CTR in the core demographic. Recommendation: <span className="text-white font-bold">Shift $2,500 from Google Search to Meta Reel Ads</span> to capture high-intent visual audience. Expected ROAS increase: <span className="text-success font-black">+0.42</span>."

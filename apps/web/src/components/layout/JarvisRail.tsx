@@ -66,7 +66,7 @@ export default function JarvisRail() {
             setPerf(p);
             setAgents(a);
             setSlaAlerts(dash.sla_alerts ?? []);
-        }).catch(() => toast.error('Erro ao carregar Jarvis'));
+        }).catch(() => toast.error('Erro ao carregar Pulse AI'));
     }, []);
 
     async function toggleAgent(agent: Agent) {
@@ -101,7 +101,7 @@ export default function JarvisRail() {
                         )}
                     </div>
                     <div>
-                        <p className="text-[13px] font-semibold text-text-1 leading-tight">Jarvis</p>
+                        <p className="text-[13px] font-semibold text-text-1 leading-tight">Pulse AI</p>
                         <p className={`text-[9px] leading-tight ${systemOk ? 'text-success' : 'text-text-3'}`}>
                             {perf == null ? 'Connecting...' : systemOk ? `${perf.active_agents} agents online` : 'No active agents'}
                         </p>

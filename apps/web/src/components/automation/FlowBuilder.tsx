@@ -34,7 +34,7 @@ const ACTION_TYPES = [
     { value: 'notify_team',   label: 'Notificar Equipa' },
     { value: 'send_whatsapp', label: 'Enviar WhatsApp' },
     { value: 'send_email',    label: 'Enviar Email' },
-    { value: 'ai_analyze',   label: 'Jarvis: Analisar com IA' },
+    { value: 'ai_analyze',   label: 'Pulse AI: Analisar com IA' },
     { value: 'create_ticket', label: 'Criar Ticket de Suporte' },
     { value: 'update_deal',   label: 'Atualizar Deal no CRM' },
 ];

@@ -61,7 +61,7 @@ export default function StrategyDashboardPage() {
                     <div className="flex flex-col gap-6">
                         <div className="flex items-center gap-3">
                             <div className="w-1.5 h-6 bg-white rounded-full"></div>
-                            <h2 className="text-sm font-black text-white uppercase tracking-[0.3em]">Consultoria Jarvis</h2>
+                            <h2 className="text-sm font-black text-white uppercase tracking-[0.3em]">Consultoria Pulse AI</h2>
                         </div>
 
                         <div className="flex flex-col gap-4">

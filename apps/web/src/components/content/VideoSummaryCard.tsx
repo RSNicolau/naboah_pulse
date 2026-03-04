@@ -19,7 +19,7 @@ export default function VideoSummaryCard({ summary, events }: VideoSummaryProps)
                     </div>
                     <div className="flex flex-col">
                         <h3 className="text-sm font-bold text-white tracking-tight uppercase tracking-widest">Video Content Intelligence</h3>
-                        <span className="text-[9px] text-text-3 font-black uppercase tracking-tighter">Análise Multimodal Jarvis Perception</span>
+                        <span className="text-[9px] text-text-3 font-black uppercase tracking-tighter">Análise Multimodal Pulse Perception</span>
                     </div>
                 </div>
             </div>

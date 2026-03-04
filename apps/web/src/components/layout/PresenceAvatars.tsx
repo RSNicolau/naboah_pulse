@@ -3,7 +3,7 @@ import { Users } from 'lucide-react';
 
 const mockPresence = [
     { id: 'u1', name: 'Rodrigo', color: 'bg-primary' },
-    { id: 'u2', name: 'Jarvis', color: 'bg-ai' },
+    { id: 'u2', name: 'Pulse AI', color: 'bg-ai' },
     { id: 'u3', name: 'Aegis', color: 'bg-secondary' },
 ];
 

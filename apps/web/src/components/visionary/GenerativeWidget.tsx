@@ -49,7 +49,7 @@ export default function GenerativeWidget({ type, data, title }: GenerativeWidget
 
                 {type === 'suggested_action' && (
                     <div className="flex flex-col gap-3 w-full">
-                        <p className="text-[11px] text-text-2 font-medium italic">"Jarvis detectou que este cliente tem alta propensão a converter um contrato anual."</p>
+                        <p className="text-[11px] text-text-2 font-medium italic">"Pulse AI detectou que este cliente tem alta propensão a converter um contrato anual."</p>
                         <button className="w-full py-2.5 bg-ai-accent text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-ai-accent/20">
                             ENVIAR PROPOSTA ANUAL
                         </button>

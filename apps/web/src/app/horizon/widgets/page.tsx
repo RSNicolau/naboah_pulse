@@ -16,7 +16,7 @@ export default function HorizonWidgetsPage() {
                         <h1 className="text-3xl font-black text-white tracking-tighter uppercase tracking-widest flex items-center gap-3">
                             Pulse Horizon <span className="text-[10px] px-2 py-0.5 bg-secondary/20 text-secondary border border-secondary/30 rounded-md italic">Public SDK v1.0</span>
                         </h1>
-                        <p className="text-text-3 font-medium text-sm">Gerencie seus pontos de contato externos e integre o Jarvis em qualquer lugar.</p>
+                        <p className="text-text-3 font-medium text-sm">Gerencie seus pontos de contato externos e integre o Pulse AI em qualquer lugar.</p>
                     </div>
                 </div>
 

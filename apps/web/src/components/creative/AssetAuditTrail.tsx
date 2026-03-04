@@ -7,7 +7,7 @@ export default function AssetAuditTrail() {
     const logs = [
         { id: '1', action: 'Asset Created', user: 'System (AI)', time: '2h ago', version: 'v1.0' },
         { id: '2', action: 'Metadata Modified', user: 'Rodrigo N.', time: '1h ago', version: 'v1.1' },
-        { id: '3', action: 'Sent to Meta Ads', user: 'Jarvis', time: '45m ago', version: 'v1.1' },
+        { id: '3', action: 'Sent to Meta Ads', user: 'Pulse AI', time: '45m ago', version: 'v1.1' },
         { id: '4', action: 'Quality QA Passed', user: 'QA Bot', time: '10m ago', version: 'v1.1' },
     ];
 

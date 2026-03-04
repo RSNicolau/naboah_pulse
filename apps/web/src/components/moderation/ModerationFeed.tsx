@@ -59,7 +59,7 @@ export default function ModerationFeed() {
                                 <tr className="border-b border-stroke bg-surface-1/30">
                                     <th className="px-6 py-4 text-[10px] font-bold text-text-3 uppercase tracking-widest">Type / Platform</th>
                                     <th className="px-6 py-4 text-[10px] font-bold text-text-3 uppercase tracking-widest">Content Preview</th>
-                                    <th className="px-6 py-4 text-[10px] font-bold text-text-3 uppercase tracking-widest">Jarvis Classification</th>
+                                    <th className="px-6 py-4 text-[10px] font-bold text-text-3 uppercase tracking-widest">Pulse AI Classification</th>
                                     <th className="px-6 py-4 text-[10px] font-bold text-text-3 uppercase tracking-widest">Action</th>
                                     <th className="px-6 py-4 text-[10px] font-bold text-text-3 uppercase tracking-widest text-right">Ação</th>
                                 </tr>

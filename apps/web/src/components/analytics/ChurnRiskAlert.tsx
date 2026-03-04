@@ -18,7 +18,7 @@ export default function ChurnRiskAlert() {
                     <h3 className="text-lg font-bold text-white flex items-center gap-3">
                         <ShieldAlert className="text-error w-5 h-5" /> Radar de Churn
                     </h3>
-                    <span className="text-[10px] text-text-3 font-black uppercase tracking-widest">Prevenção Preditiva Jarvis</span>
+                    <span className="text-[10px] text-text-3 font-black uppercase tracking-widest">Prevenção Preditiva Pulse</span>
                 </div>
                 <button className="text-text-3 hover:text-white transition-colors"><MoreHorizontal size={20} /></button>
             </div>

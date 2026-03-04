@@ -5,11 +5,11 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/components/providers/SupabaseProvider';
 import {
-    LogOut, LayoutDashboard, Inbox, PenTool, Calendar, ShieldAlert,
+    LogOut, LayoutDashboard, Inbox, Calendar, ShieldAlert,
     BarChart3, Users, Share2, Settings, Palette, UserCircle, FileText,
     Shield, Code2, GitBranch, Bot, Kanban, LifeBuoy, Puzzle, Target,
-    UserSquare2, Rocket, DollarSign, ShieldCheck, Brain, Sparkles, Zap,
-    ShoppingBag, Building2, Terminal, Globe, Monitor, Search, BookUser,
+    UserSquare2, Rocket, DollarSign, ShieldCheck, Brain, Sparkles,
+    ShoppingBag, Building2, Terminal, Globe, Monitor, BookUser, Activity,
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -67,7 +67,7 @@ const navSections: NavSection[] = [
             { icon: Brain,     label: 'Neural Mind', href: '/neural/knowledge' },
             { icon: GitBranch, label: 'Automations', href: '/automation' },
             { icon: GitBranch, label: 'Pulse Flow',  href: '/automation/canvas' },
-            { icon: Sparkles,  label: 'Jarvis Lab',  href: '/visionary/lab' },
+            { icon: Sparkles,  label: 'Pulse Lab',   href: '/visionary/lab' },
             { icon: Users,     label: 'Synergy',     href: '/synergy/canvas' },
         ],
     },
@@ -82,7 +82,7 @@ const navSections: NavSection[] = [
             { icon: Monitor,    label: 'Desktop',      href: '/desktop/landing' },
             { icon: Terminal,   label: 'Developer',    href: '/developer/portal' },
             { icon: Share2,     label: 'Integrations', href: '/integrations' },
-            { icon: Zap,        label: 'Quantum',      href: '/quantum/status' },
+            { icon: Activity,   label: 'Quantum',      href: '/quantum/status' },
         ],
     },
     {
@@ -112,10 +112,14 @@ export default function Sidebar() {
 
             {/* Logo */}
             <div className="h-12 px-4 flex items-center gap-2.5 border-b border-white/[0.05] flex-shrink-0">
-                <div className="w-7 h-7 rounded-lg jarvis-gradient flex items-center justify-center flex-shrink-0">
-                    <Zap className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+                <div className="w-7 h-7 rounded-lg jarvis-gradient flex items-center justify-center flex-shrink-0 shadow-glow-primary">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L4 7v10l8 5 8-5V7l-8-5z" stroke="white" strokeWidth="1.5" strokeLinejoin="round" fill="white" fillOpacity="0.1"/>
+                        <path d="M12 6l-4 2.5v5L12 16l4-2.5v-5L12 6z" stroke="white" strokeWidth="1.5" strokeLinejoin="round" fill="white" fillOpacity="0.25"/>
+                        <circle cx="12" cy="11" r="2" fill="white" fillOpacity="0.9"/>
+                    </svg>
                 </div>
-                <span className="font-semibold text-sm tracking-tight text-text-1">Naboah Pulse</span>
+                <span className="font-semibold text-sm tracking-tight text-text-1">Naboah <span className="text-text-3">Pulse</span></span>
             </div>
 
             {/* Nav */}

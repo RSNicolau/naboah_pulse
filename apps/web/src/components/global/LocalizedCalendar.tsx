@@ -52,7 +52,7 @@ export default function LocalizedCalendar() {
                     <span className="text-[10px] font-black text-white uppercase tracking-widest">IA Awareness Active</span>
                 </div>
                 <p className="text-[10px] font-medium text-text-2 leading-relaxed">
-                    O Jarvis detectou que AMANHÃ é feriado em **Lisboa (Corpo de Deus)**.
+                    O Pulse AI detectou que AMANHÃ é feriado em **Lisboa (Corpo de Deus)**.
                     Agendamentos para clientes nesta região serão movidos para o próximo dia útil automaticamente.
                 </p>
             </div>

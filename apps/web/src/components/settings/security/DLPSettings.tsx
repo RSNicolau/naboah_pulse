@@ -61,7 +61,7 @@ export default function DLPSettings() {
             <div className="p-6 bg-surface-1 border border-dashed border-stroke rounded-2xl flex items-center gap-4">
                 <Sparkles size={16} className="text-ai-accent" />
                 <p className="text-[11px] text-text-2 font-medium">
-                    <span className="font-bold text-white uppercase tracking-tighter">Jarvis Insight:</span> Detectamos 23 tentativas de compartilhamento de cartões de crédito no chatbot de suporte nas últimas 24h. Sua política de DLP evitou um possível incidente de conformidade.
+                    <span className="font-bold text-white uppercase tracking-tighter">Pulse Insight:</span> Detectamos 23 tentativas de compartilhamento de cartões de crédito no chatbot de suporte nas últimas 24h. Sua política de DLP evitou um possível incidente de conformidade.
                 </p>
             </div>
 

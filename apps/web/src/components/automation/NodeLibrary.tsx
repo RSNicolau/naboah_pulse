@@ -11,7 +11,7 @@ const nodeCategories = [
         ]
     },
     {
-        title: 'Cérebro Jarvis (AI)',
+        title: 'Cérebro Pulse AI (AI)',
         items: [
             { id: 'sentiment', label: 'Análise de Sentimento', icon: Cpu, color: 'text-primary' },
             { id: 'ocr', label: 'Visão OCR', icon: Eye, color: 'text-ai-accent' },
@@ -71,7 +71,7 @@ export default function NodeLibrary() {
             <div className="p-8 mt-auto bg-surface-1 border-t border-stroke">
                 <div className="bg-primary/10 border border-primary/30 rounded-2xl p-4 flex flex-col gap-2">
                     <span className="text-[9px] font-black text-primary uppercase tracking-widest flex items-center gap-2">
-                        <Sparkles size={12} fill="currentColor" /> Jarvis Pro-Tip
+                        <Sparkles size={12} fill="currentColor" /> Pulse Pro-Tip
                     </span>
                     <p className="text-[10px] text-text-2 italic font-medium">Use gatilhos de Commerce para criar réguas de cobrança automatizadas via WhatsApp.</p>
                 </div>

@@ -18,8 +18,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         return (
             <div className="fixed inset-0 bg-bg-0 flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl jarvis-gradient flex items-center justify-center shadow-lg shadow-primary/30">
-                        <div className="w-5 h-5 bg-white rounded-full opacity-30 blur-[2px]" />
+                    <div className="w-10 h-10 rounded-xl jarvis-gradient flex items-center justify-center shadow-glow-primary">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L4 7v10l8 5 8-5V7l-8-5z" stroke="white" strokeWidth="1.5" strokeLinejoin="round" fill="white" fillOpacity="0.1"/>
+                            <path d="M12 6l-4 2.5v5L12 16l4-2.5v-5L12 6z" stroke="white" strokeWidth="1.5" strokeLinejoin="round" fill="white" fillOpacity="0.25"/>
+                            <circle cx="12" cy="11" r="2" fill="white" fillOpacity="0.9"/>
+                        </svg>
                     </div>
                     <Loader2 size={16} className="animate-spin text-primary" />
                 </div>

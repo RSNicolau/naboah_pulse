@@ -2,8 +2,8 @@ import React from 'react';
 import { Bot, ArrowRight, ArrowRightLeft, MessageCircle, Zap, ShieldCheck } from 'lucide-react';
 
 const activeHandoffs = [
-    { id: '1', from: 'Jarvis Support', to: 'Jarvis Sales', reason: 'Identificação de Up-sell', time: 'Há 2m', status: 'completed' },
-    { id: '2', from: 'Jarvis Sales', to: 'Jarvis Support', reason: 'Dúvida Técnica Pós-Venda', time: 'Há 15m', status: 'completed' },
+    { id: '1', from: 'Pulse Support', to: 'Pulse Sales', reason: 'Identificação de Up-sell', time: 'Há 2m', status: 'completed' },
+    { id: '2', from: 'Pulse Sales', to: 'Pulse Support', reason: 'Dúvida Técnica Pós-Venda', time: 'Há 15m', status: 'completed' },
 ];
 
 export default function AgentHandoffMonitor() {

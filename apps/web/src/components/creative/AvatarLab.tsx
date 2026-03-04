@@ -5,7 +5,7 @@ import { User, Shield, Camera, Mic2, Settings, Plus, Star, Heart } from 'lucide-
 
 export default function AvatarLab() {
     const avatars = [
-        { id: '1', name: 'Jarvis Prime', persona: 'Executive / Helpful', type: 'Brand Default', status: 'Ready' },
+        { id: '1', name: 'Pulse Prime', persona: 'Executive / Helpful', type: 'Brand Default', status: 'Ready' },
         { id: '2', name: 'Luna Fashion', persona: 'Trendy / Youthful', type: 'Campaign', status: 'In Use' },
         { id: '3', name: 'Marcus Tech', persona: 'Expert / Concise', type: 'Support', status: 'Ready' },
     ];

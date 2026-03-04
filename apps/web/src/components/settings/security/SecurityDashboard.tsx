@@ -85,7 +85,7 @@ export default function SecurityDashboard() {
                 </div>
                 <div className="flex-1 flex flex-col gap-1">
                     <span className="text-[10px] font-black text-error uppercase tracking-widest">Global IP Blacklist</span>
-                    <p className="text-xs font-bold text-white">42 novos endereços IP foram bloqueados pelo Jarvis nas últimas 6h por tentativas de injeção SQL.</p>
+                    <p className="text-xs font-bold text-white">42 novos endereços IP foram bloqueados pelo Pulse AI nas últimas 6h por tentativas de injeção SQL.</p>
                 </div>
                 <button className="px-6 py-2.5 bg-bg-0 border border-stroke rounded-xl text-[10px] font-black text-white uppercase tracking-widest hover:border-error transition-all">Monitor de Rede</button>
             </div>

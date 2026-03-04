@@ -317,7 +317,7 @@ export default function PipelineBoard() {
             {/* Footer */}
             <div className="px-8 py-3 bg-bg-1 border-t border-stroke flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                <span className="text-[9px] font-bold text-text-3 uppercase tracking-tighter">Jarvis Lead Scoring Engine — ativo</span>
+                <span className="text-[9px] font-bold text-text-3 uppercase tracking-tighter">Pulse AI Lead Scoring Engine — ativo</span>
             </div>
 
             {/* New Deal Modal */}

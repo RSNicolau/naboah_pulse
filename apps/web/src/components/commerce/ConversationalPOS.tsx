@@ -99,7 +99,7 @@ export default function ConversationalPOS() {
             {/* Jarvis POS Input */}
             <div className="p-8 border-t border-stroke bg-bg-1 relative">
                 <div className="absolute -top-6 left-1/2 -translate-x-1/2 px-4 py-2 bg-primary text-white rounded-full text-[9px] font-black uppercase tracking-widest shadow-xl flex items-center gap-2">
-                    <Mic size={12} className="animate-pulse" /> Jarvis Listening...
+                    <Mic size={12} className="animate-pulse" /> Pulse AI Listening...
                 </div>
                 <div className="flex items-center gap-4 bg-bg-0 border border-white/5 p-4 rounded-[2.5rem] focus-within:border-primary/50 transition-all">
                     <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">

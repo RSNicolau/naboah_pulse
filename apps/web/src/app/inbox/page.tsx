@@ -60,7 +60,7 @@ export default function InboxPage() {
                             <div className="p-10 bg-gradient-to-br from-primary/20 to-bg-1 border border-primary/20 rounded-[3rem] shadow-2xl flex flex-col gap-8 relative overflow-hidden">
                                 <Sparkles size={140} className="absolute -bottom-10 -right-10 text-white/[0.03] rotate-12" />
                                 <div className="flex flex-col gap-1">
-                                    <span className="text-[10px] font-black text-white uppercase tracking-widest italic">Jarvis Intelligence</span>
+                                    <span className="text-[10px] font-black text-white uppercase tracking-widest italic">Pulse Intelligence</span>
                                     <h3 className="text-2xl font-black text-white tracking-tighter uppercase italic leading-none">Automated Job Builder</h3>
                                 </div>
                                 <p className="text-[11px] text-text-3 font-medium leading-relaxed italic">

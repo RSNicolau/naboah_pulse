@@ -14,7 +14,7 @@ export function BrandProvider({ children, tenantConfig }: { children: React.Reac
     const [config, setConfig] = useState<BrandConfig>({
         primaryColor: tenantConfig?.primary_color || '#0066FF',
         logoUrl: tenantConfig?.logo_url,
-        aiName: tenantConfig?.ai_persona_config?.name || 'Jarvis',
+        aiName: tenantConfig?.ai_persona_config?.name || 'Pulse AI',
     });
 
     useEffect(() => {
@@ -22,7 +22,7 @@ export function BrandProvider({ children, tenantConfig }: { children: React.Reac
             setConfig({
                 primaryColor: tenantConfig.primary_color,
                 logoUrl: tenantConfig.logo_url,
-                aiName: tenantConfig.ai_persona_config?.name || 'Jarvis',
+                aiName: tenantConfig.ai_persona_config?.name || 'Pulse AI',
             });
 
             // Injeta a cor primária como uma variável CSS no root

@@ -5,7 +5,7 @@ import { Send, X, MessageCircle, Paperclip, Mic, Sparkles, Smile } from 'lucide-
 export default function PulseMessenger() {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
-        { id: '1', role: 'ai', text: 'Olá! Sou o Jarvis. Como posso transformar sua experiência hoje?' }
+        { id: '1', role: 'ai', text: 'Olá! Sou o Pulse AI. Como posso transformar sua experiência hoje?' }
     ]);
 
     if (!isOpen) {
@@ -33,7 +33,7 @@ export default function PulseMessenger() {
                         </div>
                         <div className="flex flex-col">
                             <span className="text-sm font-black text-white uppercase tracking-widest">Pulse Horizon</span>
-                            <span className="text-[10px] text-white/70 font-bold italic">Powered by Jarvis AI</span>
+                            <span className="text-[10px] text-white/70 font-bold italic">Powered by Naboah Tech</span>
                         </div>
                     </div>
                     <button onClick={() => setIsOpen(false)} className="text-white/60 hover:text-white transition-colors">

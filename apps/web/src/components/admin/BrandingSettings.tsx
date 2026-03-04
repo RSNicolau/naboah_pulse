@@ -14,7 +14,7 @@ type BrandingData = {
 
 export default function BrandingSettings() {
     const [primaryColor, setPrimaryColor] = useState('#0066FF');
-    const [aiName, setAiName] = useState('Jarvis');
+    const [aiName, setAiName] = useState('Pulse AI');
     const [customDomain, setCustomDomain] = useState('');
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -24,7 +24,7 @@ export default function BrandingSettings() {
         apiGet<BrandingData>('/settings/branding')
             .then((data) => {
                 setPrimaryColor(data.primary_color ?? '#0066FF');
-                setAiName(data.ai_name ?? 'Jarvis');
+                setAiName(data.ai_name ?? 'Pulse AI');
                 setCustomDomain(data.custom_domain ?? '');
             })
             .catch(() => toast.error('Erro ao carregar branding'))
@@ -127,10 +127,10 @@ export default function BrandingSettings() {
                             </div>
                         </div>
 
-                        {/* Jarvis Persona */}
+                        {/* Pulse AI Persona */}
                         <div className="bg-bg-1 border border-stroke rounded-2xl p-6 flex flex-col gap-6">
                             <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                                <Bot size={16} className="text-text-3" /> Jarvis Persona
+                                <Bot size={16} className="text-text-3" /> Pulse AI Persona
                             </h3>
                             <div className="flex flex-col gap-4">
                                 <div className="flex flex-col gap-2">
@@ -139,7 +139,7 @@ export default function BrandingSettings() {
                                         type="text"
                                         value={aiName}
                                         onChange={(e) => setAiName(e.target.value)}
-                                        placeholder="Ex: Jarvis, PulseAI, Nexus..."
+                                        placeholder="Ex: Pulse AI, Nexus, Atlas..."
                                         className="bg-surface-1 border border-stroke rounded-xl px-4 py-2.5 text-sm text-white focus:border-primary/50 outline-none"
                                     />
                                 </div>

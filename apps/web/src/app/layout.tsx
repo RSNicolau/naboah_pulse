@@ -13,7 +13,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-    title: "Naboah Pulse | Jarvis ChannelHub",
+    title: "Naboah Pulse",
     description: "Omnichannel Command Center for Enterprise",
     manifest: "/manifest.json",
     themeColor: "#070A10",

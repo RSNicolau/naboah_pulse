@@ -8,7 +8,7 @@ export default function GrandWalkthrough() {
 
     const steps = [
         { title: 'O Coração do Pulse', desc: 'Sua Unified Inbox centraliza todas as interações humanas e de IA em um só fluxo.', icon: Zap, target: 'Inbox' },
-        { title: 'Jarvis Everywhere', desc: 'Use CMD+K para comandar o Pulse via linguagem natural a qualquer momento.', icon: Sparkles, target: 'Search' },
+        { title: 'Pulse AI Everywhere', desc: 'Use CMD+K para comandar o Pulse via linguagem natural a qualquer momento.', icon: Sparkles, target: 'Search' },
         { title: 'Estratégia Quantun', desc: 'Seus novos AI Strategy Insights simulam o futuro do seu negócio em segundos.', icon: ShieldCheck, target: 'Insights' },
     ];
 

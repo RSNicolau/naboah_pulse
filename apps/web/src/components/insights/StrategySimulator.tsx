@@ -57,7 +57,7 @@ export default function StrategySimulator() {
                             <Zap size={24} />
                         </div>
                         <div className="flex flex-col gap-0.5">
-                            <span className="text-[9px] font-black text-text-3 uppercase tracking-widest">Recomendação Jarvis</span>
+                            <span className="text-[9px] font-black text-text-3 uppercase tracking-widest">Recomendação Pulse AI</span>
                             <p className="text-[11px] text-white font-medium italic">"Aumentar 10% no plano Pro reduz o ROI em 2% no primeiro mês, mas estabiliza MRR em 90 dias."</p>
                         </div>
                     </div>

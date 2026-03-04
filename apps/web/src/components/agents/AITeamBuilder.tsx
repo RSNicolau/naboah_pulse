@@ -309,7 +309,7 @@ export default function AITeamBuilder() {
                                 <input
                                     value={form.name}
                                     onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))}
-                                    placeholder="Ex: Jarvis Support"
+                                    placeholder="Ex: Pulse Support"
                                     className="w-full bg-surface-2 border border-stroke rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary/50"
                                 />
                             </div>

@@ -5,7 +5,7 @@ import { Lightbulb, ThumbsUp, MessageCircle, Clock, CheckCircle2, Search, Filter
 const feedRequests = [
     { id: '1', title: 'Integração Nativa com TikTok Ads', description: 'Gostaria de ver as campanhas direto no Content Studio.', votes: 156, status: 'planned', comments: 12 },
     { id: '2', title: 'Relatórios em PDF Customizados', description: 'Poder enviar relatórios com a minha logo para os clientes.', votes: 89, status: 'under_review', comments: 5 },
-    { id: '3', title: 'Automação via Voz (PT-BR)', description: 'Bot que atende chamadas e transcreve com Jarvis.', votes: 245, status: 'in_progress', comments: 45 },
+    { id: '3', title: 'Automação via Voz (PT-BR)', description: 'Bot que atende chamadas e transcreve com Pulse AI.', votes: 245, status: 'in_progress', comments: 45 },
 ];
 
 export default function FeedbackPortal() {

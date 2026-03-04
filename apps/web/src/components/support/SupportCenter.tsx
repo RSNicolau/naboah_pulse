@@ -57,7 +57,7 @@ function timeAgo(iso: string): string {
 }
 
 const KB_ARTICLES = [
-    'Como configurar o Jarvis Bot?',
+    'Como configurar o Pulse AI Bot?',
     'Guia de integração com WhatsApp',
     'Entendendo as métricas de BI',
     'Política de retenção de dados',
@@ -296,10 +296,10 @@ export default function SupportCenter() {
                                 <div className="w-8 h-8 rounded-lg bg-ai-accent/20 flex items-center justify-center">
                                     <Bot size={18} className="text-ai-accent" />
                                 </div>
-                                <h4 className="text-xs font-bold text-white">Jarvis Auto-resolve</h4>
+                                <h4 className="text-xs font-bold text-white">Pulse AI Auto-resolve</h4>
                             </div>
                             <p className="text-[10px] text-text-3 leading-relaxed">
-                                O Jarvis resolveu <span className="text-white font-bold">{solved}</span> tickets automaticamente.{' '}
+                                O Pulse AI resolveu <span className="text-white font-bold">{solved}</span> tickets automaticamente.{' '}
                                 Taxa de satisfação: <span className="text-success font-bold">94%</span>.
                             </p>
                             <div className="flex items-center justify-between">

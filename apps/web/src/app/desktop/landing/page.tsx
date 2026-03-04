@@ -53,7 +53,7 @@ export default function DesktopLandingPage() {
                             </div>
                             <h3 className="text-sm font-black text-white uppercase italic">Offline Brain</h3>
                             <p className="text-[11px] text-text-3 font-medium leading-relaxed">
-                                Sincronização em tempo real do seu banco de dados local. Trabalhe sem internet e deixe o Jarvis cuidar do sync ao reconectar.
+                                Sincronização em tempo real do seu banco de dados local. Trabalhe sem internet e deixe o Pulse AI cuidar do sync ao reconectar.
                             </p>
                         </div>
                         <div className="bg-bg-1 border border-stroke rounded-[2.5rem] p-8 flex flex-col gap-4 shadow-xl">
@@ -82,7 +82,7 @@ export default function DesktopLandingPage() {
                             <span className="text-xs font-black text-white uppercase tracking-widest">Global Overlay Ready</span>
                         </div>
                         <p className="text-[10px] font-medium text-text-2">
-                            Ative a overlay para que o Jarvis flutue sobre seus outros aplicativos, permitindo resumos instantâneos de planilhas, PDFs e e-mails externos.
+                            Ative a overlay para que o Pulse AI flutue sobre seus outros aplicativos, permitindo resumos instantâneos de planilhas, PDFs e e-mails externos.
                         </p>
                     </div>
                 </div>
