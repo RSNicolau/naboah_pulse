@@ -14,6 +14,7 @@ _origins = [
     "http://localhost:3000",
     "http://localhost:3001",
     "http://127.0.0.1:3000",
+    "https://naboahpulse.vercel.app",
 ]
 if os.getenv("FRONTEND_URL"):
     _origins.append(os.environ["FRONTEND_URL"])
