@@ -16,7 +16,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
     if (loading) {
         return (
-            <div className="fixed inset-0 bg-[#05060A] flex items-center justify-center">
+            <div className="fixed inset-0 bg-bg-0 flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-10 h-10 rounded-xl jarvis-gradient flex items-center justify-center shadow-lg shadow-primary/30">
                         <div className="w-5 h-5 bg-white rounded-full opacity-30 blur-[2px]" />
@@ -40,12 +40,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
             <div className="flex flex-col flex-1 h-screen">
                 {/* Topbar: full-width on mobile, offset on desktop */}
-                <div className="md:ml-64 md:mr-80">
+                <div className="md:ml-56 md:mr-80">
                     <Topbar />
                 </div>
 
                 {/* Main content: full-width on mobile, offset on desktop */}
-                <main className="flex-1 overflow-y-auto md:ml-64 md:mr-80 pb-16 md:pb-0">
+                <main className="flex-1 overflow-y-auto md:ml-56 md:mr-80 pb-16 md:pb-0">
                     {children}
                 </main>
             </div>

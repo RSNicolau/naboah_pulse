@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Zap } from 'lucide-react';
 
 type Mode = 'login' | 'signup';
 
@@ -37,46 +37,61 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="fixed inset-0 bg-[#05060A] flex items-center justify-center z-50 overflow-hidden">
-            {/* Background glow */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#7B61FF]/10 rounded-full blur-[120px]" />
-                <div className="absolute top-1/4 right-1/4 w-[300px] h-[300px] bg-[#7B61FF]/5 rounded-full blur-[80px]" />
-            </div>
+        <div className="fixed inset-0 bg-bg-0 flex items-center justify-center z-50 overflow-hidden">
 
-            <div className="relative w-full max-w-sm mx-4">
-                {/* Logo */}
-                <div className="flex items-center gap-3 mb-10 justify-center">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#7B61FF] to-[#5B41DF] flex items-center justify-center shadow-lg shadow-[#7B61FF]/30">
-                        <div className="w-5 h-5 bg-white rounded-full opacity-30 blur-[2px]" />
+            {/* Single ambient glow — centered, subtle */}
+            <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                    background: 'radial-gradient(ellipse 700px 500px at 50% 40%, rgba(123,97,255,0.07) 0%, transparent 70%)',
+                }}
+            />
+
+            <div className="relative w-full max-w-[360px] mx-6 flex flex-col gap-8">
+
+                {/* Logo mark */}
+                <div className="flex flex-col items-center gap-3">
+                    <div className="w-11 h-11 rounded-2xl jarvis-gradient flex items-center justify-center shadow-glow-primary">
+                        <Zap className="w-5 h-5 text-white" strokeWidth={2.5} />
                     </div>
-                    <span className="font-bold text-2xl tracking-tight text-white">Naboah Pulse</span>
+                    <div className="text-center">
+                        <h2 className="text-lg font-bold text-text-1 tracking-tight">Naboah Pulse</h2>
+                        <p className="text-xs text-text-3 mt-0.5">Jarvis ChannelHub</p>
+                    </div>
                 </div>
 
                 {/* Card */}
-                <div className="bg-[#0C0D12] border border-white/5 rounded-3xl p-8 shadow-2xl">
-                    <h1 className="text-xl font-black text-white uppercase tracking-widest mb-1">
-                        {mode === 'login' ? 'Entrar' : 'Criar Conta'}
-                    </h1>
-                    <p className="text-xs text-[#6B7280] mb-8">
-                        {mode === 'login' ? 'Bem-vindo de volta ao Jarvis ChannelHub' : 'Junta-te ao Jarvis ChannelHub'}
-                    </p>
+                <div className="bg-surface-1 border border-white/[0.06] rounded-2xl p-7 shadow-2xl shadow-black/60">
+                    <div className="mb-6">
+                        <h1 className="text-base font-semibold text-text-1 tracking-tight">
+                            {mode === 'login' ? 'Bem-vindo de volta' : 'Criar conta'}
+                        </h1>
+                        <p className="text-xs text-text-3 mt-1">
+                            {mode === 'login'
+                                ? 'Entra na tua conta para continuar'
+                                : 'Junta-te ao Jarvis ChannelHub'}
+                        </p>
+                    </div>
 
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Email</label>
+                            <label className="text-[11px] font-medium text-text-3 tracking-wide">
+                                Email
+                            </label>
                             <input
                                 type="email"
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
                                 required
                                 placeholder="nome@empresa.com"
-                                className="bg-[#0F1018] border border-white/8 rounded-xl px-4 py-3 text-sm text-white placeholder:text-[#374151] focus:outline-none focus:border-[#7B61FF]/50 transition-colors"
+                                className="bg-white/[0.04] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-sm text-text-1 placeholder:text-text-3/40 focus:outline-none focus:border-primary/50 focus:bg-white/[0.05] transition-all"
                             />
                         </div>
 
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Password</label>
+                            <label className="text-[11px] font-medium text-text-3 tracking-wide">
+                                Password
+                            </label>
                             <div className="relative">
                                 <input
                                     type={showPassword ? 'text' : 'password'}
@@ -84,25 +99,25 @@ export default function LoginPage() {
                                     onChange={e => setPassword(e.target.value)}
                                     required
                                     placeholder="••••••••"
-                                    className="w-full bg-[#0F1018] border border-white/8 rounded-xl px-4 py-3 pr-12 text-sm text-white placeholder:text-[#374151] focus:outline-none focus:border-[#7B61FF]/50 transition-colors"
+                                    className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-3.5 py-2.5 pr-11 text-sm text-text-1 placeholder:text-text-3/40 focus:outline-none focus:border-primary/50 focus:bg-white/[0.05] transition-all"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(v => !v)}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-white transition-colors"
+                                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-text-3 hover:text-text-1 transition-colors"
                                 >
-                                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                                 </button>
                             </div>
                         </div>
 
                         {error && (
-                            <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-xs text-red-400">
+                            <div className="bg-critical/8 border border-critical/15 rounded-xl px-3.5 py-2.5 text-xs text-critical/90">
                                 {error}
                             </div>
                         )}
                         {success && (
-                            <div className="bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3 text-xs text-green-400">
+                            <div className="bg-success/8 border border-success/15 rounded-xl px-3.5 py-2.5 text-xs text-success/90">
                                 {success}
                             </div>
                         )}
@@ -110,25 +125,25 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="mt-2 w-full py-3.5 bg-[#7B61FF] hover:bg-[#6A51EE] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#7B61FF]/20"
+                            className="mt-1 w-full py-2.5 jarvis-gradient disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-sm font-semibold tracking-tight transition-opacity hover:opacity-90 flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
                         >
                             {loading && <Loader2 size={14} className="animate-spin" />}
-                            {mode === 'login' ? 'Entrar' : 'Criar Conta'}
+                            {mode === 'login' ? 'Entrar' : 'Criar conta'}
                         </button>
                     </form>
 
-                    <div className="mt-6 text-center">
+                    <div className="mt-5 pt-5 border-t border-white/[0.05] text-center">
                         <button
                             onClick={() => { setMode(m => m === 'login' ? 'signup' : 'login'); setError(''); setSuccess(''); }}
-                            className="text-[10px] text-[#6B7280] hover:text-white transition-colors uppercase tracking-widest"
+                            className="text-xs text-text-3 hover:text-text-1 transition-colors"
                         >
-                            {mode === 'login' ? 'Não tens conta? Criar agora' : 'Já tens conta? Entrar'}
+                            {mode === 'login' ? 'Não tens conta? Criar agora →' : '← Já tens conta? Entrar'}
                         </button>
                     </div>
                 </div>
 
-                <p className="text-center text-[10px] text-[#374151] mt-6 uppercase tracking-widest">
-                    Jarvis ChannelHub · Omnichannel Command Center
+                <p className="text-center text-[10px] text-text-3/40 tracking-widest uppercase">
+                    Naboah Pulse · Omnichannel Command Center
                 </p>
             </div>
         </div>

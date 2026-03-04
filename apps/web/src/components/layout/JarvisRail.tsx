@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Sparkles, Zap, ShieldCheck, Brain, ArrowUpRight, Ticket, Activity } from 'lucide-react';
+import { Sparkles, Zap, Brain, ArrowUpRight, Activity } from 'lucide-react';
 import { apiGet, apiPatch } from '@/lib/api';
 import { toast } from '@/lib/toast';
 import Link from 'next/link';
@@ -36,7 +36,7 @@ type SlaAlert = {
 const STATUS_DOT: Record<string, string> = {
     acting:   'bg-success animate-pulse',
     thinking: 'bg-primary animate-pulse',
-    idle:     'bg-text-3',
+    idle:     'bg-text-3/40',
     paused:   'bg-warning',
 };
 
@@ -89,99 +89,96 @@ export default function JarvisRail() {
     const systemOk = perf ? perf.active_agents > 0 : true;
 
     return (
-        <aside className="w-80 h-screen bg-bg-1 border-l border-stroke fixed right-0 top-0 z-20 flex flex-col overflow-hidden">
+        <aside className="w-80 h-screen bg-bg-1 border-l border-white/[0.05] fixed right-0 top-0 z-20 flex flex-col overflow-hidden">
 
-            {/* Header — Jarvis avatar + status */}
-            <div className="p-6 flex flex-col items-center gap-4 border-b border-stroke flex-shrink-0">
-                <div className="relative w-24 h-24 flex items-center justify-center">
-                    <div className="absolute inset-0 jarvis-gradient opacity-20 blur-xl rounded-full animate-pulse" />
-                    <div className="relative w-16 h-16 rounded-full border-2 border-ai/30 flex items-center justify-center shadow-[0_0_15px_rgba(45,212,191,0.2)]">
-                        <Zap className="w-8 h-8 text-ai animate-pulse" />
+            {/* Header — slimmer, inline stats */}
+            <div className="h-12 px-4 flex items-center justify-between border-b border-white/[0.05] flex-shrink-0">
+                <div className="flex items-center gap-2.5">
+                    <div className={`relative w-7 h-7 rounded-lg flex items-center justify-center ${systemOk ? 'jarvis-gradient' : 'bg-surface-2'}`}>
+                        <Zap className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+                        {systemOk && (
+                            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-success border border-bg-1" />
+                        )}
+                    </div>
+                    <div>
+                        <p className="text-[13px] font-semibold text-text-1 leading-tight">Jarvis</p>
+                        <p className={`text-[9px] leading-tight ${systemOk ? 'text-success' : 'text-text-3'}`}>
+                            {perf == null ? 'Connecting...' : systemOk ? `${perf.active_agents} agents online` : 'No active agents'}
+                        </p>
                     </div>
                 </div>
 
-                <div className="text-center">
-                    <h2 className="text-lg font-bold text-white">Jarvis Pulse</h2>
-                    <p className={`text-xs font-medium flex items-center justify-center gap-1 ${systemOk ? 'text-ai' : 'text-warning'}`}>
-                        <ShieldCheck className="w-3 h-3" />
-                        {perf == null ? 'Connecting...' : systemOk ? `${perf.active_agents} agents online` : 'No active agents'}
-                    </p>
-                </div>
-
-                {/* Quick stats */}
                 {perf && (
-                    <div className="flex gap-3 w-full">
-                        <div className="flex-1 bg-surface-1 border border-stroke rounded-xl p-2.5 text-center">
-                            <div className="text-base font-black text-white">{perf.handoffs_today}</div>
-                            <div className="text-[9px] font-bold text-text-3 uppercase tracking-widest">Handoffs</div>
+                    <div className="flex items-center gap-3">
+                        <div className="text-right">
+                            <div className="text-[11px] font-bold text-text-1 tabular-nums">{perf.handoffs_today}</div>
+                            <div className="text-[8px] text-text-3/60 uppercase tracking-wider">Handoffs</div>
                         </div>
-                        <div className="flex-1 bg-surface-1 border border-stroke rounded-xl p-2.5 text-center">
-                            <div className="text-base font-black text-success">{perf.resolution_rate_ai}</div>
-                            <div className="text-[9px] font-bold text-text-3 uppercase tracking-widest">AI Resolve</div>
-                        </div>
-                        <div className="flex-1 bg-surface-1 border border-stroke rounded-xl p-2.5 text-center">
-                            <div className="text-base font-black text-ai">{perf.avg_collaboration_time}</div>
-                            <div className="text-[9px] font-bold text-text-3 uppercase tracking-widest">Avg Collab</div>
+                        <div className="text-right">
+                            <div className="text-[11px] font-bold text-success tabular-nums">{perf.resolution_rate_ai}</div>
+                            <div className="text-[8px] text-text-3/60 uppercase tracking-wider">AI Rate</div>
                         </div>
                     </div>
                 )}
             </div>
 
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 flex flex-col gap-5">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-3 flex flex-col gap-4">
 
-                {/* SLA Alerts → Next Actions */}
+                {/* SLA Alerts */}
                 <div>
-                    <h3 className="text-[10px] font-bold text-text-3 uppercase tracking-widest mb-3 px-1">
-                        {slaAlerts.length > 0 ? `⚠ SLA Alerts (${slaAlerts.length})` : 'Next Actions'}
-                    </h3>
-                    <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between mb-2 px-1">
+                        <span className="text-[9px] font-semibold text-text-3/50 uppercase tracking-[0.1em]">
+                            {slaAlerts.length > 0 ? `SLA Alerts · ${slaAlerts.length}` : 'Next Actions'}
+                        </span>
+                    </div>
+                    <div className="flex flex-col gap-1">
                         {slaAlerts.length > 0 ? (
                             slaAlerts.slice(0, 3).map((alert) => (
                                 <Link
                                     key={alert.id}
                                     href="/support"
-                                    className="surface-glass p-3 rounded-xl border border-stroke/50 group cursor-pointer hover:border-critical/30 transition-all block"
+                                    className="flex items-start justify-between gap-2 px-3 py-2 rounded-lg bg-white/[0.03] hover:bg-white/[0.05] border border-white/[0.04] group transition-all"
                                 >
-                                    <div className="flex items-start justify-between mb-1.5">
-                                        <span className="text-xs font-bold text-text-1 group-hover:text-white transition-colors line-clamp-1 flex-1">
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[12px] font-medium text-text-2 group-hover:text-text-1 truncate transition-colors">
                                             {alert.subject}
-                                        </span>
-                                        <ArrowUpRight className="w-3 h-3 text-text-3 group-hover:text-critical flex-shrink-0 ml-1" />
+                                        </p>
+                                        <div className="flex items-center gap-1.5 mt-1">
+                                            <span className={`text-[9px] px-1.5 py-0.5 rounded font-semibold ${
+                                                alert.overdue
+                                                    ? 'bg-critical/10 text-critical'
+                                                    : 'bg-warning/10 text-warning'
+                                            }`}>
+                                                {alert.overdue ? 'Expirado' : `${alert.due_in_hours}h`}
+                                            </span>
+                                            <span className="text-[9px] text-text-3/60 capitalize">{alert.priority}</span>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase border ${
-                                            alert.overdue
-                                                ? 'bg-critical/10 text-critical border-critical/20'
-                                                : 'bg-warning/10 text-warning border-warning/20'
-                                        }`}>
-                                            {alert.overdue ? 'EXPIRADO' : `${alert.due_in_hours}h`}
-                                        </span>
-                                        <span className="text-[9px] text-text-3 px-1.5 py-0.5 bg-surface-2 rounded capitalize">{alert.priority}</span>
-                                        <Ticket size={9} className="text-text-3 ml-auto" />
-                                    </div>
+                                    <ArrowUpRight size={12} className="text-text-3/40 group-hover:text-text-3 mt-0.5 flex-shrink-0 transition-colors" />
                                 </Link>
                             ))
                         ) : (
-                            <div className="surface-glass p-3 rounded-xl border border-stroke/50 text-center">
-                                <p className="text-xs text-success font-bold">✓ Sem alertas SLA</p>
-                                <p className="text-[10px] text-text-3 mt-0.5">Todos os tickets dentro do prazo</p>
+                            <div className="px-3 py-2.5 rounded-lg bg-success/5 border border-success/10 text-center">
+                                <p className="text-[11px] text-success/80 font-medium">Sem alertas SLA</p>
                             </div>
                         )}
                     </div>
                 </div>
 
-                {/* Active Agents */}
+                <div className="h-px bg-white/[0.04]" />
+
+                {/* Agents */}
                 <div>
-                    <h3 className="text-[10px] font-bold text-text-3 uppercase tracking-widest mb-3 px-1 flex items-center justify-between">
-                        <span>Agentes Activos</span>
-                        <Link href="/agents" className="text-primary hover:text-ai transition-colors">
-                            <ArrowUpRight size={12} />
+                    <div className="flex items-center justify-between mb-2 px-1">
+                        <span className="text-[9px] font-semibold text-text-3/50 uppercase tracking-[0.1em]">Agentes</span>
+                        <Link href="/agents" className="text-[9px] text-text-3/50 hover:text-primary transition-colors flex items-center gap-0.5">
+                            Ver todos <ArrowUpRight size={9} />
                         </Link>
-                    </h3>
-                    <div className="flex flex-col gap-2">
+                    </div>
+                    <div className="flex flex-col gap-0.5">
                         {agents.length === 0 ? (
                             Array.from({ length: 3 }).map((_, i) => (
-                                <div key={i} className="h-12 bg-surface-1 rounded-xl animate-pulse" />
+                                <div key={i} className="h-9 rounded-lg bg-white/[0.03] animate-pulse" />
                             ))
                         ) : (
                             agents.map((agent) => {
@@ -190,26 +187,22 @@ export default function JarvisRail() {
                                 return (
                                     <div
                                         key={agent.id}
-                                        className="flex items-center gap-3 p-2.5 rounded-xl bg-surface-1 border border-stroke/50 hover:border-stroke transition-colors group"
+                                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-white/[0.03] transition-colors group"
                                     >
-                                        <div className="w-8 h-8 rounded-lg bg-bg-0 border border-stroke flex items-center justify-center flex-shrink-0">
-                                            <Brain size={14} className={isActive ? 'text-primary' : 'text-text-3'} />
+                                        <div className={`w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 ${isActive ? 'bg-primary/10' : 'bg-white/[0.03]'}`}>
+                                            <Brain size={12} className={isActive ? 'text-primary' : 'text-text-3/50'} />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-xs font-bold text-white truncate">{agent.name}</p>
-                                            <p className="text-[9px] text-text-3 truncate">{DEPT_LABEL[agent.playbook_id] ?? 'General'}</p>
+                                            <p className="text-[12px] font-medium text-text-2 truncate leading-tight">{agent.name}</p>
+                                            <p className="text-[9px] text-text-3/50 truncate leading-tight">{DEPT_LABEL[agent.playbook_id] ?? 'General'}</p>
                                         </div>
                                         <button
                                             onClick={() => toggleAgent(agent)}
                                             disabled={isToggling}
-                                            className="flex items-center gap-1 flex-shrink-0"
+                                            className="flex-shrink-0 p-1"
                                             title={isActive ? 'Pausar' : 'Ativar'}
                                         >
-                                            {isToggling ? (
-                                                <div className="w-2 h-2 rounded-full bg-text-3 animate-pulse" />
-                                            ) : (
-                                                <div className={`w-2 h-2 rounded-full ${STATUS_DOT[agent.status] ?? 'bg-text-3'}`} />
-                                            )}
+                                            <div className={`w-1.5 h-1.5 rounded-full transition-all ${isToggling ? 'bg-text-3/30 animate-pulse' : STATUS_DOT[agent.status] ?? 'bg-text-3/40'}`} />
                                         </button>
                                     </div>
                                 );
@@ -218,36 +211,47 @@ export default function JarvisRail() {
                     </div>
                 </div>
 
+                <div className="h-px bg-white/[0.04]" />
+
                 {/* Pulse Score */}
-                <div>
-                    <h3 className="text-[10px] font-bold text-text-3 uppercase tracking-widest mb-3 px-1 flex items-center gap-1.5">
-                        <Activity size={10} /> Pulse Score
-                    </h3>
-                    <div className="surface-glass p-4 rounded-2xl border border-stroke/50 flex flex-col items-center gap-2">
-                        {pulseScore == null ? (
-                            <div className="h-8 w-16 bg-surface-2 rounded animate-pulse" />
-                        ) : (
-                            <>
-                                <span className="text-3xl font-bold text-white tracking-tighter">{pulseScore}</span>
-                                <div className="w-full h-1 bg-surface-2 rounded-full overflow-hidden">
-                                    <div className="h-full jarvis-gradient rounded-full transition-all duration-700" style={{ width: `${pulseScore}%` }} />
-                                </div>
-                                <p className="text-[10px] text-text-3 text-center mt-0.5">
-                                    {perf?.total_agents} agentes · {perf?.active_agents} activos · {perf?.handoffs_today} handoffs hoje
-                                </p>
-                            </>
+                <div className="px-1">
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-[9px] font-semibold text-text-3/50 uppercase tracking-[0.1em] flex items-center gap-1">
+                            <Activity size={9} /> Pulse Score
+                        </span>
+                        {perf && (
+                            <span className="text-[9px] text-text-3/40 tabular-nums">
+                                {perf.total_agents} agentes
+                            </span>
                         )}
                     </div>
+                    {pulseScore == null ? (
+                        <div className="h-8 rounded bg-white/[0.03] animate-pulse" />
+                    ) : (
+                        <div className="flex flex-col gap-2">
+                            <div className="flex items-end gap-1.5">
+                                <span className="text-2xl font-bold text-text-1 tabular-nums leading-none">{pulseScore}</span>
+                                <span className="text-xs text-text-3/50 mb-0.5">/ 100</span>
+                            </div>
+                            <div className="w-full h-0.5 bg-white/[0.06] rounded-full overflow-hidden">
+                                <div
+                                    className="h-full jarvis-gradient rounded-full transition-all duration-700"
+                                    style={{ width: `${pulseScore}%` }}
+                                />
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
-            {/* Footer CTA */}
-            <div className="p-4 border-t border-stroke flex-shrink-0">
+            {/* Footer */}
+            <div className="px-3 py-2.5 border-t border-white/[0.05] flex-shrink-0">
                 <Link
                     href="/agents"
-                    className="w-full py-2.5 rounded-xl jarvis-gradient text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity"
+                    className="w-full py-2 rounded-lg bg-white/[0.04] hover:bg-white/[0.06] border border-white/[0.05] text-text-2 hover:text-text-1 text-xs font-medium flex items-center justify-center gap-1.5 transition-all"
                 >
-                    <Sparkles className="w-4 h-4" /> Gerir AI Squad
+                    <Sparkles size={12} className="text-primary" />
+                    Gerir AI Squad
                 </Link>
             </div>
         </aside>

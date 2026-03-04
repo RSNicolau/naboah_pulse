@@ -5,13 +5,18 @@ import { BrandProvider } from '@/components/providers/BrandProvider';
 import { SupabaseProvider } from '@/components/providers/SupabaseProvider';
 import AppShell from '@/components/layout/AppShell';
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+    subsets: ["latin"],
+    variable: "--font-inter",
+    display: "swap",
+    weight: ["400", "500", "600", "700", "800", "900"],
+});
 
 export const metadata: Metadata = {
     title: "Naboah Pulse | Jarvis ChannelHub",
     description: "Omnichannel Command Center for Enterprise",
     manifest: "/manifest.json",
-    themeColor: "#0066FF",
+    themeColor: "#070A10",
     viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0",
     appleWebApp: {
         capable: true,
@@ -26,8 +31,8 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" className="dark">
-            <body className={`${inter.className} bg-[#05060A] text-[#E6EAF2] antialiased overflow-hidden flex`}>
+        <html lang="en" className={`dark ${inter.variable}`}>
+            <body className="bg-bg-0 text-text-1 antialiased overflow-hidden flex font-sans">
                 <BrandProvider tenantConfig={null}>
                     <SupabaseProvider>
                         <AppShell>

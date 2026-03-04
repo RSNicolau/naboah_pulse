@@ -1,37 +1,38 @@
 "use client";
 
 import React from 'react';
-import { Search, HelpCircle, ChevronDown } from 'lucide-react';
+import { Search, HelpCircle } from 'lucide-react';
 import PresenceAvatars from '@/components/layout/PresenceAvatars';
 import NotificationsPanel from '@/components/layout/NotificationsPanel';
 
 export default function Topbar() {
     return (
-        <header className="h-16 bg-bg-1/80 backdrop-blur-md border-b border-stroke sticky top-0 z-10 flex items-center justify-between px-4 md:px-8">
-            <div className="flex items-center gap-4 flex-1 max-w-xl">
-                <div className="relative w-full">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
-                    <input
-                        type="text"
-                        placeholder="Search everything..."
-                        className="w-full bg-surface-1 border border-stroke rounded-full py-2 pl-10 pr-4 text-sm text-text-1 focus:outline-none focus:border-primary/50 transition-colors"
-                    />
-                </div>
+        <header className="h-12 bg-bg-1/70 backdrop-blur-xl border-b border-white/[0.05] sticky top-0 z-10 flex items-center justify-between px-4 gap-4">
+
+            {/* Search */}
+            <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-3/60" />
+                <input
+                    type="text"
+                    placeholder="Pesquisar..."
+                    className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg py-1.5 pl-9 pr-3 text-sm text-text-1 placeholder:text-text-3/40 focus:outline-none focus:border-primary/40 focus:bg-white/[0.05] transition-all"
+                />
+                <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/[0.05] border border-white/[0.06] text-[9px] text-text-3/50 font-mono">
+                    ⌘K
+                </kbd>
             </div>
 
+            {/* Presence */}
             <div className="flex-1 flex justify-center">
                 <PresenceAvatars />
             </div>
 
-            <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2 px-3 py-1.5 surface-glass rounded-lg border border-stroke/50 hover:bg-surface-2 cursor-pointer transition-colors">
-                    <span className="text-xs font-semibold text-text-2">Workspace:</span>
-                    <span className="text-xs font-bold text-text-1">Default</span>
-                    <ChevronDown className="w-3 h-3 text-text-3" />
-                </div>
-
-                <div className="flex items-center gap-4 text-text-3 border-l border-stroke pl-6 ml-2">
-                    <HelpCircle className="w-5 h-5 hover:text-text-1 cursor-pointer transition-colors" />
+            {/* Right actions */}
+            <div className="flex items-center gap-1">
+                <button className="w-8 h-8 flex items-center justify-center rounded-lg text-text-3/60 hover:text-text-2 hover:bg-white/[0.04] transition-all">
+                    <HelpCircle size={15} />
+                </button>
+                <div className="w-8 h-8 flex items-center justify-center rounded-lg text-text-3/60 hover:text-text-2 hover:bg-white/[0.04] transition-all">
                     <NotificationsPanel />
                 </div>
             </div>
