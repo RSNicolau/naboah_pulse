@@ -91,13 +91,16 @@ export default function JarvisRail() {
     return (
         <aside className="w-80 h-screen bg-bg-1 border-l border-white/[0.05] fixed right-0 top-0 z-20 flex flex-col overflow-hidden">
 
-            {/* Header — slimmer, inline stats */}
-            <div className="h-12 px-4 flex items-center justify-between border-b border-white/[0.05] flex-shrink-0">
-                <div className="flex items-center gap-2.5">
-                    <div className={`relative w-7 h-7 rounded-lg flex items-center justify-center ${systemOk ? 'jarvis-gradient' : 'bg-surface-2'}`}>
-                        <Zap className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+            {/* Header — gradient premium style */}
+            <div className="h-14 px-4 flex items-center justify-between border-b border-white/[0.05] flex-shrink-0 relative overflow-hidden">
+                {/* Ambient gradient behind header */}
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.04] via-ai-glow/[0.03] to-transparent pointer-events-none" />
+
+                <div className="relative flex items-center gap-2.5">
+                    <div className={`relative w-8 h-8 rounded-xl flex items-center justify-center ${systemOk ? 'jarvis-gradient shadow-glow-primary' : 'bg-surface-2'}`}>
+                        <Zap className="w-4 h-4 text-white" strokeWidth={2.5} />
                         {systemOk && (
-                            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-success border border-bg-1" />
+                            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-success border-2 border-bg-1 shadow-[0_0_6px_rgba(34,197,94,0.5)]" />
                         )}
                     </div>
                     <div>
@@ -109,7 +112,7 @@ export default function JarvisRail() {
                 </div>
 
                 {perf && (
-                    <div className="flex items-center gap-3">
+                    <div className="relative flex items-center gap-3">
                         <div className="text-right">
                             <div className="text-[11px] font-bold text-text-1 tabular-nums">{perf.handoffs_today}</div>
                             <div className="text-[8px] text-text-3/60 uppercase tracking-wider">Handoffs</div>
@@ -213,9 +216,9 @@ export default function JarvisRail() {
 
                 <div className="h-px bg-white/[0.04]" />
 
-                {/* Pulse Score */}
+                {/* Pulse Score — radial gauge */}
                 <div className="px-1">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center justify-between mb-3">
                         <span className="text-[9px] font-semibold text-text-3/50 uppercase tracking-[0.1em] flex items-center gap-1">
                             <Activity size={9} /> Pulse Score
                         </span>
@@ -226,18 +229,51 @@ export default function JarvisRail() {
                         )}
                     </div>
                     {pulseScore == null ? (
-                        <div className="h-8 rounded bg-white/[0.03] animate-pulse" />
+                        <div className="h-20 rounded-xl bg-white/[0.03] animate-pulse" />
                     ) : (
-                        <div className="flex flex-col gap-2">
-                            <div className="flex items-end gap-1.5">
-                                <span className="text-2xl font-bold text-text-1 tabular-nums leading-none">{pulseScore}</span>
-                                <span className="text-xs text-text-3/50 mb-0.5">/ 100</span>
+                        <div className="card-metric p-4 flex items-center gap-4">
+                            {/* SVG radial gauge */}
+                            <div className="relative w-16 h-16 flex-shrink-0">
+                                <svg viewBox="0 0 64 64" className="w-full h-full -rotate-90">
+                                    <circle
+                                        cx="32" cy="32" r="28"
+                                        fill="none"
+                                        stroke="rgba(255,255,255,0.04)"
+                                        strokeWidth="4"
+                                    />
+                                    <circle
+                                        cx="32" cy="32" r="28"
+                                        fill="none"
+                                        stroke="url(#pulseGrad)"
+                                        strokeWidth="4"
+                                        strokeLinecap="round"
+                                        strokeDasharray={`${(pulseScore / 100) * 175.9} 175.9`}
+                                        className="transition-all duration-1000"
+                                    />
+                                    <defs>
+                                        <linearGradient id="pulseGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stopColor="#7B61FF" />
+                                            <stop offset="100%" stopColor="#2DD4BF" />
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="text-base font-bold text-text-1 tabular-nums">{pulseScore}</span>
+                                </div>
                             </div>
-                            <div className="w-full h-0.5 bg-white/[0.06] rounded-full overflow-hidden">
-                                <div
-                                    className="h-full jarvis-gradient rounded-full transition-all duration-700"
-                                    style={{ width: `${pulseScore}%` }}
-                                />
+                            <div className="flex flex-col gap-1.5">
+                                <div className="flex items-center gap-1.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_4px_rgba(34,197,94,0.4)]" />
+                                    <span className="text-[10px] text-text-3">Ativos: {perf?.active_agents ?? 0}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-text-3/30" />
+                                    <span className="text-[10px] text-text-3">Idle: {perf?.idle_agents ?? 0}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-warning" />
+                                    <span className="text-[10px] text-text-3">Pausados: {perf?.paused_agents ?? 0}</span>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -248,9 +284,9 @@ export default function JarvisRail() {
             <div className="px-3 py-2.5 border-t border-white/[0.05] flex-shrink-0">
                 <Link
                     href="/agents"
-                    className="w-full py-2 rounded-lg bg-white/[0.04] hover:bg-white/[0.06] border border-white/[0.05] text-text-2 hover:text-text-1 text-xs font-medium flex items-center justify-center gap-1.5 transition-all"
+                    className="w-full py-2.5 rounded-xl btn-primary text-xs font-semibold flex items-center justify-center gap-1.5"
                 >
-                    <Sparkles size={12} className="text-primary" />
+                    <Sparkles size={12} />
                     Gerir AI Squad
                 </Link>
             </div>

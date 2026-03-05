@@ -11,12 +11,7 @@ import {
     UserSquare2, Rocket, DollarSign, ShieldCheck, Brain, Sparkles,
     ShoppingBag, Building2, Terminal, Globe, Monitor, BookUser, Activity,
 } from 'lucide-react';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}
+import { cn } from '@/lib/utils';
 
 type NavItem = { icon: React.ElementType; label: string; href: string };
 type NavSection = { title: string; items: NavItem[] };
@@ -123,8 +118,11 @@ export default function Sidebar() {
     return (
         <aside className="w-56 h-screen bg-bg-1 border-r border-white/[0.05] flex flex-col fixed left-0 top-0 z-20">
 
+            {/* Sidebar gradient overlay */}
+            <div className="absolute inset-0 bg-sidebar-gradient pointer-events-none" />
+
             {/* Logo */}
-            <div className="h-12 px-4 flex items-center gap-2.5 border-b border-white/[0.05] flex-shrink-0">
+            <div className="relative h-12 px-4 flex items-center gap-2.5 border-b border-white/[0.05] flex-shrink-0">
                 <div className="w-7 h-7 rounded-lg jarvis-gradient flex items-center justify-center flex-shrink-0 shadow-glow-primary">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 2L4 7v10l8 5 8-5V7l-8-5z" stroke="white" strokeWidth="1.5" strokeLinejoin="round" fill="white" fillOpacity="0.1"/>
@@ -136,7 +134,7 @@ export default function Sidebar() {
             </div>
 
             {/* Nav */}
-            <nav className="flex-1 overflow-y-auto custom-scrollbar py-3">
+            <nav className="relative flex-1 overflow-y-auto custom-scrollbar py-3">
                 {navSections.map((section) => (
                     <div key={section.title} className="mb-1">
                         <div className="px-4 py-1.5">
@@ -153,8 +151,8 @@ export default function Sidebar() {
                                     className={cn(
                                         "relative flex items-center gap-2.5 mx-2 px-3 py-1.5 rounded-lg text-[13px] transition-all duration-150 group",
                                         active
-                                            ? "bg-white/[0.06] text-text-1"
-                                            : "text-text-3 hover:text-text-2 hover:bg-white/[0.03]"
+                                            ? "bg-gradient-to-r from-primary/[0.08] to-transparent text-text-1"
+                                            : "text-text-3 hover:text-text-2 hover:bg-white/[0.03] hover:translate-x-0.5"
                                     )}
                                 >
                                     {active && (
@@ -178,9 +176,9 @@ export default function Sidebar() {
             </nav>
 
             {/* User footer */}
-            <div className="border-t border-white/[0.05] px-3 py-2.5 flex-shrink-0">
+            <div className="relative border-t border-white/[0.05] px-3 py-2.5 flex-shrink-0">
                 <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-white/[0.03] transition-colors group">
-                    <div className="w-6 h-6 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-[9px] font-bold text-primary flex-shrink-0">
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-ai flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0 shadow-glow-primary/30">
                         {initials}
                     </div>
                     <div className="flex flex-col min-w-0 flex-1">

@@ -1,7 +1,9 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { TrendingUp, Zap, Info, ArrowUpRight, Loader2 } from 'lucide-react';
+import { TrendingUp, Zap, Info, Loader2 } from 'lucide-react';
 import { apiGet } from '@/lib/api';
+import MetricCard from '@/components/ui/MetricCard';
+import AIInsightBanner from '@/components/ui/AIInsightBanner';
 
 type DataPoint = { period: string; predicted_value: number; actual_value: number | null };
 type RevenueForecast = {
@@ -26,7 +28,7 @@ export default function ForecastingChart() {
         : 1;
 
     return (
-        <div className="bg-bg-1 border border-stroke rounded-[2.5rem] p-10 flex flex-col gap-10 shadow-2xl relative overflow-hidden group">
+        <div className="card-premium !rounded-[2.5rem] p-10 flex flex-col gap-10 relative overflow-hidden group">
 
             {/* Glow Effect */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 blur-[120px] rounded-full pointer-events-none"></div>
@@ -58,35 +60,32 @@ export default function ForecastingChart() {
                 </div>
             ) : (
                 <>
-                    {/* Stats Grid */}
+                    {/* Stats Grid — MetricCards */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                        <div className="p-6 bg-bg-0 border border-stroke rounded-2xl flex flex-col gap-2">
-                            <span className="text-[10px] font-black text-text-3 uppercase tracking-widest">Receita Projetada</span>
-                            <div className="flex items-end gap-3">
-                                <span className="text-2xl font-black text-white tracking-tighter">R$ {forecast.total_predicted.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}</span>
-                                <div className="flex items-center gap-1 text-success text-[10px] font-bold pb-1">
-                                    <ArrowUpRight size={12} /> +{(forecast.growth_rate * 100).toFixed(1)}%
-                                </div>
-                            </div>
-                        </div>
-                        <div className="p-6 bg-bg-0 border border-stroke rounded-2xl flex flex-col gap-2">
-                            <span className="text-[10px] font-black text-text-3 uppercase tracking-widest">Confiança da IA</span>
-                            <div className="flex items-end gap-3">
-                                <span className="text-2xl font-black text-primary tracking-tighter">94.8%</span>
-                                <span className="text-[10px] font-bold text-text-3 pb-1 uppercase">Padrão Ouro</span>
-                            </div>
-                        </div>
-                        <div className="p-6 bg-bg-0 border border-stroke rounded-2xl flex flex-col gap-2">
-                            <span className="text-[10px] font-black text-text-3 uppercase tracking-widest">Data Points</span>
-                            <div className="flex items-end gap-3">
-                                <span className="text-2xl font-black text-warning tracking-tighter">{forecast.data_points.length}</span>
-                                <span className="text-[10px] font-bold text-text-3 pb-1 uppercase">Períodos</span>
-                            </div>
-                        </div>
+                        <MetricCard
+                            label="Receita Projetada"
+                            value={`R$ ${forecast.total_predicted.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`}
+                            trend={forecast.growth_rate * 100}
+                            icon={TrendingUp}
+                            iconColor="text-success"
+                        />
+                        <MetricCard
+                            label="Confiança da IA"
+                            value="94.8%"
+                            icon={Zap}
+                            iconColor="text-primary"
+                        />
+                        <MetricCard
+                            label="Data Points"
+                            value={forecast.data_points.length}
+                            trendLabel="Períodos"
+                            icon={Info}
+                            iconColor="text-warning"
+                        />
                     </div>
 
                     {/* Chart */}
-                    <div className="h-[300px] w-full bg-bg-0 border border-stroke rounded-3xl relative flex items-end p-8 gap-4 overflow-hidden shadow-inner">
+                    <div className="h-[300px] w-full bg-bg-0/50 border border-white/[0.05] rounded-3xl relative flex items-end p-8 gap-4 overflow-hidden">
                         {/* Grid Lines */}
                         <div className="absolute inset-x-8 top-8 bottom-8 flex flex-col justify-between opacity-5">
                             {[1, 2, 3, 4, 5].map(i => <div key={i} className="w-full h-px bg-white"></div>)}
@@ -123,12 +122,11 @@ export default function ForecastingChart() {
                 </>
             )}
 
-            <div className="flex items-center gap-3 p-6 bg-surface-1 border border-stroke rounded-2xl">
-                <Info size={16} className="text-primary" />
-                <p className="text-[11px] text-text-2 font-medium">
-                    <span className="font-bold text-white uppercase tracking-tighter">Insight do Pulse AI:</span> O forecasting indica um pico de demanda na próxima quinzena. Sugerimos reforçar a "AI Squad" de Vendas VIP para capturar o aumento de leads projetado.
-                </p>
-            </div>
+            <AIInsightBanner
+                message="O forecasting indica um pico de demanda na próxima quinzena. Sugerimos reforçar a AI Squad de Vendas VIP para capturar o aumento de leads projetado."
+                variant="suggestion"
+                action={{ label: "Configurar AI Squad", onClick: () => window.location.href = '/agents/team' }}
+            />
 
         </div>
     );

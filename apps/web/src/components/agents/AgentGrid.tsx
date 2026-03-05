@@ -7,6 +7,7 @@ import {
     Brain, Zap, Play, Pause, Settings,
     Plus, X, Loader2, ShieldCheck, Users
 } from 'lucide-react';
+import Badge from '@/components/ui/Badge';
 
 type Agent = {
     id: string;
@@ -117,7 +118,7 @@ export default function AgentGrid() {
                     )}
                     <button
                         onClick={() => setShowModal(true)}
-                        className="jarvis-gradient px-5 py-2.5 rounded-xl text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20 flex items-center gap-2 hover:opacity-90 transition-opacity"
+                        className="btn-primary px-5 py-2.5 text-xs uppercase tracking-widest flex items-center gap-2"
                     >
                         <Zap size={14} /> Deploy Agent
                     </button>
@@ -149,21 +150,24 @@ export default function AgentGrid() {
                             const isActive = ['acting', 'thinking'].includes(agent.status);
 
                             return (
-                                <div key={agent.id} className="bg-bg-1 border border-stroke rounded-3xl p-6 flex flex-col gap-5 hover:border-primary/30 transition-all group relative overflow-hidden">
+                                <div key={agent.id} className="card-premium !rounded-3xl p-6 flex flex-col gap-5 group relative overflow-hidden animate-fade-in">
                                     <div className="flex items-start justify-between">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-14 h-14 rounded-2xl bg-surface-2 border border-stroke flex items-center justify-center text-primary group-hover:scale-110 transition-transform flex-shrink-0">
-                                                <Brain size={28} />
+                                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0 ${isActive ? 'bg-gradient-to-br from-primary/15 to-ai/10 border border-primary/20' : 'bg-surface-2 border border-stroke'}`}>
+                                                <Brain size={28} className={isActive ? 'text-primary' : 'text-text-3'} />
                                             </div>
                                             <div>
                                                 <h3 className="text-base font-bold text-white leading-tight">{agent.name}</h3>
                                                 <p className="text-[10px] text-text-3 mt-0.5">{agent.role}</p>
                                             </div>
                                         </div>
-                                        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[10px] font-black uppercase tracking-widest flex-shrink-0 ${sc.badge}`}>
-                                            <div className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
+                                        <Badge
+                                            variant={agent.status === 'acting' || agent.status === 'thinking' ? 'success' : agent.status === 'paused' ? 'warning' : 'neutral'}
+                                            size="md"
+                                            dot
+                                        >
                                             {sc.label}
-                                        </div>
+                                        </Badge>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-3">
@@ -223,9 +227,9 @@ export default function AgentGrid() {
                     {!loading && (
                         <button
                             onClick={() => setShowModal(true)}
-                            className="bg-bg-1 border border-stroke border-dashed rounded-3xl p-6 flex flex-col items-center justify-center gap-4 group cursor-pointer hover:bg-surface-1/20 hover:border-primary/30 transition-all min-h-[280px]"
+                            className="card !border-dashed !rounded-3xl p-6 flex flex-col items-center justify-center gap-4 group cursor-pointer hover:!border-primary/30 min-h-[280px]"
                         >
-                            <div className="w-12 h-12 rounded-full bg-surface-2 border border-stroke flex items-center justify-center text-text-3 group-hover:text-primary group-hover:border-primary/30 transition-colors">
+                            <div className="w-12 h-12 rounded-full bg-surface-2 border border-white/[0.06] flex items-center justify-center text-text-3 group-hover:text-primary group-hover:border-primary/30 group-hover:bg-primary/[0.06] transition-all">
                                 <Plus size={20} />
                             </div>
                             <div className="text-center">
@@ -239,7 +243,7 @@ export default function AgentGrid() {
 
             {showModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-                    <div className="bg-bg-1 border border-stroke rounded-2xl p-6 w-full max-w-sm shadow-2xl flex flex-col gap-5">
+                    <div className="card-premium !rounded-2xl p-6 w-full max-w-sm flex flex-col gap-5 animate-scale-in">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <Zap className="w-4 h-4 text-primary" />
@@ -282,11 +286,11 @@ export default function AgentGrid() {
                         </div>
 
                         <div className="flex gap-3">
-                            <button onClick={() => setShowModal(false)} className="flex-1 py-2.5 border border-stroke rounded-xl text-xs font-bold text-text-2 hover:text-white transition-colors">
+                            <button onClick={() => setShowModal(false)} className="flex-1 btn-secondary py-2.5">
                                 Cancelar
                             </button>
                             <button onClick={handleDeploy} disabled={saving || !form.name.trim() || !form.role.trim()}
-                                className="flex-1 py-2.5 jarvis-gradient text-white rounded-xl text-xs font-black uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                                className="flex-1 btn-primary py-2.5 text-xs uppercase tracking-widest flex items-center justify-center gap-2">
                                 {saving && <Loader2 size={12} className="animate-spin" />}
                                 Deploy
                             </button>

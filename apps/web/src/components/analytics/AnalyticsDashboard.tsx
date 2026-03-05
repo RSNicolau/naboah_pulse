@@ -6,10 +6,13 @@ import { toast } from '@/lib/toast';
 import {
     MessageSquare, Inbox, Zap, Users, ArrowRight, TrendingUp,
     DollarSign, Ticket, CheckCircle2, AlertTriangle, Bot,
-    GitBranch, LifeBuoy, BarChart3, Clock,
+    GitBranch, LifeBuoy, BarChart3, Clock, Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import MetricCard from '@/components/ui/MetricCard';
+import AIInsightBanner from '@/components/ui/AIInsightBanner';
+import Badge from '@/components/ui/Badge';
 
 type KPIs = {
     total_conversations: number;
@@ -57,17 +60,17 @@ const CHANNEL_COLORS: Record<string, string> = {
     Other: 'bg-text-3',
 };
 
-const STATUS_STYLES: Record<string, string> = {
-    open: 'bg-success/10 text-success',
-    pending: 'bg-warning/10 text-warning',
-    closed: 'bg-surface-2 text-text-3',
+const STATUS_BADGE: Record<string, 'success' | 'warning' | 'neutral'> = {
+    open: 'success',
+    pending: 'warning',
+    closed: 'neutral',
 };
 
-const PRIORITY_STYLES: Record<string, string> = {
-    urgent: 'bg-critical/10 text-critical',
-    high: 'bg-warning/10 text-warning',
-    medium: 'bg-primary/10 text-primary',
-    low: 'bg-surface-2 text-text-3',
+const PRIORITY_BADGE: Record<string, 'critical' | 'warning' | 'primary' | 'neutral'> = {
+    urgent: 'critical',
+    high: 'warning',
+    medium: 'primary',
+    low: 'neutral',
 };
 
 function timeAgo(iso: string | null): string {
@@ -135,77 +138,68 @@ export default function AnalyticsDashboard() {
     const hour = today.getHours();
     const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
 
-    const kpiCards = [
-        { label: 'Conversas',       value: kpis?.total_conversations,  icon: MessageSquare, color: 'text-primary',  bg: 'bg-primary/10',  border: 'border-primary/20' },
-        { label: 'Abertas Agora',   value: kpis?.open_conversations,   icon: Inbox,         color: 'text-warning',  bg: 'bg-warning/10',  border: 'border-warning/20' },
-        { label: 'Mensagens',       value: kpis?.total_messages,       icon: Zap,           color: 'text-ai',       bg: 'bg-ai/10',       border: 'border-ai/20' },
-        { label: 'Contactos',       value: kpis?.total_contacts,       icon: Users,         color: 'text-success',  bg: 'bg-success/10',  border: 'border-success/20' },
-        { label: 'Pipeline',        value: kpis ? formatBRL(kpis.pipeline_value) : '—', icon: DollarSign, color: 'text-ai', bg: 'bg-ai/10', border: 'border-ai/20' },
-        { label: 'Deals Abertos',   value: kpis?.open_deals,           icon: TrendingUp,    color: 'text-primary',  bg: 'bg-primary/10',  border: 'border-primary/20' },
-        { label: 'Tickets',         value: kpis?.open_tickets,         icon: Ticket,        color: 'text-warning',  bg: 'bg-warning/10',  border: 'border-warning/20' },
-        { label: 'Taxa Resolução',  value: kpis ? `${kpis.resolution_rate}%` : '—', icon: CheckCircle2, color: 'text-success', bg: 'bg-success/10', border: 'border-success/20' },
-    ];
-
     return (
         <div className="p-8 max-w-7xl mx-auto w-full flex flex-col gap-8 pb-20">
 
             {/* Header */}
-            <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center justify-between flex-wrap gap-4 animate-fade-in">
                 <div className="flex flex-col gap-1">
                     <p className="text-[10px] font-bold text-text-3 uppercase tracking-[0.3em]">
                         {today.toLocaleDateString('pt-PT', { weekday: 'long', month: 'long', day: 'numeric' })}
                     </p>
                     <h1 className="text-2xl font-black text-white tracking-tight">
-                        {greeting}, <span className="text-primary">Naboah Pulse</span>
+                        {greeting}, <span className="text-gradient">Naboah Pulse</span>
                     </h1>
                 </div>
                 <div className="flex items-center gap-3">
                     {kpis && kpis.high_churn_contacts > 0 && (
-                        <Link href="/contacts" className="flex items-center gap-2 px-3 py-1.5 bg-critical/10 border border-critical/20 rounded-xl">
+                        <Link href="/contacts" className="flex items-center gap-2 px-3 py-1.5 bg-critical/10 border border-critical/20 rounded-xl hover:bg-critical/15 transition-colors">
                             <AlertTriangle size={13} className="text-critical" />
                             <span className="text-xs font-bold text-critical">{kpis.high_churn_contacts} contacto{kpis.high_churn_contacts !== 1 ? 's' : ''} em risco</span>
                         </Link>
                     )}
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-success/10 border border-success/20 rounded-xl">
-                        <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse shadow-[0_0_6px_rgba(34,197,94,0.4)]" />
                         <span className="text-xs font-bold text-success">Live Data</span>
                     </div>
                 </div>
             </div>
 
-            {/* 8 KPI Cards */}
+            {/* AI Insight Banner */}
+            {!loading && kpis && (
+                <AIInsightBanner
+                    message={
+                        kpis.resolution_rate >= 80
+                            ? `Excelente! Taxa de resolução em ${kpis.resolution_rate}%. A AI Squad está a superar expectativas com ${kpis.total_messages} mensagens processadas.`
+                            : `A taxa de resolução está em ${kpis.resolution_rate}%. Sugiro ativar mais agentes de suporte para melhorar a performance.`
+                    }
+                    variant={kpis.resolution_rate >= 80 ? "success" : "suggestion"}
+                    action={{ label: "Ver AI Squad", onClick: () => window.location.href = '/agents/team' }}
+                />
+            )}
+
+            {/* 8 KPI Cards — MetricCard */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {kpiCards.map((card) => (
-                    <div
-                        key={card.label}
-                        className={`bg-bg-1 border ${card.border} rounded-2xl p-5 flex flex-col gap-4 relative overflow-hidden hover:scale-[1.01] transition-transform`}
-                    >
-                        <div className={`w-9 h-9 rounded-xl ${card.bg} border ${card.border} flex items-center justify-center`}>
-                            <card.icon className={`w-4 h-4 ${card.color}`} />
-                        </div>
-                        <div>
-                            <p className="text-[9px] font-bold text-text-3 uppercase tracking-widest mb-1">{card.label}</p>
-                            {loading ? (
-                                <div className="h-8 w-14 bg-surface-2 rounded animate-pulse" />
-                            ) : (
-                                <span className="text-2xl font-black text-white tracking-tight">{card.value ?? 0}</span>
-                            )}
-                        </div>
-                        <div className={`absolute -bottom-4 -right-4 w-16 h-16 rounded-full ${card.bg} blur-2xl opacity-50`} />
-                    </div>
-                ))}
+                <MetricCard label="Conversas" value={kpis?.total_conversations ?? 0} icon={MessageSquare} iconColor="text-primary" loading={loading} />
+                <MetricCard label="Abertas Agora" value={kpis?.open_conversations ?? 0} icon={Inbox} iconColor="text-warning" loading={loading} />
+                <MetricCard label="Mensagens" value={kpis?.total_messages ?? 0} icon={Zap} iconColor="text-ai" loading={loading} />
+                <MetricCard label="Contactos" value={kpis?.total_contacts ?? 0} icon={Users} iconColor="text-success" loading={loading} />
+                <MetricCard label="Pipeline" value={kpis ? formatBRL(kpis.pipeline_value) : '—'} icon={DollarSign} iconColor="text-ai" loading={loading} />
+                <MetricCard label="Deals Abertos" value={kpis?.open_deals ?? 0} icon={TrendingUp} iconColor="text-primary" loading={loading} />
+                <MetricCard label="Tickets" value={kpis?.open_tickets ?? 0} icon={Ticket} iconColor="text-warning" loading={loading} />
+                <MetricCard label="Taxa Resolução" value={kpis ? `${kpis.resolution_rate}%` : '—'} icon={CheckCircle2} iconColor="text-success" loading={loading} />
             </div>
 
             {/* SLA Alerts */}
             {(loading || slaAlerts.length > 0) && (
-                <div className="bg-bg-1 border border-warning/30 rounded-2xl p-5 flex flex-col gap-3">
-                    <div className="flex items-center gap-2">
+                <div className="card p-5 !border-warning/20">
+                    <div className="flex items-center gap-2 mb-3">
                         <Clock size={14} className="text-warning" />
                         <h3 className="text-xs font-black text-warning uppercase tracking-widest">SLA em Risco</h3>
                     </div>
                     {loading ? (
                         <div className="flex flex-wrap gap-2">
-                            {[0, 1, 2].map((i) => <div key={i} className="h-8 w-48 bg-surface-2 rounded-xl animate-pulse" />)}
+                            {[0, 1, 2].map((i) => <div key={i} className="skeleton h-8 w-48" />)}
                         </div>
                     ) : (
                         <div className="flex flex-wrap gap-2">
@@ -235,9 +229,9 @@ export default function AnalyticsDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                 {/* Channel Distribution */}
-                <div className="bg-bg-1 border border-stroke rounded-2xl p-6 flex flex-col gap-6">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-bold text-white">Canais</h3>
+                <div className="card p-6">
+                    <div className="flex items-center justify-between mb-5">
+                        <h3 className="text-sm font-semibold text-text-1">Canais</h3>
                         <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest">por conversas</span>
                     </div>
                     {loading ? (
@@ -245,10 +239,10 @@ export default function AnalyticsDashboard() {
                             {[80, 50, 30].map((w, i) => (
                                 <div key={i} className="flex flex-col gap-2">
                                     <div className="flex justify-between">
-                                        <div className="h-3 w-20 bg-surface-2 rounded animate-pulse" />
-                                        <div className="h-3 w-8 bg-surface-2 rounded animate-pulse" />
+                                        <div className="skeleton h-3 w-20" />
+                                        <div className="skeleton h-3 w-8" />
                                     </div>
-                                    <div className="h-2 bg-surface-2 rounded-full animate-pulse" style={{ width: `${w}%` }} />
+                                    <div className="skeleton h-2 rounded-full" style={{ width: `${w}%` }} />
                                 </div>
                             ))}
                         </div>
@@ -280,17 +274,17 @@ export default function AnalyticsDashboard() {
                 </div>
 
                 {/* Weekly Activity */}
-                <div className="bg-bg-1 border border-stroke rounded-2xl p-6 flex flex-col gap-6">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-bold text-white">Actividade Semanal</h3>
+                <div className="card p-6">
+                    <div className="flex items-center justify-between mb-5">
+                        <h3 className="text-sm font-semibold text-text-1">Actividade Semanal</h3>
                         <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest">mensagens / dia</span>
                     </div>
                     <div className="flex items-end justify-between gap-2 h-40">
                         {loading
                             ? Array.from({ length: 7 }).map((_, i) => (
                                 <div key={i} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
-                                    <div className="w-full bg-surface-2 rounded-t-lg animate-pulse" style={{ height: `${30 + i * 8}%` }} />
-                                    <div className="w-4 h-2 bg-surface-2 rounded animate-pulse" />
+                                    <div className="w-full skeleton rounded-t-lg" style={{ height: `${30 + i * 8}%` }} />
+                                    <div className="skeleton w-4 h-2" />
                                 </div>
                             ))
                             : dailyMsgs.map((d, i) => {
@@ -299,11 +293,11 @@ export default function AnalyticsDashboard() {
                                 return (
                                     <div key={d.day + i} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
                                         <div
-                                            className={`w-full rounded-t-lg transition-all duration-500 relative ${isToday ? 'jarvis-gradient' : 'bg-surface-2 group-hover:bg-primary/40'}`}
+                                            className={`w-full rounded-t-lg transition-all duration-500 relative ${isToday ? 'jarvis-gradient shadow-glow-primary' : 'bg-surface-2 group-hover:bg-primary/40'}`}
                                             style={{ height: `${heightPct}%` }}
                                         >
                                             {d.count > 0 && (
-                                                <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-bg-1 border border-stroke px-2 py-0.5 rounded text-[9px] text-white font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-surface-1 border border-white/[0.08] px-2 py-0.5 rounded-lg text-[9px] text-white font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
                                                     {d.count}
                                                 </div>
                                             )}
@@ -321,21 +315,21 @@ export default function AnalyticsDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {/* Recent Conversations */}
-                <div className="lg:col-span-2 bg-bg-1 border border-stroke rounded-2xl flex flex-col">
-                    <div className="p-5 flex items-center justify-between border-b border-stroke">
-                        <h3 className="text-sm font-bold text-white">Conversas Recentes</h3>
+                <div className="lg:col-span-2 card !p-0">
+                    <div className="p-5 flex items-center justify-between border-b border-white/[0.06]">
+                        <h3 className="text-sm font-semibold text-text-1">Conversas Recentes</h3>
                         <Link href="/inbox" className="flex items-center gap-1.5 text-[10px] font-bold text-text-3 hover:text-primary transition-colors uppercase tracking-widest">
                             Ver todas <ArrowRight className="w-3 h-3" />
                         </Link>
                     </div>
                     {loading ? (
-                        <div className="flex flex-col divide-y divide-stroke">
+                        <div className="flex flex-col divide-y divide-white/[0.04]">
                             {Array.from({ length: 4 }).map((_, i) => (
                                 <div key={i} className="p-4 flex items-center gap-4">
-                                    <div className="w-9 h-9 rounded-full bg-surface-2 animate-pulse flex-shrink-0" />
+                                    <div className="w-9 h-9 rounded-full skeleton flex-shrink-0" />
                                     <div className="flex-1 flex flex-col gap-2">
-                                        <div className="h-3 w-32 bg-surface-2 rounded animate-pulse" />
-                                        <div className="h-2 w-48 bg-surface-2 rounded animate-pulse" />
+                                        <div className="skeleton h-3 w-32" />
+                                        <div className="skeleton h-2 w-48" />
                                     </div>
                                 </div>
                             ))}
@@ -343,26 +337,22 @@ export default function AnalyticsDashboard() {
                     ) : recentConvs.length === 0 ? (
                         <div className="p-12 text-center text-text-3 text-sm">Sem conversas ainda</div>
                     ) : (
-                        <div className="flex flex-col divide-y divide-stroke">
+                        <div className="flex flex-col divide-y divide-white/[0.04]">
                             {recentConvs.map((conv) => (
-                                <Link key={conv.id} href="/inbox" className="p-4 flex items-center gap-3 hover:bg-surface-1 transition-colors group">
-                                    <div className="w-9 h-9 rounded-full bg-surface-2 flex items-center justify-center text-xs font-black text-text-2 flex-shrink-0">
+                                <Link key={conv.id} href="/inbox" className="p-4 flex items-center gap-3 hover:bg-white/[0.02] transition-colors group">
+                                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/20 to-ai/10 border border-white/[0.06] flex items-center justify-center text-xs font-black text-text-2 flex-shrink-0">
                                         {(conv.contact_name ?? '?').slice(0, 2).toUpperCase()}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-0.5">
                                             <span className="text-sm font-bold text-text-1 truncate">{conv.contact_name}</span>
-                                            <span className="text-[9px] font-bold text-text-3 px-1.5 py-0.5 bg-surface-2 rounded flex-shrink-0">{conv.channel}</span>
+                                            <Badge variant="neutral" size="sm">{conv.channel}</Badge>
                                         </div>
                                         <p className="text-xs text-text-3 truncate">{conv.last_message || '—'}</p>
                                     </div>
                                     <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${STATUS_STYLES[conv.status] ?? 'bg-surface-2 text-text-3'}`}>
-                                            {conv.status}
-                                        </span>
-                                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${PRIORITY_STYLES[conv.priority] ?? 'bg-surface-2 text-text-3'}`}>
-                                            {conv.priority}
-                                        </span>
+                                        <Badge variant={STATUS_BADGE[conv.status] ?? 'neutral'} size="sm" dot>{conv.status}</Badge>
+                                        <Badge variant={PRIORITY_BADGE[conv.priority] ?? 'neutral'} size="sm">{conv.priority}</Badge>
                                     </div>
                                     <span className="text-[10px] text-text-3 flex-shrink-0 ml-1">{timeAgo(conv.updated_at)}</span>
                                 </Link>
@@ -378,13 +368,13 @@ export default function AnalyticsDashboard() {
                         <Link
                             key={link.href}
                             href={link.href}
-                            className="bg-bg-1 border border-stroke rounded-xl p-4 flex items-center gap-3 hover:border-stroke/80 hover:bg-surface-1 transition-all group"
+                            className="card !p-4 flex items-center gap-3 group"
                         >
                             <div className={`w-8 h-8 rounded-lg ${link.bg} border ${link.border} flex items-center justify-center flex-shrink-0`}>
                                 <link.icon className={`w-4 h-4 ${link.color}`} />
                             </div>
                             <span className="text-sm font-bold text-text-2 group-hover:text-white transition-colors">{link.label}</span>
-                            <ArrowRight className="w-3 h-3 text-text-3 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <ArrowRight className="w-3 h-3 text-text-3 ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
                         </Link>
                     ))}
                 </div>
