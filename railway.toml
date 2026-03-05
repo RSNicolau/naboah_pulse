@@ -2,6 +2,7 @@
 # Railway builds the API from its Dockerfile
 builder = "DOCKERFILE"
 dockerfilePath = "apps/api/Dockerfile"
+dockerContextPath = "apps/api"
 
 [deploy]
 # Use Railway's dynamic $PORT — falls back to 8000 locally
