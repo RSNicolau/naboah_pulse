@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://naboah-pulse-api-production.up.railway.app'
 
 async function getHeaders(): Promise<HeadersInit> {
     const { data: { session } } = await supabase.auth.getSession()
