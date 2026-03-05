@@ -6,7 +6,7 @@ dockerfilePath = "Dockerfile"
 
 [deploy]
 # Use Railway's dynamic $PORT — falls back to 8000 locally
-startCommand = "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 2"
+
 healthcheckPath = "/health"
 healthcheckTimeout = 60
 restartPolicyType = "ON_FAILURE"
