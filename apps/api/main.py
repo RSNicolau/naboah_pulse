@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session
-from db import init_db, get_session
+from db import init_db, get_session, engine
 from models import Tenant, User, Role, Membership, AuditLog
 import models_crm  # CRM tables — imported so init_db creates them
 from auth_utils import get_password_hash, create_access_token
@@ -81,6 +81,19 @@ app.include_router(crm.router)
 @app.on_event("startup")
 def on_startup():
     init_db()
+    # Ensure default tenant exists so FK constraints don't break
+    from sqlmodel import select
+    with Session(engine) as session:
+        existing = session.exec(select(Tenant).where(Tenant.id == "naboah")).first()
+        if not existing:
+            session.add(Tenant(
+                id="naboah",
+                name="Naboah Pulse",
+                slug="naboah",
+                primary_color="#6C5CE7",
+                ai_persona_config={"name": "Pulse AI", "avatar": None},
+            ))
+            session.commit()
 
 @app.get("/")
 async def root():
