@@ -54,6 +54,28 @@ function shortDate(iso: string): string {
 export default function ReportingDashboard() {
     const [data, setData] = useState<Reports | null>(null);
     const [loading, setLoading] = useState(true);
+    const [exporting, setExporting] = useState(false);
+
+    const handleExport = async () => {
+        setExporting(true);
+        try {
+            const exportData = await apiGet('/reports/export');
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `pulse-report-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            toast.success('Relatório exportado com sucesso');
+        } catch {
+            toast.error('Erro ao exportar relatório');
+        } finally {
+            setExporting(false);
+        }
+    };
 
     useEffect(() => {
         apiGet<Reports>('/analytics/reports').then(setData).catch(() => toast.error('Erro ao carregar relatórios')).finally(() => setLoading(false));
@@ -78,8 +100,13 @@ export default function ReportingDashboard() {
                         </h2>
                         <p className="text-text-3 text-sm">Insights reais conectados ao banco de dados da plataforma.</p>
                     </div>
-                    <button className="jarvis-gradient px-5 py-2.5 rounded-xl text-white font-bold text-xs shadow-lg shadow-primary/20 flex items-center gap-2 hover:opacity-90 transition-opacity">
-                        <Download size={14} /> Exportar Dados
+                    <button
+                        onClick={handleExport}
+                        disabled={exporting || loading}
+                        className="jarvis-gradient px-5 py-2.5 rounded-xl text-white font-bold text-xs shadow-lg shadow-primary/20 flex items-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50"
+                    >
+                        <Download size={14} className={exporting ? 'animate-bounce' : ''} />
+                        {exporting ? 'Exportando...' : 'Exportar Dados'}
                     </button>
                 </div>
 

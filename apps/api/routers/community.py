@@ -22,12 +22,11 @@ class FeedbackCreate(BaseModel):
 
 @router.get("/topics", response_model=List[ForumTopic])
 async def list_topics(db: Session = Depends(get_session)):
-    topics = db.exec(select(ForumTopic).order_by(ForumTopic.created_at.desc())).all()
-    if not topics:
-        return [
-            ForumTopic(id="t1", tenant_id=TENANT_ID, author_id="u1", title="Bem-vindos à Comunidade Pulse!", content="Este é o nosso espaço de troca.", category="Announcements", is_pinned=True),
-            ForumTopic(id="t2", tenant_id=TENANT_ID, author_id="u2", title="Dúvida sobre integração Webhook", content="Alguém já usou a API de Voice?", category="Q&A"),
-        ]
+    topics = db.exec(
+        select(ForumTopic)
+        .where(ForumTopic.tenant_id == TENANT_ID)
+        .order_by(ForumTopic.created_at.desc())
+    ).all()
     return topics
 
 @router.post("/topics")
@@ -46,15 +45,23 @@ async def create_topic(data: TopicCreate, db: Session = Depends(get_session)):
 
 @router.get("/feedback", response_model=List[FeatureRequest])
 async def list_feedback(db: Session = Depends(get_session)):
-    requests = db.exec(select(FeatureRequest).order_by(FeatureRequest.votes.desc())).all()
-    if not requests:
-        return [
-            FeatureRequest(id="fr1", tenant_id=TENANT_ID, author_id="u1", title="Modo Escuro ainda mais escuro", description="Sugestão estética.", votes=45, status="planned"),
-            FeatureRequest(id="fr2", tenant_id=TENANT_ID, author_id="u2", title="App Nativo iOS", description="Precisamos de push notifications nativas.", votes=128, status="under_review"),
-        ]
+    requests = db.exec(
+        select(FeatureRequest)
+        .where(FeatureRequest.tenant_id == TENANT_ID)
+        .order_by(FeatureRequest.votes.desc())
+    ).all()
     return requests
 
 @router.post("/feedback/{request_id}/vote")
 async def vote_feedback(request_id: str, db: Session = Depends(get_session)):
-    # Simulação de voto
-    return {"status": "voted", "new_count": 129}
+    feature_request = db.exec(
+        select(FeatureRequest).where(FeatureRequest.id == request_id)
+    ).first()
+    if not feature_request:
+        raise HTTPException(status_code=404, detail="Feature request not found")
+
+    feature_request.votes = (feature_request.votes or 0) + 1
+    db.add(feature_request)
+    db.commit()
+    db.refresh(feature_request)
+    return {"status": "voted", "new_count": feature_request.votes}

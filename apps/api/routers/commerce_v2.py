@@ -32,6 +32,18 @@ async def create_sku(data: SKUCreate, db: Session = Depends(get_session)):
     db.refresh(sku)
     return sku
 
+@router.get("/warehouses")
+async def list_warehouses(db: Session = Depends(get_session)):
+    """List all warehouses for the current tenant."""
+    warehouses = db.exec(select(Warehouse).where(Warehouse.tenant_id == TENANT_ID)).all()
+    return warehouses
+
+@router.get("/shipping")
+async def list_shipping_orders(db: Session = Depends(get_session)):
+    """List all shipping orders for the current tenant."""
+    orders = db.exec(select(ShippingOrder).where(ShippingOrder.tenant_id == TENANT_ID)).all()
+    return orders
+
 @router.get("/inventory/stock")
 async def get_total_stock(sku_id: Optional[str] = None, db: Session = Depends(get_session)):
     # Simulação de agregação de estoque por SKU/Warehouse

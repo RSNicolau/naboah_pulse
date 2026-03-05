@@ -16,24 +16,32 @@ class CallCreate(BaseModel):
 
 @router.get("/history", response_model=List[CallRecord])
 async def list_call_history(db: Session = Depends(get_session)):
-    # Mock de histórico se nenhum existir
-    calls = db.exec(select(CallRecord)).all()
-    if not calls:
-        return [
-            CallRecord(id="call_1", tenant_id=TENANT_ID, from_number="+551199999999", to_number="+551188888888", direction="outbound", duration_seconds=120, status="completed", sentiment_score=0.8),
-            CallRecord(id="call_2", tenant_id=TENANT_ID, from_number="+554877777777", to_number="+551199999999", direction="inbound", duration_seconds=60, status="completed", sentiment_score=-0.2),
-            CallRecord(id="call_3", tenant_id=TENANT_ID, from_number="+551155555555", to_number="+551199999999", direction="inbound", duration_seconds=0, status="missed"),
-        ]
+    calls = db.exec(
+        select(CallRecord)
+        .where(CallRecord.tenant_id == TENANT_ID)
+        .order_by(CallRecord.created_at.desc())
+    ).all()
     return calls
 
 @router.post("/dial")
-async def initiate_call(data: CallCreate):
-    # Simulação de sinalização WebRTC / Twilio
+async def initiate_call(data: CallCreate, db: Session = Depends(get_session)):
     call_id = f"call_{uuid.uuid4().hex[:8]}"
+    new_call = CallRecord(
+        id=call_id,
+        tenant_id=TENANT_ID,
+        from_number="tenant_line",
+        to_number=data.to_number,
+        direction="outbound",
+        duration_seconds=0,
+        status="initiating",
+    )
+    db.add(new_call)
+    db.commit()
+    db.refresh(new_call)
     return {
         "status": "initiating",
-        "call_id": call_id,
-        "token": "webrtc_token_mock_123"
+        "call_id": new_call.id,
+        "call": new_call,
     }
 
 @router.post("/webhook/event")

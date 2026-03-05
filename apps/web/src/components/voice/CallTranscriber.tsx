@@ -1,17 +1,24 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Mic, Zap, MessageSquare, AlertCircle, Quote, Sparkles, Smile, Frown, Meh } from 'lucide-react';
+import { Mic, Zap, MessageSquare, AlertCircle, Quote, Sparkles, Smile, Frown, Meh, Loader2 } from 'lucide-react';
+import { apiGet } from '@/lib/api';
 
-const mockTranscript = [
-    { sender: 'client', text: 'Olá, bom dia. Gostaria de saber sobre o status do meu pedido #1234.' },
-    { sender: 'agent', text: 'Bom dia! Com certeza, me informe seu CPF para eu localizar sua conta.' },
-    { sender: 'client', text: 'O número é 123.456.789-00.' },
-    { sender: 'agent', text: 'Localizei aqui. O pedido já saiu do nosso centro de distribuição e deve chegar amanhã.' },
-    { sender: 'client', text: 'Ah, que ótimo! Muito obrigado pela ajuda.' },
-];
+type TranscriptMessage = {
+    sender: string;
+    text: string;
+};
 
 export default function CallTranscriber() {
+    const [transcript, setTranscript] = useState<TranscriptMessage[]>([]);
+    const [loading, setLoading] = useState(true);
     const [sentiment, setSentiment] = useState<'positive' | 'neutral' | 'negative'>('positive');
+
+    useEffect(() => {
+        apiGet<TranscriptMessage[]>('/voice/calls')
+            .then(setTranscript)
+            .catch(() => {})
+            .finally(() => setLoading(false));
+    }, []);
 
     return (
         <div className="bg-bg-1 border border-stroke rounded-[2rem] p-8 flex flex-col gap-8 shadow-2xl h-full relative overflow-hidden">
@@ -43,28 +50,43 @@ export default function CallTranscriber() {
 
             {/* Transcript Area */}
             <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-6 pr-4">
-                {mockTranscript.map((msg, i) => (
-                    <div key={i} className={`flex flex-col gap-2 ${msg.sender === 'agent' ? 'items-end' : 'items-start'}`}>
-                        <div className="flex items-center gap-2">
-                            <span className={`text-[9px] font-black uppercase tracking-widest ${msg.sender === 'agent' ? 'text-primary' : 'text-ai-accent'}`}>
-                                {msg.sender === 'agent' ? 'Você (Agente)' : 'Cliente'}
-                            </span>
-                            <span className="text-[8px] text-text-3">14:02:{i}</span>
-                        </div>
-                        <div className={`max-w-[80%] p-4 rounded-2xl text-xs leading-relaxed border ${msg.sender === 'agent'
-                                ? 'bg-bg-0 border-stroke text-text-2'
-                                : 'bg-surface-1 border-ai-accent/20 text-white shadow-lg shadow-ai-accent/5'
-                            }`}>
-                            {msg.text}
-                        </div>
+                {loading ? (
+                    <div className="flex items-center justify-center py-16">
+                        <Loader2 size={24} className="text-ai-accent animate-spin" />
                     </div>
-                ))}
+                ) : transcript.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 gap-3">
+                        <Mic size={28} className="text-text-3" />
+                        <p className="text-sm text-text-3">Nenhuma transcrição disponível.</p>
+                    </div>
+                ) : (
+                    <>
+                        {transcript.map((msg, i) => (
+                            <div key={i} className={`flex flex-col gap-2 ${msg.sender === 'agent' ? 'items-end' : 'items-start'}`}>
+                                <div className="flex items-center gap-2">
+                                    <span className={`text-[9px] font-black uppercase tracking-widest ${msg.sender === 'agent' ? 'text-primary' : 'text-ai-accent'}`}>
+                                        {msg.sender === 'agent' ? 'Você (Agente)' : 'Cliente'}
+                                    </span>
+                                    <span className="text-[8px] text-text-3">14:02:{i}</span>
+                                </div>
+                                <div className={`max-w-[80%] p-4 rounded-2xl text-xs leading-relaxed border ${msg.sender === 'agent'
+                                        ? 'bg-bg-0 border-stroke text-text-2'
+                                        : 'bg-surface-1 border-ai-accent/20 text-white shadow-lg shadow-ai-accent/5'
+                                    }`}>
+                                    {msg.text}
+                                </div>
+                            </div>
+                        ))}
+                    </>
+                )}
 
                 {/* Real-time listening indicator */}
-                <div className="flex items-center gap-3 text-text-3 italic text-[10px] animate-pulse py-4">
-                    <Sparkles size={12} className="text-ai-accent" />
-                    <span>Pulse AI está ouvindo e transcrevendo...</span>
-                </div>
+                {!loading && transcript.length > 0 && (
+                    <div className="flex items-center gap-3 text-text-3 italic text-[10px] animate-pulse py-4">
+                        <Sparkles size={12} className="text-ai-accent" />
+                        <span>Pulse AI está ouvindo e transcrevendo...</span>
+                    </div>
+                )}
             </div>
 
             {/* AI Summary Sidebar / Bottom Section */}
@@ -76,7 +98,11 @@ export default function CallTranscriber() {
                 <div className="flex flex-col gap-3">
                     <div className="flex gap-4 p-3 bg-bg-0/50 rounded-xl border border-stroke">
                         <Quote className="text-text-3 flex-shrink-0" size={12} />
-                        <p className="text-[10px] text-text-2 leading-relaxed">O cliente mencionou o pedido <span className="text-white font-bold">#1234</span>. Sugerido: Conferir status na conta Loggi.</p>
+                        <p className="text-[10px] text-text-2 leading-relaxed">
+                            {transcript.length > 0
+                                ? 'Transcrição carregada. Pulse AI está analisando o sentimento da conversa.'
+                                : 'Aguardando dados de transcrição para gerar insights.'}
+                        </p>
                     </div>
                 </div>
             </div>

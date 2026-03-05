@@ -74,6 +74,22 @@ async def get_translations(lang: str):
         "translations": data,
     }
 
+@router.get("/tax-rules")
+async def list_all_tax_rules(db: Session = Depends(get_session)):
+    """List all tax rules for the current tenant."""
+    TENANT_ID = "naboah"
+    return db.exec(select(RegionalTaxRule).where(RegionalTaxRule.tenant_id == TENANT_ID)).all()
+
+@router.get("/currencies")
+async def list_currencies():
+    """List available currencies and their configurations."""
+    return [
+        {"code": "BRL", "name": "Real Brasileiro", "symbol": "R$", "decimal_places": 2},
+        {"code": "USD", "name": "US Dollar", "symbol": "$", "decimal_places": 2},
+        {"code": "EUR", "name": "Euro", "symbol": "\u20ac", "decimal_places": 2},
+        {"code": "GBP", "name": "British Pound", "symbol": "\u00a3", "decimal_places": 2},
+    ]
+
 @router.post("/tax-rules")
 async def create_tax_rule(rule: RegionalTaxRule, db: Session = Depends(get_session)):
     db.add(rule)

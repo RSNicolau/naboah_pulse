@@ -19,27 +19,29 @@ class AppCreate(BaseModel):
 
 @router.get("/apps", response_model=List[App])
 async def list_available_apps(db: Session = Depends(get_session)):
-    # Mock de apps padrão se nenhum existir
     apps = db.exec(select(App).where(App.is_public == True)).all()
-    if not apps:
-        return [
-            App(id="app_1", name="WhatsApp Business Pro", description="Integração avançada com API oficial.", developer_name="Meta", category="Messaging", is_official=True),
-            App(id="app_2", name="Slack Sync", description="Sincronize conversas para canais do Slack.", developer_name="Slack", category="Collaboration"),
-            App(id="app_3", name="Jarvis Content Writer", description="Geração de posts via IA Turbo.", developer_name="Naboah Pulse", category="AI", is_official=True),
-            App(id="app_4", name="Google Sheets Export", description="Exporte deals e tickets para planilhas.", developer_name="Google", category="Utility"),
-        ]
     return apps
 
 @router.post("/install/{app_id}")
 async def install_app(app_id: str, db: Session = Depends(get_session)):
     app = db.get(App, app_id)
-    # No mock, deixamos passar se o ID for app_X
-    
+    if not app:
+        raise HTTPException(status_code=404, detail="App not found")
+
+    # Check if already installed
+    existing = db.exec(
+        select(AppInstallation)
+        .where(AppInstallation.tenant_id == TENANT_ID)
+        .where(AppInstallation.app_id == app_id)
+    ).first()
+    if existing:
+        raise HTTPException(status_code=409, detail="App already installed")
+
     new_install = AppInstallation(
         id=f"inst_{uuid.uuid4().hex[:8]}",
-        tenant_id=TENANT_ID, # Mock
+        tenant_id=TENANT_ID,
         app_id=app_id,
-        installed_by_id="user_admin", # Mock
+        installed_by_id="user_admin",
         is_enabled=True
     )
     db.add(new_install)

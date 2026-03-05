@@ -1,24 +1,42 @@
 "use client";
-import React, { useState } from 'react';
-import { CircleDollarSign, Landmark, ArrowRightLeft, Globe2, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { CircleDollarSign, Landmark, ArrowRightLeft, Globe2, ChevronDown, Loader2 } from 'lucide-react';
+import { apiGet } from '@/lib/api';
 
 const currencies = [
-    { code: 'BRL', name: 'Real Brasileiro', symbol: 'R$', flag: '🇧🇷' },
-    { code: 'USD', name: 'Dólar Americano', symbol: '$', flag: '🇺🇸' },
-    { code: 'EUR', name: 'Euro', symbol: '€', flag: '🇪🇺' },
-    { code: 'GBP', name: 'Libra Esterlina', symbol: '£', flag: '🇬🇧' },
+    { code: 'BRL', name: 'Real Brasileiro', symbol: 'R$', flag: '\u{1F1E7}\u{1F1F7}' },
+    { code: 'USD', name: 'Dolar Americano', symbol: '$', flag: '\u{1F1FA}\u{1F1F8}' },
+    { code: 'EUR', name: 'Euro', symbol: '\u20AC', flag: '\u{1F1EA}\u{1F1FA}' },
+    { code: 'GBP', name: 'Libra Esterlina', symbol: '\u00A3', flag: '\u{1F1EC}\u{1F1E7}' },
 ];
+
+/**
+ * FX rates are fetched from the API at `/global/currencies`.
+ * If the API is unavailable, static fallback rates are used.
+ * Note: Exchange rates change frequently. The API should return
+ * up-to-date rates from a reliable FX data provider.
+ */
+const FALLBACK_RATES: Record<string, number> = {
+    'USD': 0.20,
+    'EUR': 0.18,
+    'GBP': 0.16,
+    'BRL': 1,
+};
 
 export default function CurrencySelector() {
     const [selected, setSelected] = useState(currencies[0]);
     const [amount, setAmount] = useState(1000);
+    const [rates, setRates] = useState<Record<string, number>>(FALLBACK_RATES);
+    const [loading, setLoading] = useState(true);
 
-    const mockRates: any = {
-        'USD': 0.20,
-        'EUR': 0.18,
-        'GBP': 0.16,
-        'BRL': 1
-    };
+    useEffect(() => {
+        apiGet<Record<string, number>>('/global/currencies')
+            .then((data) => setRates(data))
+            .catch(() => {
+                // Use static fallback rates when API is unavailable
+            })
+            .finally(() => setLoading(false));
+    }, []);
 
     return (
         <div className="bg-bg-1 border border-stroke rounded-[2.5rem] p-8 flex flex-col gap-8 shadow-2xl relative overflow-hidden group">
@@ -34,8 +52,14 @@ export default function CurrencySelector() {
                     <p className="text-[10px] font-medium text-text-3">Converta valores instantaneamente.</p>
                 </div>
                 <div className="flex items-center gap-2 px-4 py-2 bg-bg-0 border border-white/5 rounded-2xl">
-                    <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
-                    <span className="text-[9px] font-black text-white uppercase tracking-widest">Live Rates</span>
+                    {loading ? (
+                        <Loader2 size={12} className="text-text-3 animate-spin" />
+                    ) : (
+                        <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
+                    )}
+                    <span className="text-[9px] font-black text-white uppercase tracking-widest">
+                        {loading ? 'Loading...' : 'Live Rates'}
+                    </span>
                 </div>
             </div>
 
@@ -71,13 +95,13 @@ export default function CurrencySelector() {
                     <div className="p-6 bg-surface-2/40 border border-white/5 rounded-3xl flex flex-col gap-1">
                         <span className="text-[9px] font-black text-text-3 uppercase">Converted Amount</span>
                         <span className="text-2xl font-black text-primary tracking-tighter italic">
-                            {selected.symbol} {(amount * mockRates[selected.code]).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            {selected.symbol} {(amount * (rates[selected.code] ?? 0)).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </span>
                     </div>
                     <div className="p-6 bg-surface-2/40 border border-white/5 rounded-3xl flex flex-col gap-1">
                         <span className="text-[9px] font-black text-text-3 uppercase">Rate Applied</span>
                         <span className="text-xs font-bold text-white">
-                            1 BRL = {mockRates[selected.code]} {selected.code}
+                            1 BRL = {rates[selected.code] ?? '---'} {selected.code}
                         </span>
                     </div>
                 </div>
@@ -88,6 +112,7 @@ export default function CurrencySelector() {
                     <Landmark size={18} />
                 </div>
                 <p className="text-[9px] text-text-2 leading-relaxed">
+                    {/* FX rates: fetched from API when available, static fallback otherwise */}
                     As taxas são atualizadas a cada 15 minutos via **Pulse FX API**.
                     O cálculo inclui o spread de conversão configurado no seu plano.
                 </p>

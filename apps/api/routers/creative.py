@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 from db import get_session
-from models import MediaAsset, PromptArtifact, PersonaProfile, KnowledgePack, AvatarProfile, VoiceProfile, AvatarScene
+from models import MediaAsset, ContentAsset, PromptArtifact, PersonaProfile, KnowledgePack, AvatarProfile, VoiceProfile, AvatarScene
 from pydantic import BaseModel
 from typing import List, Optional, Dict
 import uuid
@@ -81,19 +81,48 @@ async def generate_product_scene(
         title=f"Product Scene: {preset.capitalize()}",
         storage_url=f"https://cdn.pulse.ai/generated/{asset_id}.png",
         provenance_json={"model": "Pulse Vision v2", "preset": preset},
-        status="approved"
+        qa_status="approved"
     )
     db.add(new_asset)
     db.commit()
     return new_asset
 
 @router.get("/trends/viral")
-async def get_viral_trends():
-    return [
-        {"id": "tr_1", "name": "Quiet Luxury Aesthetics", "reach": "high", "sentiment": "positive"},
-        {"id": "tr_2", "name": "Cyberpunk 2077 Resurgence", "reach": "medium", "sentiment": "neutral"},
-        {"id": "tr_3", "name": "Eco-Minimalism", "reach": "viral", "sentiment": "positive"}
-    ]
+async def get_viral_trends(db: Session = Depends(get_session)):
+    # Query recent ContentAssets and MediaAssets to derive trend-like data
+    content_assets = db.exec(
+        select(ContentAsset)
+        .where(ContentAsset.tenant_id == TENANT_ID)
+        .order_by(ContentAsset.created_at.desc())
+        .limit(20)
+    ).all()
+
+    media_assets = db.exec(
+        select(MediaAsset)
+        .where(MediaAsset.tenant_id == TENANT_ID)
+        .order_by(MediaAsset.created_at.desc())
+        .limit(20)
+    ).all()
+
+    trends = []
+    for asset in content_assets:
+        trends.append({
+            "id": asset.id,
+            "name": asset.title,
+            "source": "content_asset",
+            "type": asset.type,
+            "qa_status": asset.qa_status,
+        })
+    for asset in media_assets:
+        trends.append({
+            "id": asset.id,
+            "name": asset.title,
+            "source": "media_asset",
+            "type": asset.asset_type,
+            "qa_status": asset.qa_status,
+        })
+
+    return trends
 
 @router.post("/meme/generate")
 async def generate_meme(trend_id: str, db: Session = Depends(get_session)):
@@ -105,7 +134,7 @@ async def generate_meme(trend_id: str, db: Session = Depends(get_session)):
         title=f"Meme for Trend {trend_id}",
         storage_url=f"https://cdn.pulse.ai/memes/{asset_id}.jpg",
         provenance_json={"type": "Meme Gen", "trend_id": trend_id},
-        status="approved"
+        qa_status="approved"
     )
     db.add(new_asset)
     db.commit()

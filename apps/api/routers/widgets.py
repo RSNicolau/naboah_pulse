@@ -1,13 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 from db import get_session
-from models import WidgetConfig
+from models import WidgetConfig, Message
 from pydantic import BaseModel
 from typing import List, Optional
 import uuid
 from datetime import datetime
 
 router = APIRouter(prefix="/horizon/widgets", tags=["widgets"])
+configs_router = APIRouter(prefix="/widgets", tags=["widgets"])
 
 TENANT_ID = "naboah"
 
@@ -17,16 +18,9 @@ class MessagePublic(BaseModel):
 
 @router.get("/", response_model=List[WidgetConfig])
 async def list_widgets(db: Session = Depends(get_session)):
-    widgets = db.exec(select(WidgetConfig)).all()
-    if not widgets:
-        return [
-            WidgetConfig(
-                id="w_1", 
-                tenant_id=TENANT_ID,
-                name="Chat Principal Site", 
-                allowed_domains_json=["naboah.com", "localhost:3000"]
-            )
-        ]
+    widgets = db.exec(
+        select(WidgetConfig).where(WidgetConfig.tenant_id == TENANT_ID)
+    ).all()
     return widgets
 
 @router.get("/{widget_id}/config")
@@ -57,5 +51,30 @@ async def start_session(widget_id: str):
     }
 
 @router.post("/{widget_id}/messages")
-async def send_public_message(widget_id: str, msg: MessagePublic):
-    return {"status": "sent", "message_id": f"msg_{uuid.uuid4().hex[:6]}"}
+async def send_public_message(widget_id: str, msg: MessagePublic, db: Session = Depends(get_session)):
+    widget = db.get(WidgetConfig, widget_id)
+    if not widget:
+        raise HTTPException(status_code=404, detail="Widget not found")
+
+    message_id = f"msg_{uuid.uuid4().hex[:8]}"
+    new_message = Message(
+        id=message_id,
+        tenant_id=widget.tenant_id,
+        conversation_id=f"widget_{widget_id}",
+        external_message_id=message_id,
+        direction="inbound",
+        sender_type="contact",
+        content=msg.content,
+    )
+    db.add(new_message)
+    db.commit()
+    db.refresh(new_message)
+    return {"status": "sent", "message_id": new_message.id}
+
+@configs_router.get("/configs", response_model=List[WidgetConfig])
+async def list_widget_configs(db: Session = Depends(get_session)):
+    """List all widget configs for the current tenant."""
+    widgets = db.exec(
+        select(WidgetConfig).where(WidgetConfig.tenant_id == TENANT_ID)
+    ).all()
+    return widgets

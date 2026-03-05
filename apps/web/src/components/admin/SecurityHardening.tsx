@@ -1,7 +1,24 @@
-import React from 'react';
-import { Lock, Fingerprint, ShieldAlert, Cpu, Laptop, Smartphone, Key } from 'lucide-react';
+"use client";
+import React, { useState } from 'react';
+import { Lock, Fingerprint, ShieldAlert, Cpu, Laptop, Smartphone, Key, Loader2 } from 'lucide-react';
+import { apiPost } from '@/lib/api';
+import { toast } from '@/lib/toast';
 
 export default function SecurityHardening() {
+    const [enforcingMfa, setEnforcingMfa] = useState(false);
+
+    const handleEnforceMfa = async () => {
+        setEnforcingMfa(true);
+        try {
+            await apiPost('/shield/policies', { name: '2FA Mandatory', action: 'enforce' });
+            toast.success('2FA ativado para todos');
+        } catch {
+            toast.error('Erro ao ativar 2FA');
+        } finally {
+            setEnforcingMfa(false);
+        }
+    };
+
     return (
         <div className="bg-bg-1 border border-stroke rounded-[2rem] p-8 flex flex-col gap-8 shadow-2xl">
             <div className="flex flex-col gap-2">
@@ -20,7 +37,7 @@ export default function SecurityHardening() {
                             <span className="font-bold text-sm">Whitelist de IPs Corporativos</span>
                         </div>
                         <div className="flex items-center gap-3">
-                            <span className="text-[10px] font-bold text-success uppercase tracking-widest">Serviço Ativo</span>
+                            <span className="text-[10px] font-bold text-success uppercase tracking-widest">Servico Ativo</span>
                             <div className="w-10 h-5 bg-primary/20 rounded-full p-1 border border-primary/30 relative cursor-pointer">
                                 <div className="w-3 h-3 bg-primary rounded-full absolute right-1"></div>
                             </div>
@@ -43,7 +60,20 @@ export default function SecurityHardening() {
                             <span className="font-bold text-xs uppercase tracking-tighter">Obrigatoriedade de MFA</span>
                         </div>
                         <p className="text-[10px] text-text-3 leading-relaxed">Exigir autenticação de dois fatores para TODOS os usuários do tenant.</p>
-                        <button className="w-full py-2 bg-surface-1 border border-stroke rounded-xl text-[9px] font-black text-white hover:bg-surface-2 transition-all uppercase tracking-widest">ATIVAR PARA TODOS</button>
+                        <button
+                            onClick={handleEnforceMfa}
+                            disabled={enforcingMfa}
+                            className="w-full py-2 bg-surface-1 border border-stroke rounded-xl text-[9px] font-black text-white hover:bg-surface-2 transition-all uppercase tracking-widest disabled:opacity-50 flex items-center justify-center gap-2"
+                        >
+                            {enforcingMfa ? (
+                                <>
+                                    <Loader2 size={12} className="animate-spin" />
+                                    ATIVANDO...
+                                </>
+                            ) : (
+                                'ATIVAR PARA TODOS'
+                            )}
+                        </button>
                     </div>
 
                     {/* Session Timeout */}
@@ -54,8 +84,8 @@ export default function SecurityHardening() {
                         </div>
                         <select className="bg-surface-1 border border-stroke rounded-xl p-2 text-[10px] text-white outline-none focus:border-primary">
                             <option>Expira em 30 minutos (Inativo)</option>
-                            <option selected>Expira em 1 hora (Inativo)</option>
-                            <option>Expira em 8 horas (Obrigatório)</option>
+                            <option defaultValue="">Expira em 1 hora (Inativo)</option>
+                            <option>Expira em 8 horas (Obrigatorio)</option>
                         </select>
                     </div>
                 </div>

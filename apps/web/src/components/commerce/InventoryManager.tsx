@@ -15,6 +15,9 @@ type SKU = {
 export default function InventoryManager() {
     const [skus, setSkus] = useState<SKU[]>([]);
     const [loading, setLoading] = useState(true);
+    const [showFilter, setShowFilter] = useState(false);
+    const [filterWarehouse, setFilterWarehouse] = useState<string>('all');
+    const [filterStatus, setFilterStatus] = useState<string>('all');
 
     useEffect(() => {
         apiGet<SKU[]>('/commerce/v2/skus')
@@ -22,6 +25,16 @@ export default function InventoryManager() {
             .catch(() => {})
             .finally(() => setLoading(false));
     }, []);
+
+    const warehouses = Array.from(new Set(skus.map(s => s.warehouse)));
+
+    const filteredSkus = skus.filter(s => {
+        if (filterWarehouse !== 'all' && s.warehouse !== filterWarehouse) return false;
+        if (filterStatus === 'low' && s.stock >= 15) return false;
+        if (filterStatus === 'out' && s.stock > 0) return false;
+        if (filterStatus === 'optimal' && s.stock < 15) return false;
+        return true;
+    });
 
     const lowStockCount = skus.filter(s => s.status === 'Low Stock' || s.stock < 15).length;
     const outOfStockCount = skus.filter(s => s.status === 'Out of Stock' || s.stock === 0).length;
@@ -37,7 +50,10 @@ export default function InventoryManager() {
                     <p className="text-xs text-text-3 font-medium">Orquestração unificada de digital & físico.</p>
                 </div>
                 <div className="flex gap-4">
-                    <button className="p-4 bg-bg-0 border border-white/5 rounded-2xl text-text-3 hover:text-white transition-all">
+                    <button
+                        onClick={() => setShowFilter(!showFilter)}
+                        className={`p-4 bg-bg-0 border rounded-2xl transition-all ${showFilter ? 'border-primary text-primary' : 'border-white/5 text-text-3 hover:text-white'}`}
+                    >
                         <Filter size={20} />
                     </button>
                     <button className="px-8 py-4 bg-secondary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-secondary/20">
@@ -45,6 +61,35 @@ export default function InventoryManager() {
                     </button>
                 </div>
             </div>
+
+            {showFilter && (
+                <div className="flex flex-wrap gap-4 p-6 bg-bg-0 border border-stroke rounded-2xl animate-in fade-in">
+                    <div className="flex flex-col gap-2">
+                        <label className="text-[9px] font-black text-text-3 uppercase tracking-widest">Warehouse</label>
+                        <select
+                            value={filterWarehouse}
+                            onChange={(e) => setFilterWarehouse(e.target.value)}
+                            className="bg-surface-1 border border-stroke rounded-xl px-4 py-2 text-[10px] text-white outline-none focus:border-primary"
+                        >
+                            <option value="all">Todos</option>
+                            {warehouses.map(w => <option key={w} value={w}>{w}</option>)}
+                        </select>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <label className="text-[9px] font-black text-text-3 uppercase tracking-widest">Status</label>
+                        <select
+                            value={filterStatus}
+                            onChange={(e) => setFilterStatus(e.target.value)}
+                            className="bg-surface-1 border border-stroke rounded-xl px-4 py-2 text-[10px] text-white outline-none focus:border-primary"
+                        >
+                            <option value="all">Todos</option>
+                            <option value="optimal">Optimal</option>
+                            <option value="low">Low Stock</option>
+                            <option value="out">Out of Stock</option>
+                        </select>
+                    </div>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {[
@@ -64,14 +109,16 @@ export default function InventoryManager() {
                 <div className="flex items-center justify-center py-16">
                     <Loader2 size={28} className="text-secondary animate-spin" />
                 </div>
-            ) : skus.length === 0 ? (
+            ) : filteredSkus.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 gap-3">
                     <Package size={28} className="text-text-3" />
-                    <p className="text-sm text-text-3">Nenhum SKU cadastrado.</p>
+                    <p className="text-sm text-text-3">
+                        {skus.length === 0 ? 'Nenhum SKU cadastrado.' : 'Nenhum SKU corresponde aos filtros.'}
+                    </p>
                 </div>
             ) : (
                 <div className="flex flex-col gap-3">
-                    {skus.map((item) => (
+                    {filteredSkus.map((item) => (
                         <div key={item.id} className="group/item flex items-center justify-between p-6 bg-surface-2/30 border border-white/5 rounded-[2rem] hover:border-secondary/30 transition-all">
                             <div className="flex items-center gap-6">
                                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${

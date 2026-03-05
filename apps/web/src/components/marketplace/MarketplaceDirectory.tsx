@@ -21,6 +21,7 @@ export default function MarketplaceDirectory() {
     const [apps, setApps] = useState<MarketplaceApp[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState('Todos');
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         apiGet<MarketplaceApp[]>('/marketplace/apps')
@@ -29,9 +30,15 @@ export default function MarketplaceDirectory() {
             .finally(() => setLoading(false));
     }, []);
 
-    const filtered = selectedCategory === 'Todos'
-        ? apps
-        : apps.filter(a => a.category === selectedCategory);
+    const filtered = apps
+        .filter(a => selectedCategory === 'Todos' || a.category === selectedCategory)
+        .filter(a => {
+            if (!searchQuery.trim()) return true;
+            const q = searchQuery.toLowerCase();
+            return a.name.toLowerCase().includes(q) ||
+                   a.developer.toLowerCase().includes(q) ||
+                   a.description.toLowerCase().includes(q);
+        });
 
     return (
         <div className="flex-1 flex flex-col h-full bg-bg-0">
@@ -68,7 +75,13 @@ export default function MarketplaceDirectory() {
                     <div className="flex items-center gap-4">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-3" size={14} />
-                            <input type="text" placeholder="Buscar apps e integrações..." className="bg-bg-1 border border-stroke rounded-xl pl-10 pr-4 py-2 text-xs text-white w-64 focus:border-primary focus:outline-none transition-all" />
+                            <input
+                                type="text"
+                                placeholder="Buscar apps e integrações..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="bg-bg-1 border border-stroke rounded-xl pl-10 pr-4 py-2 text-xs text-white w-64 focus:border-primary focus:outline-none transition-all"
+                            />
                         </div>
                     </div>
                 </div>

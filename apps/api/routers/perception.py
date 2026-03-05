@@ -15,31 +15,48 @@ class MediaAnalysisRequest(BaseModel):
 
 @router.post("/analyze")
 async def analyze_media(data: MediaAnalysisRequest):
-    # Mock de análise de visão (Gemini/GPT-4o Vision)
+    # NOTE: This endpoint returns placeholder results. In production, it will
+    # call an AI vision service (Gemini / GPT-4o Vision) to perform real analysis.
+    # The response structure matches the expected contract for downstream consumers.
     if data.media_type == "image":
         return {
-            "status": "success",
-            "labels": ["comprovante", "pagamento", "itau"],
-            "ocr_text": "VALOR: R$ 150,00 - DATA: 03/03/2026",
-            "visual_summary": "Um comprovante de transação bancária legível."
+            "status": "placeholder",
+            "media_url": data.media_url,
+            "media_type": data.media_type,
+            "labels": [],
+            "ocr_text": None,
+            "visual_summary": "AI vision analysis not yet connected. Placeholder response.",
         }
     elif data.media_type == "video":
         return {
-            "status": "success",
-            "summary": "O cliente mostra um unboxing do produto, indicando que a caixa chegou levemente amassada no canto superior esquerdo.",
-            "events": [
-                {"timestamp": "0:05", "event": "Abertura da embalagem"},
-                {"timestamp": "0:45", "event": "Demonstração do dano funcional"}
-            ]
+            "status": "placeholder",
+            "media_url": data.media_url,
+            "media_type": data.media_type,
+            "summary": "AI vision analysis not yet connected. Placeholder response.",
+            "events": [],
         }
-    return {"status": "unsupported_media"}
+    return {
+        "status": "placeholder",
+        "media_url": data.media_url,
+        "media_type": data.media_type,
+        "message": f"Media type '{data.media_type}' accepted. AI analysis not yet connected.",
+    }
 
 @router.get("/insights/message/{message_id}")
 async def get_message_visual_insights(message_id: str, db: Session = Depends(get_session)):
-    # Simulação de busca de insights já processados
+    message = db.get(Message, message_id)
+    if not message:
+        raise HTTPException(status_code=404, detail="Message not found")
+
+    has_visual = bool(message.visual_summary_json)
+    labels = message.visual_summary_json.get("labels", []) if message.visual_summary_json else []
+    ocr_available = bool(message.ocr_text)
+
     return {
         "message_id": message_id,
-        "has_visual_data": True,
-        "labels": ["laptop", "apple", "office"],
-        "ocr_available": False
+        "has_visual_data": has_visual,
+        "labels": labels,
+        "ocr_available": ocr_available,
+        "ocr_text": message.ocr_text,
+        "visual_summary": message.visual_summary_json,
     }
