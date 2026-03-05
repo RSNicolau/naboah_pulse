@@ -1,9 +1,28 @@
-import React from 'react';
+'use client';
+import React, { useEffect, useState } from 'react';
 import CostObservability from '@/components/creative/CostObservability';
 import AssetAuditTrail from '@/components/creative/AssetAuditTrail';
-import { ShieldAlert, Database, History, HardDrive, Sparkles, Filter, LayoutGrid, Zap, Lock } from 'lucide-react';
+import { ShieldAlert, Database, History, HardDrive, Sparkles, Lock } from 'lucide-react';
+import { apiGet } from '@/lib/api';
+
+type HealthData = {
+    status: string;
+    storage_used: string;
+    disaster_recovery: string;
+    versioning_uptime: string;
+};
 
 export default function GovernancePage() {
+    const [health, setHealth] = useState<HealthData | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        apiGet<HealthData>('/creative/observability/health')
+            .then(setHealth)
+            .catch(() => {})
+            .finally(() => setLoading(false));
+    }, []);
+
     return (
         <div className="flex-1 flex flex-col h-full bg-bg-0 overflow-hidden text-white">
 
@@ -31,36 +50,48 @@ export default function GovernancePage() {
             <div className="flex-1 p-10 grid grid-cols-1 lg:grid-cols-12 gap-10 overflow-y-auto custom-scrollbar pb-32">
 
                 <div className="lg:col-span-12 grid grid-cols-1 md:grid-cols-3 gap-10 mb-4">
-                    <div className="p-10 bg-bg-1 border border-stroke rounded-[3rem] flex flex-col gap-6 shadow-xl relative overflow-hidden group">
-                        <Database size={24} className="text-primary" />
-                        <div className="flex flex-col">
-                            <span className="text-3xl font-black text-white italic tracking-tighter uppercase">1.2 TB</span>
-                            <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest">Asset Storage Used</span>
-                        </div>
-                        <div className="absolute -bottom-4 -right-4 opacity-5 group-hover:scale-110 transition-all">
-                            <HardDrive size={120} />
-                        </div>
-                    </div>
-                    <div className="p-10 bg-bg-1 border border-stroke rounded-[3rem] flex flex-col gap-6 shadow-xl relative overflow-hidden group">
-                        <ShieldAlert size={24} className="text-secondary" />
-                        <div className="flex flex-col">
-                            <span className="text-3xl font-black text-white italic tracking-tighter uppercase">Healthy</span>
-                            <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest">Disaster Recovery Status</span>
-                        </div>
-                        <div className="absolute -bottom-4 -right-4 opacity-5 group-hover:scale-110 transition-all">
-                            <ShieldAlert size={120} />
-                        </div>
-                    </div>
-                    <div className="p-10 bg-bg-1 border border-stroke rounded-[3rem] flex flex-col gap-6 shadow-xl relative overflow-hidden group">
-                        <History size={24} className="text-success" />
-                        <div className="flex flex-col">
-                            <span className="text-3xl font-black text-white italic tracking-tighter uppercase">100%</span>
-                            <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest">Versioning Uptime</span>
-                        </div>
-                        <div className="absolute -bottom-4 -right-4 opacity-5 group-hover:scale-110 transition-all">
-                            <History size={120} />
-                        </div>
-                    </div>
+                    {loading ? (
+                        Array.from({ length: 3 }).map((_, i) => (
+                            <div key={i} className="p-10 bg-bg-1 border border-stroke rounded-[3rem] animate-pulse">
+                                <div className="w-6 h-6 bg-surface-2 rounded mb-6" />
+                                <div className="h-8 w-20 bg-surface-2 rounded mb-2" />
+                                <div className="h-3 w-32 bg-surface-2 rounded" />
+                            </div>
+                        ))
+                    ) : (
+                        <>
+                            <div className="p-10 bg-bg-1 border border-stroke rounded-[3rem] flex flex-col gap-6 shadow-xl relative overflow-hidden group">
+                                <Database size={24} className="text-primary" />
+                                <div className="flex flex-col">
+                                    <span className="text-3xl font-black text-white italic tracking-tighter uppercase">{health?.storage_used ?? '---'}</span>
+                                    <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest">Asset Storage Used</span>
+                                </div>
+                                <div className="absolute -bottom-4 -right-4 opacity-5 group-hover:scale-110 transition-all">
+                                    <HardDrive size={120} />
+                                </div>
+                            </div>
+                            <div className="p-10 bg-bg-1 border border-stroke rounded-[3rem] flex flex-col gap-6 shadow-xl relative overflow-hidden group">
+                                <ShieldAlert size={24} className="text-secondary" />
+                                <div className="flex flex-col">
+                                    <span className="text-3xl font-black text-white italic tracking-tighter uppercase">{health?.disaster_recovery ?? '---'}</span>
+                                    <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest">Disaster Recovery Status</span>
+                                </div>
+                                <div className="absolute -bottom-4 -right-4 opacity-5 group-hover:scale-110 transition-all">
+                                    <ShieldAlert size={120} />
+                                </div>
+                            </div>
+                            <div className="p-10 bg-bg-1 border border-stroke rounded-[3rem] flex flex-col gap-6 shadow-xl relative overflow-hidden group">
+                                <History size={24} className="text-success" />
+                                <div className="flex flex-col">
+                                    <span className="text-3xl font-black text-white italic tracking-tighter uppercase">{health?.versioning_uptime ?? '---'}</span>
+                                    <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest">Versioning Uptime</span>
+                                </div>
+                                <div className="absolute -bottom-4 -right-4 opacity-5 group-hover:scale-110 transition-all">
+                                    <History size={120} />
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 <div className="lg:col-span-6">

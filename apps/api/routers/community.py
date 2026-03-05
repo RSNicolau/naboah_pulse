@@ -9,6 +9,8 @@ from datetime import datetime
 
 router = APIRouter(prefix="/community", tags=["community"])
 
+TENANT_ID = "naboah"
+
 class TopicCreate(BaseModel):
     title: str
     content: str
@@ -23,8 +25,8 @@ async def list_topics(db: Session = Depends(get_session)):
     topics = db.exec(select(ForumTopic).order_by(ForumTopic.created_at.desc())).all()
     if not topics:
         return [
-            ForumTopic(id="t1", tenant_id="t1", author_id="u1", title="Bem-vindos à Comunidade Pulse!", content="Este é o nosso espaço de troca.", category="Announcements", is_pinned=True),
-            ForumTopic(id="t2", tenant_id="t1", author_id="u2", title="Dúvida sobre integração Webhook", content="Alguém já usou a API de Voice?", category="Q&A"),
+            ForumTopic(id="t1", tenant_id=TENANT_ID, author_id="u1", title="Bem-vindos à Comunidade Pulse!", content="Este é o nosso espaço de troca.", category="Announcements", is_pinned=True),
+            ForumTopic(id="t2", tenant_id=TENANT_ID, author_id="u2", title="Dúvida sobre integração Webhook", content="Alguém já usou a API de Voice?", category="Q&A"),
         ]
     return topics
 
@@ -32,7 +34,7 @@ async def list_topics(db: Session = Depends(get_session)):
 async def create_topic(data: TopicCreate, db: Session = Depends(get_session)):
     new_topic = ForumTopic(
         id=f"topic_{uuid.uuid4().hex[:8]}",
-        tenant_id="tenant_123", # Mock
+        tenant_id=TENANT_ID, # Mock
         author_id="user_admin", # Mock
         title=data.title,
         content=data.content,
@@ -47,8 +49,8 @@ async def list_feedback(db: Session = Depends(get_session)):
     requests = db.exec(select(FeatureRequest).order_by(FeatureRequest.votes.desc())).all()
     if not requests:
         return [
-            FeatureRequest(id="fr1", tenant_id="t1", author_id="u1", title="Modo Escuro ainda mais escuro", description="Sugestão estética.", votes=45, status="planned"),
-            FeatureRequest(id="fr2", tenant_id="t1", author_id="u2", title="App Nativo iOS", description="Precisamos de push notifications nativas.", votes=128, status="under_review"),
+            FeatureRequest(id="fr1", tenant_id=TENANT_ID, author_id="u1", title="Modo Escuro ainda mais escuro", description="Sugestão estética.", votes=45, status="planned"),
+            FeatureRequest(id="fr2", tenant_id=TENANT_ID, author_id="u2", title="App Nativo iOS", description="Precisamos de push notifications nativas.", votes=128, status="under_review"),
         ]
     return requests
 

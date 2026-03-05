@@ -56,15 +56,11 @@ function timeAgo(iso: string): string {
     return `${Math.floor(h / 24)}d atrás`;
 }
 
-const KB_ARTICLES = [
-    'Como configurar o Pulse AI Bot?',
-    'Guia de integração com WhatsApp',
-    'Entendendo as métricas de BI',
-    'Política de retenção de dados',
-];
+type KBArticle = { id: string; title: string; category: string };
 
 export default function SupportCenter() {
     const [tickets, setTickets] = useState<SupportTicket[]>([]);
+    const [kbArticles, setKbArticles] = useState<KBArticle[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [showModal, setShowModal] = useState(false);
@@ -75,8 +71,12 @@ export default function SupportCenter() {
     async function load() {
         setLoading(true);
         try {
-            const data = await apiGet<SupportTicket[]>('/support/tickets');
-            setTickets(data);
+            const [ticketData, kbData] = await Promise.all([
+                apiGet<SupportTicket[]>('/support/tickets'),
+                apiGet<KBArticle[]>('/support/kb'),
+            ]);
+            setTickets(ticketData);
+            setKbArticles(kbData);
         } catch (e) { toast.error('Erro ao carregar tickets'); }
         finally { setLoading(false); }
     }
@@ -279,9 +279,11 @@ export default function SupportCenter() {
                                 <button className="text-primary hover:text-ai-accent transition-colors"><Plus size={16} /></button>
                             </div>
                             <div className="flex flex-col gap-3">
-                                {KB_ARTICLES.map((article, i) => (
-                                    <div key={i} className="flex items-center justify-between group cursor-pointer hover:translate-x-1 transition-all">
-                                        <span className="text-[11px] text-text-2 group-hover:text-white">{article}</span>
+                                {kbArticles.length === 0 ? (
+                                    <p className="text-[10px] text-text-3">Nenhum artigo ainda.</p>
+                                ) : kbArticles.map((article) => (
+                                    <div key={article.id} className="flex items-center justify-between group cursor-pointer hover:translate-x-1 transition-all">
+                                        <span className="text-[11px] text-text-2 group-hover:text-white">{article.title}</span>
                                         <ArrowRight size={12} className="text-text-3 opacity-0 group-hover:opacity-100 transition-all" />
                                     </div>
                                 ))}

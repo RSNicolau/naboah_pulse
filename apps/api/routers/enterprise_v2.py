@@ -9,19 +9,45 @@ from datetime import datetime
 
 router = APIRouter(prefix="/enterprise", tags=["enterprise"])
 
-# Mock de regiões globais
-REGIONS = [
-    {"id": "reg_1", "name": "sa-east-1 (São Paulo)", "status": "operational", "latency": 12},
-    {"id": "reg_2", "name": "us-east-1 (N. Virginia)", "status": "operational", "latency": 115},
-    {"id": "reg_3", "name": "eu-west-1 (Ireland)", "status": "degraded", "latency": 240},
-]
+TENANT_ID = "naboah"
 
 @router.get("/health/global")
-async def get_global_health():
+async def get_global_health(db: Session = Depends(get_session)):
+    # Query RegionHealth table
+    regions = db.exec(select(RegionHealth)).all()
+
+    if not regions:
+        return {
+            "status": "unknown",
+            "regions": [],
+            "last_update": datetime.utcnow(),
+        }
+
+    region_list = [
+        {
+            "id": r.id,
+            "name": r.region_name,
+            "status": r.status,
+            "latency_ms": r.latency_ms,
+            "load_percentage": r.load_percentage,
+            "last_check_at": r.last_check_at.isoformat() if r.last_check_at else None,
+        }
+        for r in regions
+    ]
+
+    # Overall status: degraded if any region is degraded, down if any is down
+    statuses = [r.status for r in regions]
+    if "down" in statuses:
+        overall = "critical"
+    elif "degraded" in statuses:
+        overall = "degraded"
+    else:
+        overall = "healthy"
+
     return {
-        "status": "healthy",
-        "regions": REGIONS,
-        "last_update": datetime.utcnow()
+        "status": overall,
+        "regions": region_list,
+        "last_update": datetime.utcnow(),
     }
 
 @router.post("/audit-stream/config")
@@ -32,12 +58,27 @@ async def update_audit_config(config: AuditStreamConfig, db: Session = Depends(g
     return config
 
 @router.get("/audit-stream/status")
-async def get_stream_status():
+async def get_stream_status(db: Session = Depends(get_session)):
+    # Query AuditStreamConfig for this tenant
+    config = db.exec(
+        select(AuditStreamConfig).where(AuditStreamConfig.tenant_id == TENANT_ID)
+    ).first()
+
+    if not config:
+        return {
+            "connected": False,
+            "destination_url": None,
+            "is_active": False,
+            "event_filters": "*",
+            "last_event_at": None,
+        }
+
     return {
-        "connected": True,
-        "events_streamed": 145020,
-        "failed_delivery": 0,
-        "last_event_at": datetime.utcnow()
+        "connected": config.is_active,
+        "destination_url": config.destination_url,
+        "is_active": config.is_active,
+        "event_filters": config.event_filters,
+        "created_at": config.created_at.isoformat() if config.created_at else None,
     }
 
 @router.post("/failover/trigger")

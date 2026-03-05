@@ -9,6 +9,8 @@ from datetime import datetime
 
 router = APIRouter(prefix="/horizon/widgets", tags=["widgets"])
 
+TENANT_ID = "naboah"
+
 class MessagePublic(BaseModel):
     sender_id: str
     content: str
@@ -20,7 +22,7 @@ async def list_widgets(db: Session = Depends(get_session)):
         return [
             WidgetConfig(
                 id="w_1", 
-                tenant_id="t1", 
+                tenant_id=TENANT_ID,
                 name="Chat Principal Site", 
                 allowed_domains_json=["naboah.com", "localhost:3000"]
             )
@@ -29,12 +31,22 @@ async def list_widgets(db: Session = Depends(get_session)):
 
 @router.get("/{widget_id}/config")
 async def get_widget_public_config(widget_id: str, db: Session = Depends(get_session)):
-    # Simulação de retorno de configuração pública (sem expor tenant_id diretamente)
+    # Query WidgetConfig from DB (public config, no tenant_id exposed)
+    widget = db.get(WidgetConfig, widget_id)
+
+    if not widget:
+        raise HTTPException(status_code=404, detail="Widget not found")
+
     return {
-        "id": widget_id,
-        "primary_color": "#7C3AED",
-        "welcome_message": "Olá! Sou o Jarvis, assistente da Naboah.",
-        "features": ["attachments", "voice_notes"]
+        "id": widget.id,
+        "name": widget.name,
+        "primary_color": widget.primary_color,
+        "accent_color": widget.accent_color,
+        "logo_url": widget.logo_url,
+        "welcome_message": widget.welcome_message,
+        "is_active": widget.is_active,
+        "collect_email": widget.collect_email,
+        "allowed_domains": widget.allowed_domains_json,
     }
 
 @router.post("/{widget_id}/sessions")

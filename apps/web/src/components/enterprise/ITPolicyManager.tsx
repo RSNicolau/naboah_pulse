@@ -1,13 +1,63 @@
-import React from 'react';
-import { ShieldCheck, Key, LogOut, Network, Share2, ArrowUpRight, Lock, BellRing } from 'lucide-react';
+'use client';
+import React, { useEffect, useState } from 'react';
+import { ShieldCheck, Key, LogOut, Network, Share2, ArrowUpRight, Lock, BellRing, Loader2 } from 'lucide-react';
+import { apiGet } from '@/lib/api';
+
+type ITPolicy = {
+    title: string;
+    desc: string;
+    active: boolean;
+    icon_name: string;
+};
+
+type SecurityBaseline = {
+    anomalous_logins: string;
+    key_rotations: string;
+    auth_token_duration: string;
+};
+
+type TenantPolicies = {
+    policies: ITPolicy[];
+    security_baseline: SecurityBaseline;
+};
+
+const ICON_MAP: Record<string, React.ComponentType<any>> = {
+    Key, Lock, Share2, Network,
+};
 
 export default function ITPolicyManager() {
-    const policies = [
-        { title: 'Bring Your Own Key (BYOK)', desc: 'Gerencie suas próprias chaves de criptografia KMS.', active: true, icon: Key },
-        { title: 'Session Pinning', desc: 'Invalida sessões se o IP ou User-Agent mudar drasticamente.', active: true, icon: Lock },
-        { title: 'Audit SIEM Streaming', desc: 'Envie eventos em tempo real para splunk/syslog.', active: false, icon: Share2 },
-        { title: 'Network Restricted Access', desc: 'Permitir acesso apenas via listas de IPs corporativos.', active: true, icon: Network },
-    ];
+    const [data, setData] = useState<TenantPolicies | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        apiGet<TenantPolicies>('/enterprise/tenants')
+            .then(setData)
+            .catch(() => {})
+            .finally(() => setLoading(false));
+    }, []);
+
+    const policies = (data?.policies ?? []).map(p => ({
+        ...p,
+        icon: ICON_MAP[p.icon_name] ?? Key,
+    }));
+    const baseline = data?.security_baseline ?? { anomalous_logins: '---', key_rotations: '---', auth_token_duration: '---' };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <Loader2 size={32} className="text-primary animate-spin" />
+            </div>
+        );
+    }
+
+    if (policies.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20 gap-3 bg-bg-1 border border-dashed border-stroke rounded-3xl">
+                <Key size={32} className="text-text-3" />
+                <p className="text-sm text-text-3">Nenhuma política de TI configurada.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col gap-8">
@@ -45,15 +95,15 @@ export default function ITPolicyManager() {
                     </div>
                     <div className="flex flex-col">
                         <h3 className="text-lg font-black text-white uppercase tracking-tighter italic">Security Baseline Status</h3>
-                        <span className="text-[10px] font-bold text-success uppercase tracking-widest">Nível: Enterprise Hardened</span>
+                        <span className="text-[10px] font-bold text-success uppercase tracking-widest">Nivel: Enterprise Hardened</span>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {[
-                        { label: 'Anomalous Logins', value: '0 detectados', color: 'success' },
-                        { label: 'Key Rotations', value: '14 dias atrás', color: 'text-3' },
-                        { label: 'Auth Token Duration', value: '4 Horas', color: 'primary' },
+                        { label: 'Anomalous Logins', value: baseline.anomalous_logins },
+                        { label: 'Key Rotations', value: baseline.key_rotations },
+                        { label: 'Auth Token Duration', value: baseline.auth_token_duration },
                     ].map((stat, i) => (
                         <div key={i} className="p-6 bg-bg-0 border border-white/5 rounded-2xl flex flex-col gap-1">
                             <span className="text-[9px] font-black text-text-3 uppercase tracking-widest">{stat.label}</span>

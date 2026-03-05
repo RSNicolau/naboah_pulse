@@ -7,6 +7,8 @@ from typing import List, Optional
 
 router = APIRouter(prefix="/enterprise", tags=["enterprise"])
 
+TENANT_ID = "naboah"
+
 class EnterpriseUpdate(BaseModel):
     region_id: Optional[str] = None
     data_retention_days: Optional[int] = None
@@ -14,14 +16,14 @@ class EnterpriseUpdate(BaseModel):
 
 @router.get("/config", response_model=Tenant)
 async def get_enterprise_config(db: Session = Depends(get_session)):
-    tenant = db.exec(select(Tenant).where(Tenant.id == "tenant_123")).first() # Mock
+    tenant = db.exec(select(Tenant).where(Tenant.id == TENANT_ID)).first() # Mock
     if not tenant:
         raise HTTPException(status_code=404, detail="Tenant não encontrado")
     return tenant
 
 @router.patch("/config")
 async def update_enterprise_config(data: EnterpriseUpdate, db: Session = Depends(get_session)):
-    tenant = db.exec(select(Tenant).where(Tenant.id == "tenant_123")).first() # Mock
+    tenant = db.exec(select(Tenant).where(Tenant.id == TENANT_ID)).first() # Mock
     if not tenant:
         raise HTTPException(status_code=404, detail="Tenant não encontrado")
     

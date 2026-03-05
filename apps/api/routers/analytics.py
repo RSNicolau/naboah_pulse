@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlmodel import Session, select, func
 from db import get_session
-from models import Message, Conversation, Contact, ChannelAccount, Channel, Deal, Ticket
+from models import Message, Conversation, Contact, ChannelAccount, Channel, Deal, Ticket, ModerationEvent
 from datetime import datetime, timedelta, date
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
@@ -139,26 +139,78 @@ async def get_dashboard_overview(db: Session = Depends(get_session)):
 
 @router.get("/summary")
 async def get_summary(db: Session = Depends(get_session)):
+    TENANT_ID = "naboah"
+
+    # Real counts from DB
+    total_contacts = len(db.exec(select(Contact).where(Contact.tenant_id == TENANT_ID)).all())
+    total_messages = len(db.exec(select(Message).where(Message.tenant_id == TENANT_ID)).all())
+    total_deals = db.exec(select(Deal).where(Deal.tenant_id == TENANT_ID)).all()
+    won_deals = [d for d in total_deals if d.status == "won"]
+
+    # Conversion rate: won deals / total deals
+    conversion_rate = round(len(won_deals) / max(len(total_deals), 1) * 100, 1)
+
+    # Average risk score from contacts
+    all_contacts = db.exec(select(Contact).where(Contact.tenant_id == TENANT_ID)).all()
+    risk_scores = [c.health_score for c in all_contacts if c.health_score is not None]
+    avg_risk = round((100 - (sum(risk_scores) / max(len(risk_scores), 1))) / 100, 2)  # invert health to risk
+    risk_status = "low" if avg_risk < 0.3 else ("medium" if avg_risk < 0.6 else "high")
+
+    # Threats blocked = moderation events with action != "none"
+    threats_blocked = len(db.exec(
+        select(ModerationEvent).where(
+            ModerationEvent.tenant_id == TENANT_ID,
+            ModerationEvent.action_taken != "none"
+        )
+    ).all())
+
     return {
-        "active_customers": 12402,
-        "active_customers_change": 2.4,
-        "threats_blocked": 142,
-        "threats_blocked_change": 12,
-        "avg_risk_score": 0.12,
-        "avg_risk_score_status": "low",
-        "conversion_rate": 3.8,
-        "conversion_rate_change": 0.5,
+        "active_customers": total_contacts,
+        "active_customers_change": 0,
+        "threats_blocked": threats_blocked,
+        "threats_blocked_change": 0,
+        "avg_risk_score": avg_risk,
+        "avg_risk_score_status": risk_status,
+        "conversion_rate": conversion_rate,
+        "conversion_rate_change": 0,
     }
 
 
 @router.get("/channel-performance")
-async def get_channel_performance():
-    return [
-        {"name": "Instagram", "value": 45},
-        {"name": "WhatsApp", "value": 30},
-        {"name": "Email", "value": 15},
-        {"name": "Others", "value": 10},
+async def get_channel_performance(db: Session = Depends(get_session)):
+    TENANT_ID = "naboah"
+
+    # Get all channel accounts for this tenant, then count messages per channel
+    channel_accounts = db.exec(
+        select(ChannelAccount).where(ChannelAccount.tenant_id == TENANT_ID)
+    ).all()
+
+    channel_msg_counts: dict[str, int] = {}
+    for ca in channel_accounts:
+        ch = db.get(Channel, ca.channel_id)
+        ch_name = ch.name if ch else "Other"
+
+        # Count messages in conversations linked to this channel account
+        conversations = db.exec(
+            select(Conversation).where(
+                Conversation.channel_account_id == ca.id,
+                Conversation.tenant_id == TENANT_ID,
+            )
+        ).all()
+        for conv in conversations:
+            msg_count = len(db.exec(
+                select(Message).where(Message.conversation_id == conv.id)
+            ).all())
+            channel_msg_counts[ch_name] = channel_msg_counts.get(ch_name, 0) + msg_count
+
+    # Convert to percentage-like values
+    total = max(sum(channel_msg_counts.values()), 1)
+    result = [
+        {"name": name, "value": round(count / total * 100)}
+        for name, count in sorted(channel_msg_counts.items(), key=lambda x: -x[1])
     ]
+
+    return result if result else [{"name": "No data", "value": 0}]
 
 
 @router.get("/reports")

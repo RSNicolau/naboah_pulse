@@ -9,6 +9,8 @@ from datetime import datetime, timedelta
 
 router = APIRouter(prefix="/commerce/v2", tags=["commerce_v2"])
 
+TENANT_ID = "naboah"
+
 class SKUCreate(BaseModel):
     name: str
     base_price: float
@@ -19,7 +21,7 @@ class SKUCreate(BaseModel):
 async def create_sku(data: SKUCreate, db: Session = Depends(get_session)):
     sku = ProductSKU(
         id=f"sku_{uuid.uuid4().hex[:6]}",
-        tenant_id="t1", # Mock
+        tenant_id=TENANT_ID, # Mock
         name=data.name,
         base_price=data.base_price,
         barcode=data.barcode,
@@ -43,7 +45,7 @@ async def get_total_stock(sku_id: Optional[str] = None, db: Session = Depends(ge
 async def create_shipping(order_id: str, carrier: str, db: Session = Depends(get_session)):
     shipping = ShippingOrder(
         id=f"shp_{uuid.uuid4().hex[:8]}",
-        tenant_id="t1",
+        tenant_id=TENANT_ID,
         order_id=order_id,
         carrier_name=carrier,
         status="pending",

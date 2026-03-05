@@ -10,6 +10,8 @@ from datetime import datetime, timedelta
 
 router = APIRouter(prefix="/apihub", tags=["apihub"])
 
+TENANT_ID = "naboah"
+
 class APIKeyCreate(BaseModel):
     name: str
     scopes: Optional[str] = "read,write"
@@ -26,7 +28,7 @@ class APIKeyRead(BaseModel):
 @router.post("/keys", response_model=dict)
 async def create_api_key(data: APIKeyCreate, db: Session = Depends(get_session)):
     # No mundo real, tenant_id viria do token de admin
-    tenant_id = "tenant_123"
+    tenant_id = TENANT_ID
     
     raw_key = f"pulse_live_{secrets.token_urlsafe(32)}"
     key_hash = hashlib.sha256(raw_key.encode()).hexdigest()
@@ -50,7 +52,7 @@ async def create_api_key(data: APIKeyCreate, db: Session = Depends(get_session))
 
 @router.get("/keys", response_model=List[APIKeyRead])
 async def list_api_keys(db: Session = Depends(get_session)):
-    tenant_id = "tenant_123"
+    tenant_id = TENANT_ID
     keys = db.exec(select(APIKey).where(APIKey.tenant_id == tenant_id)).all()
     return keys
 

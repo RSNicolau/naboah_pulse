@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { MousePointer2, StickyNote as NoteIcon, Square, Circle, Type, ArrowUpRight, Plus, Share2, Video, Mic } from 'lucide-react';
+import { MousePointer2, StickyNote as NoteIcon, Square, Circle, Type, ArrowUpRight, Plus, Video, Mic, Loader2 } from 'lucide-react';
+import { apiGet } from '@/lib/api';
 
 interface Cursor {
     id: string;
@@ -10,12 +11,28 @@ interface Cursor {
     color: string;
 }
 
+type SynergyRoom = {
+    id: string;
+    name: string;
+    participants: number;
+    status: string;
+};
+
 export default function SynergyCanvas() {
     const [elements, setElements] = useState<any[]>([]);
-    const [cursors, setCursors] = useState<Cursor[]>([
+    const [rooms, setRooms] = useState<SynergyRoom[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [cursors] = useState<Cursor[]>([
         { id: 'u2', x: 250, y: 300, name: 'Alice', color: '#10B981' },
         { id: 'u3', x: 600, y: 150, name: 'Bob', color: '#F59E0B' },
     ]);
+
+    useEffect(() => {
+        apiGet<SynergyRoom[]>('/synergy/rooms')
+            .then(setRooms)
+            .catch(() => {})
+            .finally(() => setLoading(false));
+    }, []);
 
     const addSticky = () => {
         const newSticky = {
@@ -28,6 +45,8 @@ export default function SynergyCanvas() {
         };
         setElements([...elements, newSticky]);
     };
+
+    const activeRoom = rooms.find(r => r.status === 'active') ?? rooms[0];
 
     return (
         <div className="relative w-full h-full bg-[#0F0F0F] overflow-hidden cursor-crosshair group">
@@ -64,6 +83,23 @@ export default function SynergyCanvas() {
                     SHARE CANVAS
                 </button>
             </div>
+
+            {/* Room Info */}
+            {activeRoom && (
+                <div className="absolute top-10 left-10 px-4 py-2 bg-bg-1/80 backdrop-blur-xl border border-white/10 rounded-2xl z-50">
+                    <span className="text-[9px] font-black text-primary uppercase tracking-widest">{activeRoom.name}</span>
+                    <div className="flex items-center gap-2 mt-1">
+                        <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></div>
+                        <span className="text-[8px] font-bold text-text-3">{activeRoom.participants} participants</span>
+                    </div>
+                </div>
+            )}
+
+            {loading && (
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
+                    <Loader2 size={32} className="text-primary animate-spin" />
+                </div>
+            )}
 
             {/* Render Elements */}
             {elements.map((el) => (
@@ -107,7 +143,7 @@ export default function SynergyCanvas() {
                             </div>
                         ))}
                         <div className="w-10 h-10 rounded-2xl bg-bg-0 border border-stroke flex items-center justify-center text-[10px] font-black text-text-3">
-                            +4
+                            +{rooms.reduce((a, r) => a + r.participants, 0) || 4}
                         </div>
                     </div>
                     <div className="flex gap-2">

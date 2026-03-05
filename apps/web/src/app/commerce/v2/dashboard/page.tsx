@@ -1,9 +1,39 @@
-import React from 'react';
+'use client';
+import React, { useEffect, useState } from 'react';
 import InventoryManager from '@/components/commerce/InventoryManager';
 import ConversationalPOS from '@/components/commerce/ConversationalPOS';
-import { ShoppingCart, Package, Truck, BarChart3, TrendingUp, Boxes, Zap, ArrowRight } from 'lucide-react';
+import { ShoppingCart, Truck, TrendingUp, Boxes, Zap, ArrowRight } from 'lucide-react';
+import { apiGet } from '@/lib/api';
+
+type Warehouse = {
+    id: string;
+    name: string;
+    efficiency: number;
+    load: string;
+};
+
+type ShippingOrder = {
+    id: string;
+    status: string;
+};
 
 export default function CommerceV2Dashboard() {
+    const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+    const [shipping, setShipping] = useState<ShippingOrder[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        Promise.all([
+            apiGet<Warehouse[]>('/commerce/v2/warehouses').catch(() => []),
+            apiGet<ShippingOrder[]>('/commerce/v2/shipping').catch(() => []),
+        ]).then(([wh, sh]) => {
+            setWarehouses(wh);
+            setShipping(sh);
+        }).finally(() => setLoading(false));
+    }, []);
+
+    const inTransit = shipping.filter(s => s.status === 'in_transit' || s.status === 'pending').length;
+
     return (
         <div className="flex-1 flex flex-col h-full bg-bg-0 overflow-hidden">
 
@@ -17,7 +47,7 @@ export default function CommerceV2Dashboard() {
                         <h1 className="text-4xl font-black text-white tracking-tighter uppercase tracking-widest italic flex items-center gap-4">
                             Pulse Commerce <span className="text-[10px] bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-3 py-1 rounded-full not-italic tracking-normal">VERSION 2.0</span>
                         </h1>
-                        <p className="text-text-3 font-medium text-base mt-1 italic italic">Supply chain moderna. Experiência de venda conversacional.</p>
+                        <p className="text-text-3 font-medium text-base mt-1 italic">Supply chain moderna. Experiência de venda conversacional.</p>
                     </div>
                 </div>
 
@@ -65,11 +95,17 @@ export default function CommerceV2Dashboard() {
 
                         <div className="flex flex-col gap-6">
                             <div className="flex flex-col gap-1">
-                                <span className="text-[40px] font-black text-white tracking-tighter leading-none italic">148</span>
+                                <span className="text-[40px] font-black text-white tracking-tighter leading-none italic">
+                                    {loading ? '---' : inTransit}
+                                </span>
                                 <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">PEDIDOS EM TRÂNSITO</span>
                             </div>
                             <div className="flex flex-col gap-1">
-                                <span className="text-[40px] font-black text-white tracking-tighter leading-none italic">99.2%</span>
+                                <span className="text-[40px] font-black text-white tracking-tighter leading-none italic">
+                                    {loading ? '---' : warehouses.length > 0
+                                        ? `${(warehouses.reduce((a, w) => a + w.efficiency, 0) / warehouses.length).toFixed(1)}%`
+                                        : '---'}
+                                </span>
                                 <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">STOCK ACCURACY</span>
                             </div>
                         </div>
@@ -92,23 +128,32 @@ export default function CommerceV2Dashboard() {
                             <span className="text-[11px] font-black text-white uppercase tracking-widest">Warehouse Performance</span>
                         </div>
 
-                        <div className="flex flex-col gap-4">
-                            {[
-                                { name: 'Depósito SP', efficiency: '98%', load: 'high' },
-                                { name: 'Hub Porto', efficiency: '94%', load: 'optimal' },
-                                { name: 'Miami Warehouse', efficiency: '88%', load: 'low' },
-                            ].map((wh, i) => (
-                                <div key={i} className="flex flex-col gap-2">
-                                    <div className="flex justify-between items-end">
-                                        <span className="text-[10px] font-bold text-white uppercase">{wh.name}</span>
-                                        <span className="text-[9px] font-black text-text-3 uppercase tracking-widest">{wh.efficiency} Eff.</span>
+                        {loading ? (
+                            <div className="flex flex-col gap-4">
+                                {Array.from({ length: 3 }).map((_, i) => (
+                                    <div key={i} className="animate-pulse">
+                                        <div className="h-3 w-24 bg-surface-2 rounded mb-2" />
+                                        <div className="h-1.5 w-full bg-surface-2 rounded-full" />
                                     </div>
-                                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                                        <div className={`h-full ${wh.load === 'high' ? 'bg-primary' : 'bg-secondary'}`} style={{ width: wh.efficiency }}></div>
+                                ))}
+                            </div>
+                        ) : warehouses.length === 0 ? (
+                            <p className="text-sm text-text-3 text-center py-6">Nenhum warehouse configurado.</p>
+                        ) : (
+                            <div className="flex flex-col gap-4">
+                                {warehouses.map((wh) => (
+                                    <div key={wh.id} className="flex flex-col gap-2">
+                                        <div className="flex justify-between items-end">
+                                            <span className="text-[10px] font-bold text-white uppercase">{wh.name}</span>
+                                            <span className="text-[9px] font-black text-text-3 uppercase tracking-widest">{wh.efficiency}% Eff.</span>
+                                        </div>
+                                        <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                            <div className={`h-full ${wh.efficiency >= 95 ? 'bg-primary' : 'bg-secondary'}`} style={{ width: `${wh.efficiency}%` }}></div>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
 

@@ -9,6 +9,8 @@ from datetime import datetime
 
 router = APIRouter(prefix="/desktop", tags=["desktop"])
 
+TENANT_ID = "naboah"
+
 class DeviceRegister(BaseModel):
     device_name: str
     os_type: str
@@ -19,7 +21,7 @@ async def register_device(data: DeviceRegister, db: Session = Depends(get_sessio
     device = UserDevice(
         id=f"dev_{uuid.uuid4().hex[:6]}",
         user_id="u1", # Mock
-        tenant_id="t1", # Mock
+        tenant_id=TENANT_ID, # Mock
         device_name=data.device_name,
         os_type=data.os_type,
         app_version=data.app_version

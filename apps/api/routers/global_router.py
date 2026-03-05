@@ -21,30 +21,58 @@ async def get_fx_rates():
     return {
         "base": "USD",
         "rates": FX_RATES,
-        "updated_at": datetime.utcnow()
+        "pairs": [
+            {"from": "USD", "to": "BRL", "rate": FX_RATES["USD_BRL"]},
+            {"from": "EUR", "to": "BRL", "rate": FX_RATES["EUR_BRL"]},
+            {"from": "USD", "to": "EUR", "rate": FX_RATES["USD_EUR"]},
+        ],
+        "source": "static",
+        "updated_at": datetime.utcnow().isoformat(),
     }
 
 @router.get("/i18n/{lang}")
 async def get_translations(lang: str):
-    # Simulação de dicionário dinâmico carregado via Jarvis
     translations = {
         "en": {
             "welcome": "Welcome to Naboah Pulse",
             "inbox": "Omnichannel Inbox",
-            "synergy": "Synergy Canvas"
+            "synergy": "Synergy Canvas",
+            "dashboard": "Dashboard",
+            "settings": "Settings",
+            "analytics": "Analytics",
+            "agents": "AI Agents",
+            "commerce": "Commerce",
+            "shield": "Security Shield",
         },
         "pt": {
             "welcome": "Bem-vindo ao Naboah Pulse",
             "inbox": "Inbox Omnichannel",
-            "synergy": "Canvas de Sinergia"
+            "synergy": "Canvas de Sinergia",
+            "dashboard": "Painel",
+            "settings": "Configuracoes",
+            "analytics": "Analiticos",
+            "agents": "Agentes IA",
+            "commerce": "Comercio",
+            "shield": "Escudo de Seguranca",
         },
         "es": {
             "welcome": "Bienvenido a Naboah Pulse",
             "inbox": "Bandeja de Entrada Omnicanal",
-            "synergy": "Lienzo de Sinergia"
+            "synergy": "Lienzo de Sinergia",
+            "dashboard": "Panel",
+            "settings": "Configuracion",
+            "analytics": "Analitica",
+            "agents": "Agentes IA",
+            "commerce": "Comercio",
+            "shield": "Escudo de Seguridad",
         }
     }
-    return translations.get(lang, translations["en"])
+    data = translations.get(lang, translations["en"])
+    return {
+        "lang": lang if lang in translations else "en",
+        "available_languages": list(translations.keys()),
+        "translations": data,
+    }
 
 @router.post("/tax-rules")
 async def create_tax_rule(rule: RegionalTaxRule, db: Session = Depends(get_session)):

@@ -9,6 +9,8 @@ from datetime import datetime
 
 router = APIRouter(prefix="/creative", tags=["creative"])
 
+TENANT_ID = "naboah"
+
 class PromptGenRequest(BaseModel):
     persona_id: str
     knowledge_id: str
@@ -30,7 +32,7 @@ async def generate_prompt(req: PromptGenRequest, db: Session = Depends(get_sessi
     
     artifact = PromptArtifact(
         id=f"prm_{uuid.uuid4().hex[:6]}",
-        tenant_id="t1",
+        tenant_id=TENANT_ID,
         prompt_type="text_to_image", # Fixed for mock
         model_provider="Midjourney",
         model_name="v6.1",
@@ -74,7 +76,7 @@ async def generate_product_scene(
     # Mock generation process
     new_asset = MediaAsset(
         id=asset_id,
-        tenant_id="t1",
+        tenant_id=TENANT_ID,
         asset_type="image",
         title=f"Product Scene: {preset.capitalize()}",
         storage_url=f"https://cdn.pulse.ai/generated/{asset_id}.png",
@@ -98,7 +100,7 @@ async def generate_meme(trend_id: str, db: Session = Depends(get_session)):
     asset_id = f"meme_{uuid.uuid4().hex[:6]}"
     new_asset = MediaAsset(
         id=asset_id,
-        tenant_id="t1",
+        tenant_id=TENANT_ID,
         asset_type="image",
         title=f"Meme for Trend {trend_id}",
         storage_url=f"https://cdn.pulse.ai/memes/{asset_id}.jpg",

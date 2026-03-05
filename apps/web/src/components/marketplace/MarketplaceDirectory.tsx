@@ -1,20 +1,37 @@
 "use client";
-import React, { useState } from 'react';
-import { LayoutGrid, Puzzle, ExternalLink, Download, ShieldCheck, Box, Search, Filter, Star, Info, CheckCircle2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Puzzle, Download, ShieldCheck, Search, Star, Loader2 } from 'lucide-react';
+import { apiGet } from '@/lib/api';
+
+type MarketplaceApp = {
+    id: string;
+    name: string;
+    developer: string;
+    category: string;
+    installs: string;
+    rating: number;
+    description: string;
+    is_official: boolean;
+    icon: string;
+};
 
 const categories = ['Todos', 'AI & Pulse', 'Messaging', 'CRM', 'Support', 'Developer'];
 
-const apps = [
-    { id: 'app_1', name: 'WhatsApp Business Pro', developer: 'Meta', category: 'Messaging', installs: '1.2k', rating: 4.8, description: 'Integração oficial com API de nuvem da Meta.', isOfficial: true, icon: 'WA' },
-    { id: 'app_2', name: 'Slack Connect', developer: 'Slack', category: 'Collaboration', installs: '850', rating: 4.5, description: 'Transfira tickets do Suporte direto para canais do Slack.', isOfficial: false, icon: 'SL' },
-    { id: 'app_3', name: 'Pulse Turbo Writer', developer: 'Pulse Corp', category: 'AI & Pulse', installs: '3.4k', rating: 4.9, description: 'Geração de conteúdo em massa com a nova API Pulse AI.', isOfficial: true, icon: 'PT' },
-    { id: 'app_4', name: 'Stripe Billing Connect', developer: 'Stripe', category: 'Payments', installs: '2.1k', rating: 4.7, description: 'Sincronize assinaturas e faturas com o Pulse Billing.', isOfficial: true, icon: 'ST' },
-    { id: 'app_5', name: 'Google Sheets Export', developer: 'DevCommunity', category: 'Developer', installs: '500', rating: 4.2, description: 'Exportação programada de dados para planilhas.', isOfficial: false, icon: 'GS' },
-    { id: 'app_6', name: 'Zendesk Bridge', developer: 'HelpDesk Inc', category: 'Support', installs: '150', rating: 4.0, description: 'Migração bidirecional de dados entre plataformas.', isOfficial: false, icon: 'ZD' },
-];
-
 export default function MarketplaceDirectory() {
+    const [apps, setApps] = useState<MarketplaceApp[]>([]);
+    const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState('Todos');
+
+    useEffect(() => {
+        apiGet<MarketplaceApp[]>('/marketplace/apps')
+            .then(setApps)
+            .catch(() => {})
+            .finally(() => setLoading(false));
+    }, []);
+
+    const filtered = selectedCategory === 'Todos'
+        ? apps
+        : apps.filter(a => a.category === selectedCategory);
 
     return (
         <div className="flex-1 flex flex-col h-full bg-bg-0">
@@ -57,52 +74,63 @@ export default function MarketplaceDirectory() {
                 </div>
 
                 {/* Apps Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {apps.map((app) => (
-                        <div key={app.id} className="bg-bg-1 border border-stroke rounded-[1.5rem] p-6 hover:border-primary/50 transition-all group flex flex-col gap-4 relative shadow-xl hover:-translate-y-1">
-                            <div className="flex items-center justify-between">
-                                <div className="w-14 h-14 rounded-2xl bg-surface-2 border border-stroke flex items-center justify-center text-xl font-bold text-white shadow-inner group-hover:scale-105 transition-transform">
-                                    {app.icon}
+                {loading ? (
+                    <div className="flex items-center justify-center py-20">
+                        <Loader2 size={32} className="text-primary animate-spin" />
+                    </div>
+                ) : filtered.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-20 gap-3 bg-bg-1 border border-dashed border-stroke rounded-[1.5rem]">
+                        <Puzzle size={32} className="text-text-3" />
+                        <p className="text-sm text-text-3">Nenhum app disponível no marketplace.</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filtered.map((app) => (
+                            <div key={app.id} className="bg-bg-1 border border-stroke rounded-[1.5rem] p-6 hover:border-primary/50 transition-all group flex flex-col gap-4 relative shadow-xl hover:-translate-y-1">
+                                <div className="flex items-center justify-between">
+                                    <div className="w-14 h-14 rounded-2xl bg-surface-2 border border-stroke flex items-center justify-center text-xl font-bold text-white shadow-inner group-hover:scale-105 transition-transform">
+                                        {app.icon || app.name.substring(0, 2).toUpperCase()}
+                                    </div>
+                                    {app.is_official && (
+                                        <div className="flex items-center gap-1.5 bg-success/10 px-2 py-1 rounded-lg border border-success/20">
+                                            <ShieldCheck size={12} className="text-success" />
+                                            <span className="text-[9px] font-black text-success uppercase">Oficial</span>
+                                        </div>
+                                    )}
                                 </div>
-                                {app.isOfficial && (
-                                    <div className="flex items-center gap-1.5 bg-success/10 px-2 py-1 rounded-lg border border-success/20">
-                                        <ShieldCheck size={12} className="text-success" />
-                                        <span className="text-[9px] font-black text-success uppercase">Oficial</span>
-                                    </div>
-                                )}
-                            </div>
 
-                            <div className="flex flex-col gap-1">
-                                <h3 className="text-lg font-bold text-white group-hover:text-primary transition-colors">{app.name}</h3>
-                                <span className="text-[10px] text-text-3">Desenvolvido por <span className="text-primary font-bold">{app.developer}</span></span>
-                            </div>
-
-                            <p className="text-xs text-text-3 leading-relaxed h-10 line-clamp-2">{app.description}</p>
-
-                            <div className="flex items-center justify-between pt-4 border-t border-stroke mt-2">
-                                <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-1">
-                                        <Star size={12} className="text-warning fill-warning" />
-                                        <span className="text-[10px] font-bold text-white">{app.rating}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <Download size={12} className="text-text-3" />
-                                        <span className="text-[10px] font-bold text-text-3">{app.installs}</span>
-                                    </div>
+                                <div className="flex flex-col gap-1">
+                                    <h3 className="text-lg font-bold text-white group-hover:text-primary transition-colors">{app.name}</h3>
+                                    <span className="text-[10px] text-text-3">Desenvolvido por <span className="text-primary font-bold">{app.developer}</span></span>
                                 </div>
-                                <button className="bg-surface-2 hover:bg-primary px-3 py-1.5 rounded-lg text-white text-[10px] font-black transition-all border border-stroke hover:border-primary uppercase tracking-tighter">
-                                    Ver no Marketplace
-                                </button>
+
+                                <p className="text-xs text-text-3 leading-relaxed h-10 line-clamp-2">{app.description}</p>
+
+                                <div className="flex items-center justify-between pt-4 border-t border-stroke mt-2">
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-1">
+                                            <Star size={12} className="text-warning fill-warning" />
+                                            <span className="text-[10px] font-bold text-white">{app.rating?.toFixed(1) ?? '---'}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <Download size={12} className="text-text-3" />
+                                            <span className="text-[10px] font-bold text-text-3">{app.installs ?? '0'}</span>
+                                        </div>
+                                    </div>
+                                    <button className="bg-surface-2 hover:bg-primary px-3 py-1.5 rounded-lg text-white text-[10px] font-black transition-all border border-stroke hover:border-primary uppercase tracking-tighter">
+                                        Ver no Marketplace
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
 
                 {/* Bottom Banner */}
                 <div className="bg-surface-1/30 border border-stroke border-dashed p-8 rounded-[1.5rem] flex items-center justify-between mt-10">
                     <div className="flex items-center gap-6">
                         <div className="w-16 h-16 rounded-[1.25rem] bg-bg-0 flex items-center justify-center border border-stroke border-dashed group hover:border-primary transition-all">
-                            <Plus size={32} className="text-text-3 group-hover:text-primary" />
+                            <PlusIcon size={32} className="text-text-3 group-hover:text-primary" />
                         </div>
                         <div className="flex flex-col gap-1">
                             <h4 className="text-lg font-bold text-white">Desenvolvedor? Construa no Pulse.</h4>
@@ -118,7 +146,7 @@ export default function MarketplaceDirectory() {
     );
 }
 
-function Plus(props: any) {
+function PlusIcon(props: any) {
     return (
         <svg
             {...props}

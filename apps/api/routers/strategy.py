@@ -8,6 +8,8 @@ import uuid
 
 router = APIRouter(prefix="/strategy", tags=["strategy"])
 
+TENANT_ID = "naboah"
+
 class PersonaCreate(BaseModel):
     name: str
     tone: Dict
@@ -17,7 +19,7 @@ class PersonaCreate(BaseModel):
 async def create_persona(data: PersonaCreate, db: Session = Depends(get_session)):
     persona = PersonaProfile(
         id=f"per_{uuid.uuid4().hex[:6]}",
-        tenant_id="t1",
+        tenant_id=TENANT_ID,
         name=data.name,
         tone_json=data.tone,
         do_dont_json=data.do_dont

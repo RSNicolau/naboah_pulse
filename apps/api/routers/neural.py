@@ -9,6 +9,8 @@ from datetime import datetime
 
 router = APIRouter(prefix="/neural/knowledge", tags=["neural"])
 
+TENANT_ID = "naboah"
+
 class SearchRequest(BaseModel):
     query: str
     top_k: int = 3
@@ -20,7 +22,7 @@ async def list_sources(db: Session = Depends(get_session)):
         return [
             KnowledgeSource(
                 id="ks_1", 
-                tenant_id="t1", 
+                tenant_id=TENANT_ID,
                 name="Documentação de API", 
                 source_type="url", 
                 status="active"
@@ -29,31 +31,84 @@ async def list_sources(db: Session = Depends(get_session)):
     return sources
 
 @router.post("/upload")
-async def upload_document(file: UploadFile = File(...)):
-    # Simulação de ingestão de documento
+async def upload_document(file: UploadFile = File(...), db: Session = Depends(get_session)):
+    # Create a KnowledgeSource record in DB
+    source_id = f"ks_{uuid.uuid4().hex[:6]}"
+    source = KnowledgeSource(
+        id=source_id,
+        tenant_id=TENANT_ID,
+        name=file.filename or "Unnamed Document",
+        source_type="file",
+        metadata_json={"content_type": file.content_type, "size": file.size},
+        status="indexing",
+    )
+    db.add(source)
+    db.commit()
+    db.refresh(source)
+
     return {
-        "id": f"ks_{uuid.uuid4().hex[:6]}",
-        "name": file.filename,
-        "status": "indexing",
+        "id": source.id,
+        "name": source.name,
+        "status": source.status,
         "message": "O Jarvis começou a ler este documento."
     }
 
 @router.post("/ask")
-async def ask_neural_engine(request: SearchRequest):
-    # Simulação de RAG v2 com citações
+async def ask_neural_engine(request: SearchRequest, db: Session = Depends(get_session)):
+    # Mock RAG - but use real chunks from DB for citations
+    chunks = db.exec(select(KnowledgeChunk).limit(request.top_k)).all()
+
+    citations = []
+    context_snippets = []
+    for chunk in chunks:
+        citations.append({
+            "source_id": chunk.source_id,
+            "text": chunk.content[:200] if chunk.content else "",
+            "metadata": chunk.metadata_json,
+        })
+        context_snippets.append(chunk.content[:100] if chunk.content else "")
+
+    # Build a mock answer that references the real data
+    if context_snippets:
+        answer = f"Com base nos documentos indexados, encontrei: {context_snippets[0]}..."
+    else:
+        answer = "Nenhum documento indexado encontrado. Faça upload de documentos para habilitar o Neural Search."
+
     return {
-        "answer": "De acordo com o Manual de Reembolso (pág 12), o prazo para solicitar a devolução é de até 7 dias úteis após o recebimento.",
-        "citations": [
-            {"source_id": "ks_1", "text": "o prazo para solicitar a devolução é de até 7 dias úteis", "page": 12}
-        ],
-        "confidence": 0.98
+        "answer": answer,
+        "citations": citations,
+        "confidence": 0.85 if chunks else 0.0,
+        "chunks_searched": len(chunks),
     }
 
 @router.get("/health")
-async def get_knowledge_health():
+async def get_knowledge_health(db: Session = Depends(get_session)):
+    # Aggregate from KnowledgeSource + KnowledgeChunk
+    sources = db.exec(select(KnowledgeSource).where(KnowledgeSource.tenant_id == TENANT_ID)).all()
+    total_sources = len(sources)
+    active_sources = sum(1 for s in sources if s.status == "active")
+    error_sources = [s.name for s in sources if s.status == "error"]
+
+    # Count all chunks across all sources for this tenant
+    total_chunks = 0
+    for source in sources:
+        chunks = db.exec(select(KnowledgeChunk).where(KnowledgeChunk.source_id == source.id)).all()
+        total_chunks += len(chunks)
+
+    # Health score: percentage of active sources
+    health_score = round(active_sources / max(total_sources, 1) * 100)
+
+    gaps = []
+    if error_sources:
+        gaps.extend([f"Fonte com erro: {name}" for name in error_sources])
+    pending_sources = [s.name for s in sources if s.status == "pending"]
+    if pending_sources:
+        gaps.extend([f"Aguardando indexacao: {name}" for name in pending_sources])
+
     return {
-        "total_sources": 5,
-        "indexed_chunks": 1240,
-        "health_score": 85,
-        "gaps": ["Política de Privacidade está desatualizada", "Faltam detalhes sobre integrações Zapier"]
+        "total_sources": total_sources,
+        "active_sources": active_sources,
+        "indexed_chunks": total_chunks,
+        "health_score": health_score,
+        "gaps": gaps if gaps else ["Nenhum problema detectado"],
     }

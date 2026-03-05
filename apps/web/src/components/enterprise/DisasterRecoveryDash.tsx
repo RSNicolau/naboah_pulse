@@ -1,12 +1,26 @@
-import React from 'react';
-import { Activity, ShieldAlert, Zap, Server, Database, Globe, RefreshCcw, AlertTriangle } from 'lucide-react';
+'use client';
+import React, { useEffect, useState } from 'react';
+import { ShieldAlert, Server, AlertTriangle, Loader2 } from 'lucide-react';
+import { apiGet } from '@/lib/api';
+
+type GlobalHealth = {
+    status: string;
+    regions: { name: string; role: string; latency: string; health: number; status: string }[];
+    rto_seconds: number;
+};
 
 export default function DisasterRecoveryDash() {
-    const regions = [
-        { name: 'São Paulo (SA-East-1)', role: 'Primary', latency: '12ms', health: 100, status: 'Active' },
-        { name: 'N. Virginia (US-East-1)', role: 'Standby', latency: '115ms', health: 100, status: 'Synced' },
-        { name: 'Ireland (EU-West-1)', role: 'Secondary', latency: '240ms', health: 92, status: 'Degraded' },
-    ];
+    const [data, setData] = useState<GlobalHealth | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        apiGet<GlobalHealth>('/enterprise/health/global')
+            .then(setData)
+            .catch(() => {})
+            .finally(() => setLoading(false));
+    }, []);
+
+    const regions = data?.regions ?? [];
 
     return (
         <div className="bg-bg-1 border border-stroke rounded-[3rem] p-10 flex flex-col gap-10 shadow-2xl relative overflow-hidden group">
@@ -27,38 +41,48 @@ export default function DisasterRecoveryDash() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
-                {regions.map((region, i) => (
-                    <div key={i} className={`p-8 rounded-[2.5rem] border flex flex-col gap-6 transition-all ${region.role === 'Primary' ? 'bg-primary/5 border-primary/20' : 'bg-bg-0 border-stroke'
-                        }`}>
-                        <div className="flex items-center justify-between">
-                            <div className="p-3 bg-white/5 rounded-2xl text-white">
-                                <Server size={20} />
+            {loading ? (
+                <div className="flex items-center justify-center py-16">
+                    <Loader2 size={28} className="text-error animate-spin" />
+                </div>
+            ) : regions.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 gap-3 relative z-10">
+                    <Server size={28} className="text-text-3" />
+                    <p className="text-sm text-text-3">Nenhum dado de infraestrutura disponível.</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+                    {regions.map((region, i) => (
+                        <div key={i} className={`p-8 rounded-[2.5rem] border flex flex-col gap-6 transition-all ${region.role === 'Primary' ? 'bg-primary/5 border-primary/20' : 'bg-bg-0 border-stroke'}`}>
+                            <div className="flex items-center justify-between">
+                                <div className="p-3 bg-white/5 rounded-2xl text-white">
+                                    <Server size={20} />
+                                </div>
+                                <div className={`px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${region.status === 'Active' ? 'bg-success/20 text-success' :
+                                        region.status === 'Synced' ? 'bg-secondary/20 text-secondary' :
+                                            'bg-error/20 text-error'
+                                    }`}>
+                                    {region.status}
+                                </div>
                             </div>
-                            <div className={`px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${region.status === 'Active' ? 'bg-success/20 text-success' :
-                                    region.status === 'Synced' ? 'bg-secondary/20 text-secondary' :
-                                        'bg-error/20 text-error'
-                                }`}>
-                                {region.status}
+                            <div className="flex flex-col gap-1">
+                                <span className="text-xs font-black text-white uppercase tracking-widest">{region.name}</span>
+                                <span className="text-[10px] font-bold text-text-3 uppercase">{region.role} Region</span>
+                            </div>
+                            <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                                <div className="flex flex-col">
+                                    <span className="text-[9px] font-bold text-text-3 uppercase tracking-widest">Latency</span>
+                                    <span className="text-sm font-black text-white">{region.latency}</span>
+                                </div>
+                                <div className="flex flex-col items-end">
+                                    <span className="text-[9px] font-bold text-text-3 uppercase tracking-widest">Health</span>
+                                    <span className="text-sm font-black text-success">{region.health}%</span>
+                                </div>
                             </div>
                         </div>
-                        <div className="flex flex-col gap-1">
-                            <span className="text-xs font-black text-white uppercase tracking-widest">{region.name}</span>
-                            <span className="text-[10px] font-bold text-text-3 uppercase">{region.role} Region</span>
-                        </div>
-                        <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                            <div className="flex flex-col">
-                                <span className="text-[9px] font-bold text-text-3 uppercase tracking-widest">Latency</span>
-                                <span className="text-sm font-black text-white">{region.latency}</span>
-                            </div>
-                            <div className="flex flex-col items-end">
-                                <span className="text-[9px] font-bold text-text-3 uppercase tracking-widest">Health</span>
-                                <span className="text-sm font-black text-success">{region.health}%</span>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            )}
 
             <div className="p-8 bg-error/5 border border-error/20 rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
                 <div className="flex items-center gap-6">
@@ -69,7 +93,7 @@ export default function DisasterRecoveryDash() {
                         <span className="text-xs font-black text-white uppercase tracking-[0.2em] italic">Critical Control</span>
                         <p className="text-[11px] text-text-2 max-w-sm leading-relaxed">
                             Ao acionar o failover, o tráfego global será redirecionado para a região de standby.
-                            **RTO Estimado: 45 segundos.**
+                            <span className="font-bold text-white"> RTO Estimado: {data?.rto_seconds ?? 45} segundos.</span>
                         </p>
                     </div>
                 </div>

@@ -4,8 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session
 from db import init_db, get_session
 from models import Tenant, User, Role, Membership, AuditLog
+import models_crm  # CRM tables — imported so init_db creates them
 from auth_utils import get_password_hash, create_access_token
-from routers import auth, tenants, inbox, content, moderation, integrations, analytics, agents, billing, search, live, reports, sso, apihub, compliance, flows, sales, support, marketplace, enterprise, voice, community, agents_team, perception, commerce, insights, workflows_v2, shield, visionary, widgets, neural, synergy, desktop, global_router, developer, enterprise_v2, commerce_v2, insights_v3, intake, strategy, creative, automation, ads, observability, contacts, settings, notifications
+from routers import auth, tenants, inbox, content, moderation, integrations, analytics, agents, billing, search, live, reports, sso, apihub, compliance, flows, sales, support, marketplace, enterprise, voice, community, agents_team, perception, commerce, insights, workflows_v2, shield, visionary, widgets, neural, synergy, desktop, global_router, developer, enterprise_v2, commerce_v2, insights_v3, intake, strategy, creative, automation, ads, observability, contacts, settings, notifications, crm
 from middleware.quantum_middleware import QuantumMiddleware
 
 app = FastAPI(title="Naboah Pulse API")
@@ -75,6 +76,7 @@ app.include_router(observability.router)
 app.include_router(contacts.router)
 app.include_router(settings.router)
 app.include_router(notifications.router)
+app.include_router(crm.router)
 
 @app.on_event("startup")
 def on_startup():

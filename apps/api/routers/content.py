@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 from db import get_session
-from models import ContentAsset
+from models import ContentAsset, CalendarItem, ChannelAccount
 from pydantic import BaseModel
 from typing import Optional
 import uuid
@@ -157,3 +157,25 @@ async def delete_content_asset(asset_id: str, db: Session = Depends(get_session)
     db.delete(asset)
     db.commit()
     return {"status": "deleted", "id": asset_id}
+
+
+@router.get("/calendar")
+async def list_calendar_items(db: Session = Depends(get_session)):
+    items = db.exec(
+        select(CalendarItem)
+        .where(CalendarItem.tenant_id == TENANT_ID)
+        .order_by(CalendarItem.scheduled_at)
+    ).all()
+    results = []
+    for item in items:
+        asset = db.get(ContentAsset, item.content_asset_id)
+        account = db.get(ChannelAccount, item.channel_account_id)
+        results.append({
+            "id": item.id,
+            "title": asset.title if asset else "Untitled",
+            "type": asset.type if asset else "post",
+            "channel": account.platform if account else "unknown",
+            "scheduled_at": item.scheduled_at.isoformat(),
+            "status": item.status,
+        })
+    return results

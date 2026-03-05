@@ -1,14 +1,30 @@
 "use client";
-import React, { useState } from 'react';
-import { MessageSquare, Users, Pin, Lock, ArrowUp, Hash, Award, TrendingUp, Search, Plus, ThumbsUp } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Users, Pin, Award, TrendingUp, Search, Plus, Loader2 } from 'lucide-react';
+import { apiGet } from '@/lib/api';
 
-const topics = [
-    { id: '1', title: 'Novidades da Release v2.4', author: 'Ana Silva', category: 'Announcements', replies: 12, views: '1.2k', pinned: true, content: 'Lançamos novas funções de automação...' },
-    { id: '2', title: 'Como configurar o bot do Telegram?', author: 'Beto Costa', category: 'Q&A', replies: 5, views: 450, content: 'Estou tendo problemas com o token...' },
-    { id: '3', title: 'Melhores práticas no suporte omnichannel', author: 'Carla Dias', category: 'General', replies: 28, views: '3.1k', content: 'Notei que o tempo de resposta caiu 20%...' },
-];
+type Topic = {
+    id: string;
+    title: string;
+    author: string;
+    category: string;
+    replies: number;
+    views: number;
+    pinned: boolean;
+    content: string;
+};
 
 export default function CommunityHub() {
+    const [topics, setTopics] = useState<Topic[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        apiGet<Topic[]>('/community/topics')
+            .then(setTopics)
+            .catch(() => {})
+            .finally(() => setLoading(false));
+    }, []);
+
     return (
         <div className="flex-1 flex flex-col h-full bg-bg-0">
             <div className="p-8 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-4 gap-10">
@@ -34,42 +50,52 @@ export default function CommunityHub() {
                     </div>
 
                     {/* Topics List */}
-                    <div className="flex flex-col gap-4">
-                        {topics.map((topic) => (
-                            <div key={topic.id} className="bg-bg-1 border border-stroke rounded-[1.5rem] p-6 hover:border-primary/50 transition-all group flex gap-6">
-                                <div className="flex flex-col items-center gap-1 justify-center min-w-[60px] border-r border-stroke pr-6">
-                                    <span className="text-xl font-bold text-white leading-none">{topic.replies}</span>
-                                    <span className="text-[10px] font-bold text-text-3 uppercase tracking-tighter">Respostas</span>
-                                </div>
+                    {loading ? (
+                        <div className="flex items-center justify-center py-20">
+                            <Loader2 size={32} className="text-primary animate-spin" />
+                        </div>
+                    ) : topics.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-20 gap-3 bg-bg-1 border border-dashed border-stroke rounded-[1.5rem]">
+                            <Users size={32} className="text-text-3" />
+                            <p className="text-sm text-text-3">Nenhum tópico na comunidade ainda.</p>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col gap-4">
+                            {topics.map((topic) => (
+                                <div key={topic.id} className="bg-bg-1 border border-stroke rounded-[1.5rem] p-6 hover:border-primary/50 transition-all group flex gap-6">
+                                    <div className="flex flex-col items-center gap-1 justify-center min-w-[60px] border-r border-stroke pr-6">
+                                        <span className="text-xl font-bold text-white leading-none">{topic.replies}</span>
+                                        <span className="text-[10px] font-bold text-text-3 uppercase tracking-tighter">Respostas</span>
+                                    </div>
 
-                                <div className="flex-1 flex flex-col gap-2">
-                                    <div className="flex items-center gap-3">
-                                        {topic.pinned && <Pin size={14} className="text-primary fill-primary" />}
-                                        <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded border ${topic.category === 'Announcements' ? 'bg-success/10 border-success/20 text-success' : 'bg-surface-2 border-stroke text-text-3'}`}>
-                                            {topic.category}
-                                        </span>
-                                        <h3 className="text-lg font-bold text-white group-hover:text-primary transition-colors cursor-pointer">{topic.title}</h3>
-                                    </div>
-                                    <p className="text-xs text-text-3 line-clamp-1">{topic.content}</p>
-                                    <div className="flex items-center gap-4 mt-2">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-5 h-5 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-[10px] font-bold text-primary">
-                                                {topic.author[0]}
-                                            </div>
-                                            <span className="text-[10px] text-text-3">Postado por <span className="text-white font-bold">{topic.author}</span></span>
+                                    <div className="flex-1 flex flex-col gap-2">
+                                        <div className="flex items-center gap-3">
+                                            {topic.pinned && <Pin size={14} className="text-primary fill-primary" />}
+                                            <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded border ${topic.category === 'Announcements' ? 'bg-success/10 border-success/20 text-success' : 'bg-surface-2 border-stroke text-text-3'}`}>
+                                                {topic.category}
+                                            </span>
+                                            <h3 className="text-lg font-bold text-white group-hover:text-primary transition-colors cursor-pointer">{topic.title}</h3>
                                         </div>
-                                        <div className="w-1 h-1 rounded-full bg-stroke"></div>
-                                        <span className="text-[10px] text-text-3">{topic.views} visualizações</span>
+                                        <p className="text-xs text-text-3 line-clamp-1">{topic.content}</p>
+                                        <div className="flex items-center gap-4 mt-2">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-5 h-5 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-[10px] font-bold text-primary">
+                                                    {topic.author?.[0] ?? '?'}
+                                                </div>
+                                                <span className="text-[10px] text-text-3">Postado por <span className="text-white font-bold">{topic.author}</span></span>
+                                            </div>
+                                            <div className="w-1 h-1 rounded-full bg-stroke"></div>
+                                            <span className="text-[10px] text-text-3">{topic.views} visualizações</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Sidebar: Trends & Gamification */}
                 <div className="flex flex-col gap-8">
-                    {/* Top Contributors */}
                     <div className="bg-bg-1 border border-stroke rounded-[2rem] p-6 flex flex-col gap-6">
                         <h4 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
                             <Award size={16} className="text-warning" /> Top Contribuidores
@@ -96,7 +122,6 @@ export default function CommunityHub() {
                         </div>
                     </div>
 
-                    {/* Trending Hash */}
                     <div className="bg-bg-1 border border-stroke rounded-[2rem] p-6 flex flex-col gap-6">
                         <h4 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
                             <TrendingUp size={16} className="text-ai-accent" /> Assuntos do Momento

@@ -9,6 +9,8 @@ from datetime import datetime
 
 router = APIRouter(prefix="/insights/v3", tags=["insights_v3"])
 
+TENANT_ID = "naboah"
+
 class ScenarioCreate(BaseModel):
     name: str
     parameters: Dict[str, float]
@@ -22,7 +24,7 @@ async def create_scenario(data: ScenarioCreate, db: Session = Depends(get_sessio
     
     scenario = StrategyScenario(
         id=f"scn_{uuid.uuid4().hex[:6]}",
-        tenant_id="t1",
+        tenant_id=TENANT_ID,
         name=data.name,
         parameters_json=data.parameters,
         projected_revenue=projected,
@@ -35,27 +37,60 @@ async def create_scenario(data: ScenarioCreate, db: Session = Depends(get_sessio
 
 @router.get("/reports/executive/{period}")
 async def get_executive_summary(period: str, db: Session = Depends(get_session)):
-    # Simulação de geração de narrativa IA
-    narrative = f"""
-    <p>O período de <strong>{period}</strong> apresentou um crescimento resiliente de 12% no MRR.</p>
-    <p>Identificamos que a campanha 'Pulse Horizon' foi o principal motor de aquisição, respondendo por 45% dos novos leads.</p>
-    <p><span class='text-primary'>Insight Jarvis:</span> O churn na região us-east-1 está acima da média (4.2%). Recomendo revisar a latência de rede capturada na Phase 37.</p>
-    """
+    # Query AnalysisNarrative for the given period
+    narrative = db.exec(
+        select(AnalysisNarrative).where(
+            AnalysisNarrative.tenant_id == TENANT_ID,
+            AnalysisNarrative.period == period
+        )
+    ).first()
+
+    if narrative:
+        return {
+            "period": narrative.period,
+            "narrative_html": narrative.narrative_html,
+            "key_metrics": narrative.key_metrics_json,
+            "created_at": narrative.created_at.isoformat() if narrative.created_at else None,
+        }
+
+    # If no narrative exists for this period, return empty structure
     return {
         "period": period,
-        "narrative_html": narrative,
-        "sentiment": "positive",
-        "key_metrics": {
-            "mrr": 450000,
-            "growth": 1.12,
-            "top_channel": "Direct/Referral"
-        }
+        "narrative_html": f"<p>Nenhum relatório executivo encontrado para o periodo <strong>{period}</strong>.</p>",
+        "key_metrics": {},
+        "created_at": None,
     }
 
 @router.get("/strategy/recommendations")
-async def get_recommendations():
-    return [
-        {"id": 1, "priority": "high", "title": "Diversificação de Ad Spend", "reason": "CPA no LinkedIn subiu 20%"},
-        {"id": 2, "priority": "medium", "title": "Expansion Campaign: Global", "reason": "Alta demanda detectada em EUR/BRL na Phase 35"},
-        {"id": 3, "priority": "critical", "title": "Session Pinning Audit", "reason": "Tentativas de bypass detectadas pelo Pulse Shield"}
-    ]
+async def get_recommendations(db: Session = Depends(get_session)):
+    # Query StrategyScenario for recommendations
+    scenarios = db.exec(
+        select(StrategyScenario).where(
+            StrategyScenario.tenant_id == TENANT_ID
+        ).order_by(StrategyScenario.created_at.desc())
+    ).all()
+
+    if not scenarios:
+        return []
+
+    result = []
+    for s in scenarios:
+        # Determine priority based on confidence
+        if s.confidence_score >= 0.9:
+            priority = "critical"
+        elif s.confidence_score >= 0.7:
+            priority = "high"
+        else:
+            priority = "medium"
+
+        result.append({
+            "id": s.id,
+            "priority": priority,
+            "title": s.name,
+            "projected_revenue": s.projected_revenue,
+            "confidence_score": s.confidence_score,
+            "parameters": s.parameters_json,
+            "reason": f"Receita projetada: R$ {s.projected_revenue:,.2f} (confianca: {s.confidence_score:.0%})",
+        })
+
+    return result

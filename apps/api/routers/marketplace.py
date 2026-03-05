@@ -9,6 +9,8 @@ from datetime import datetime
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 
+TENANT_ID = "naboah"
+
 class AppCreate(BaseModel):
     name: str
     description: str
@@ -35,7 +37,7 @@ async def install_app(app_id: str, db: Session = Depends(get_session)):
     
     new_install = AppInstallation(
         id=f"inst_{uuid.uuid4().hex[:8]}",
-        tenant_id="tenant_123", # Mock
+        tenant_id=TENANT_ID, # Mock
         app_id=app_id,
         installed_by_id="user_admin", # Mock
         is_enabled=True
@@ -46,8 +48,22 @@ async def install_app(app_id: str, db: Session = Depends(get_session)):
 
 @router.get("/my-apps")
 async def list_installed_apps(db: Session = Depends(get_session)):
-    # Simula retorno de apps instalados
-    return [
-        {"app_id": "app_1", "name": "WhatsApp Business Pro", "status": "active"},
-        {"app_id": "app_3", "name": "Jarvis Content Writer", "status": "active"},
-    ]
+    # Query AppInstallation + App for the tenant
+    installations = db.exec(
+        select(AppInstallation).where(AppInstallation.tenant_id == TENANT_ID)
+    ).all()
+
+    result = []
+    for inst in installations:
+        app = db.get(App, inst.app_id)
+        result.append({
+            "installation_id": inst.id,
+            "app_id": inst.app_id,
+            "name": app.name if app else "Unknown App",
+            "description": app.description if app else "",
+            "category": app.category if app else "",
+            "status": "active" if inst.is_enabled else "disabled",
+            "installed_at": inst.installed_at.isoformat() if inst.installed_at else None,
+        })
+
+    return result

@@ -1,14 +1,28 @@
 "use client";
-import React, { useState } from 'react';
-import { Lightbulb, ThumbsUp, MessageCircle, Clock, CheckCircle2, Search, Filter, Plus } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Lightbulb, ThumbsUp, MessageCircle, CheckCircle2, Plus, Loader2 } from 'lucide-react';
+import { apiGet } from '@/lib/api';
 
-const feedRequests = [
-    { id: '1', title: 'Integração Nativa com TikTok Ads', description: 'Gostaria de ver as campanhas direto no Content Studio.', votes: 156, status: 'planned', comments: 12 },
-    { id: '2', title: 'Relatórios em PDF Customizados', description: 'Poder enviar relatórios com a minha logo para os clientes.', votes: 89, status: 'under_review', comments: 5 },
-    { id: '3', title: 'Automação via Voz (PT-BR)', description: 'Bot que atende chamadas e transcreve com Pulse AI.', votes: 245, status: 'in_progress', comments: 45 },
-];
+type FeedbackRequest = {
+    id: string;
+    title: string;
+    description: string;
+    votes: number;
+    status: string;
+    comments: number;
+};
 
 export default function FeedbackPortal() {
+    const [feedRequests, setFeedRequests] = useState<FeedbackRequest[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        apiGet<FeedbackRequest[]>('/community/feedback')
+            .then(setFeedRequests)
+            .catch(() => {})
+            .finally(() => setLoading(false));
+    }, []);
+
     return (
         <div className="bg-bg-1 border-2 border-ai-accent/20 rounded-[2.5rem] p-10 flex flex-col gap-10 shadow-2xl relative overflow-hidden">
 
@@ -41,35 +55,46 @@ export default function FeedbackPortal() {
                 </button>
             </div>
 
-            <div className="flex flex-col gap-6 relative z-10">
-                {feedRequests.map((req) => (
-                    <div key={req.id} className="bg-bg-0 border border-stroke rounded-[2rem] p-8 hover:border-ai-accent/50 transition-all flex gap-8 group">
-                        {/* Vote Counter */}
-                        <button className="flex flex-col items-center justify-center gap-2 min-w-[80px] h-[100px] border-2 border-stroke rounded-2xl bg-surface-1 group-hover:border-primary transition-all">
-                            <ThumbsUp size={20} className="text-text-3 group-hover:text-primary transition-colors" />
-                            <span className="text-xl font-black text-white leading-none">{req.votes}</span>
-                            <span className="text-[9px] font-black text-text-3 uppercase tracking-tighter">Votos</span>
-                        </button>
+            {loading ? (
+                <div className="flex items-center justify-center py-20">
+                    <Loader2 size={32} className="text-ai-accent animate-spin" />
+                </div>
+            ) : feedRequests.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 gap-3">
+                    <Lightbulb size={32} className="text-text-3" />
+                    <p className="text-sm text-text-3">Nenhuma sugestão de recurso ainda. Seja o primeiro!</p>
+                </div>
+            ) : (
+                <div className="flex flex-col gap-6 relative z-10">
+                    {feedRequests.map((req) => (
+                        <div key={req.id} className="bg-bg-0 border border-stroke rounded-[2rem] p-8 hover:border-ai-accent/50 transition-all flex gap-8 group">
+                            {/* Vote Counter */}
+                            <button className="flex flex-col items-center justify-center gap-2 min-w-[80px] h-[100px] border-2 border-stroke rounded-2xl bg-surface-1 group-hover:border-primary transition-all">
+                                <ThumbsUp size={20} className="text-text-3 group-hover:text-primary transition-colors" />
+                                <span className="text-xl font-black text-white leading-none">{req.votes}</span>
+                                <span className="text-[9px] font-black text-text-3 uppercase tracking-tighter">Votos</span>
+                            </button>
 
-                        <div className="flex-1 flex flex-col gap-3">
-                            <div className="flex items-center justify-between">
-                                <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${req.status === 'planned' ? 'bg-primary/10 border-primary text-primary' :
-                                        req.status === 'in_progress' ? 'bg-warning/10 border-warning text-warning' :
-                                            'bg-surface-2 border-stroke text-text-3'
-                                    }`}>
-                                    {req.status.replace('_', ' ')}
-                                </span>
-                                <div className="flex items-center gap-2 text-text-3">
-                                    <MessageCircle size={14} />
-                                    <span className="text-[10px] font-black">{req.comments} comentários</span>
+                            <div className="flex-1 flex flex-col gap-3">
+                                <div className="flex items-center justify-between">
+                                    <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${req.status === 'planned' ? 'bg-primary/10 border-primary text-primary' :
+                                            req.status === 'in_progress' ? 'bg-warning/10 border-warning text-warning' :
+                                                'bg-surface-2 border-stroke text-text-3'
+                                        }`}>
+                                        {req.status.replace('_', ' ')}
+                                    </span>
+                                    <div className="flex items-center gap-2 text-text-3">
+                                        <MessageCircle size={14} />
+                                        <span className="text-[10px] font-black">{req.comments} comentários</span>
+                                    </div>
                                 </div>
+                                <h3 className="text-xl font-bold text-white group-hover:text-ai-accent transition-colors cursor-pointer">{req.title}</h3>
+                                <p className="text-sm text-text-3 leading-relaxed max-w-2xl">{req.description}</p>
                             </div>
-                            <h3 className="text-xl font-bold text-white group-hover:text-ai-accent transition-colors cursor-pointer">{req.title}</h3>
-                            <p className="text-sm text-text-3 leading-relaxed max-w-2xl">{req.description}</p>
                         </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            )}
 
             <div className="p-8 bg-surface-1/50 border border-stroke border-dashed rounded-[2rem] flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -80,7 +105,7 @@ export default function FeedbackPortal() {
                     </div>
                 </div>
                 <button className="text-xs font-bold text-white hover:text-primary transition-colors flex items-center gap-2 uppercase tracking-widest">
-                    Ver Roadmap Completo <Clock size={14} />
+                    Ver Roadmap Completo
                 </button>
             </div>
         </div>

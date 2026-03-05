@@ -9,6 +9,8 @@ from datetime import datetime
 
 router = APIRouter(prefix="/intake", tags=["intake"])
 
+TENANT_ID = "naboah"
+
 @router.post("/upload")
 async def upload_intake(
     source: str,
@@ -35,7 +37,7 @@ async def upload_intake(
 
     item = IntakeItem(
         id=item_id,
-        tenant_id="t1",
+        tenant_id=TENANT_ID,
         source_type=source,
         file_type=file_type,
         file_url=file_url,
@@ -63,7 +65,7 @@ async def create_job_from_intake(
 ):
     job = CreativeJob(
         id=f"job_{uuid.uuid4().hex[:6]}",
-        tenant_id="t1",
+        tenant_id=TENANT_ID,
         intake_item_id=intake_id,
         job_type=job_type,
         persona_profile_id=persona_id,

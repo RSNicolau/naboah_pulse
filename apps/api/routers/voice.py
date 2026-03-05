@@ -9,6 +9,8 @@ from datetime import datetime
 
 router = APIRouter(prefix="/voice", tags=["voice"])
 
+TENANT_ID = "naboah"
+
 class CallCreate(BaseModel):
     to_number: str
 
@@ -18,9 +20,9 @@ async def list_call_history(db: Session = Depends(get_session)):
     calls = db.exec(select(CallRecord)).all()
     if not calls:
         return [
-            CallRecord(id="call_1", tenant_id="t1", from_number="+551199999999", to_number="+551188888888", direction="outbound", duration_seconds=120, status="completed", sentiment_score=0.8),
-            CallRecord(id="call_2", tenant_id="t1", from_number="+554877777777", to_number="+551199999999", direction="inbound", duration_seconds=60, status="completed", sentiment_score=-0.2),
-            CallRecord(id="call_3", tenant_id="t1", from_number="+551155555555", to_number="+551199999999", direction="inbound", duration_seconds=0, status="missed"),
+            CallRecord(id="call_1", tenant_id=TENANT_ID, from_number="+551199999999", to_number="+551188888888", direction="outbound", duration_seconds=120, status="completed", sentiment_score=0.8),
+            CallRecord(id="call_2", tenant_id=TENANT_ID, from_number="+554877777777", to_number="+551199999999", direction="inbound", duration_seconds=60, status="completed", sentiment_score=-0.2),
+            CallRecord(id="call_3", tenant_id=TENANT_ID, from_number="+551155555555", to_number="+551199999999", direction="inbound", duration_seconds=0, status="missed"),
         ]
     return calls
 
@@ -43,6 +45,9 @@ async def call_event_webhook(event: dict, db: Session = Depends(get_session)):
 
 @router.get("/voicemails", response_model=List[Voicemail])
 async def list_voicemails(db: Session = Depends(get_session)):
-    return [
-        Voicemail(id="vm_1", tenant_id="t1", call_record_id="call_3", audio_url="http://storage/vm1.mp3", transcription="Olá, gostaria de saber sobre meu pedido.")
-    ]
+    # Query Voicemail from DB
+    voicemails = db.exec(
+        select(Voicemail).where(Voicemail.tenant_id == TENANT_ID)
+        .order_by(Voicemail.created_at.desc())
+    ).all()
+    return voicemails

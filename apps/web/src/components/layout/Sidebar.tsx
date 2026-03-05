@@ -43,6 +43,18 @@ const navSections: NavSection[] = [
         ],
     },
     {
+        title: 'CRM',
+        items: [
+            { icon: Kanban,      label: 'CRM Home',    href: '/crm' },
+            { icon: BookUser,    label: 'CRM Contacts', href: '/crm/contacts' },
+            { icon: Kanban,      label: 'Pipeline',    href: '/crm/pipeline' },
+            { icon: LifeBuoy,    label: 'Tickets',     href: '/crm/tickets' },
+            { icon: Target,      label: 'Segments',    href: '/crm/segments' },
+            { icon: Rocket,      label: 'CRM Campaigns', href: '/crm/campaigns' },
+            { icon: Share2,      label: 'Repediu',     href: '/crm/repediu' },
+        ],
+    },
+    {
         title: 'Revenue',
         items: [
             { icon: Kanban,      label: 'Sales CRM',   href: '/sales' },
@@ -92,6 +104,7 @@ const navSections: NavSection[] = [
             { icon: Palette,    label: 'White-label',href: '/settings/branding' },
             { icon: Code2,      label: 'API Hub',    href: '/settings/apihub' },
             { icon: ShieldAlert,label: 'Privacy',    href: '/settings/privacy' },
+            { icon: Brain,      label: 'AI Center',  href: '/settings/ai-center' },
             { icon: Settings,   label: 'Billing',    href: '/billing' },
         ],
     },

@@ -32,6 +32,8 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 
+TENANT_ID = "naboah"
+
 @router.get("/rooms", response_model=List[SynergyRoom])
 async def list_rooms(db: Session = Depends(get_session)):
     return db.exec(select(SynergyRoom)).all()
@@ -40,7 +42,7 @@ async def list_rooms(db: Session = Depends(get_session)):
 async def create_room(name: str, room_type: str = "canvas", db: Session = Depends(get_session)):
     room = SynergyRoom(
         id=f"room_{uuid.uuid4().hex[:6]}",
-        tenant_id="t1", # Mock
+        tenant_id=TENANT_ID, # Mock
         name=name,
         type=room_type,
         created_by_id="u1" # Mock

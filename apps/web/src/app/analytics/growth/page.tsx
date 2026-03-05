@@ -1,9 +1,39 @@
-import React from 'react';
+'use client';
+import React, { useEffect, useState } from 'react';
 import ForecastingChart from '@/components/analytics/ForecastingChart';
 import ChurnRiskAlert from '@/components/analytics/ChurnRiskAlert';
-import { LineChart, Zap, TrendingUp, Target, BarChart2, PieChart } from 'lucide-react';
+import { Zap, TrendingUp, Target, BarChart2, PieChart } from 'lucide-react';
+import { apiGet } from '@/lib/api';
+
+type AnalyticsSummary = {
+    customers: number;
+    conversion_rate: number;
+    risk_score: number;
+    threats_blocked: number;
+    messages_count: number;
+    deals_count: number;
+};
 
 export default function GrowthPage() {
+    const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        apiGet<AnalyticsSummary>('/analytics/summary')
+            .then(setSummary)
+            .catch(() => {})
+            .finally(() => setLoading(false));
+    }, []);
+
+    const stats = summary
+        ? [
+            { label: 'Customers', value: summary.customers.toLocaleString(), sub: `${summary.deals_count} deals ativos`, icon: TrendingUp, color: 'text-primary' },
+            { label: 'Conversion Rate', value: `${(summary.conversion_rate * 100).toFixed(1)}%`, sub: 'Calculado via IA', icon: BarChart2, color: 'text-success' },
+            { label: 'Churn Risk Score', value: summary.risk_score.toFixed(2), sub: summary.risk_score < 0.3 ? 'Saudável' : 'Atenção', icon: PieChart, color: 'text-error' },
+            { label: 'Threats Blocked', value: summary.threats_blocked.toLocaleString(), sub: `${summary.messages_count} msgs total`, icon: Zap, color: 'text-warning' },
+        ]
+        : [];
+
     return (
         <div className="flex-1 flex flex-col h-full bg-bg-0 overflow-y-auto custom-scrollbar">
             <div className="p-8 max-w-7xl mx-auto w-full flex flex-col gap-10 pb-20">
@@ -27,25 +57,35 @@ export default function GrowthPage() {
 
                 {/* Global Metrics Row */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    {[
-                        { label: 'Market Velocity', value: '4.8x', sub: '+0.2 vs last week', icon: TrendingUp, color: 'text-primary' },
-                        { label: 'Avg LTV Preditivo', value: 'R$ 12.4k', sub: 'Calculado via IA', icon: BarChart2, color: 'text-success' },
-                        { label: 'Churn Rate (Forecast)', value: '1.2%', sub: 'Target: < 1.0%', icon: PieChart, color: 'text-error' },
-                        { label: 'Growth Score', value: '88/100', sub: 'Excelente Saúde', icon: Zap, color: 'text-warning' },
-                    ].map((stat, i) => (
-                        <div key={i} className="bg-bg-1 border border-stroke rounded-[1.5rem] p-6 flex flex-col gap-2 hover:border-primary/30 transition-all group">
-                            <div className="flex items-center justify-between">
-                                <div className={`w-10 h-10 rounded-xl bg-bg-0 border border-stroke flex items-center justify-center ${stat.color} group-hover:scale-110 transition-transform`}>
-                                    <stat.icon size={20} />
+                    {loading ? (
+                        Array.from({ length: 4 }).map((_, i) => (
+                            <div key={i} className="bg-bg-1 border border-stroke rounded-[1.5rem] p-6 animate-pulse">
+                                <div className="w-10 h-10 bg-surface-2 rounded-xl mb-4" />
+                                <div className="h-3 w-20 bg-surface-2 rounded mb-2" />
+                                <div className="h-7 w-16 bg-surface-2 rounded" />
+                            </div>
+                        ))
+                    ) : stats.length > 0 ? (
+                        stats.map((stat, i) => (
+                            <div key={i} className="bg-bg-1 border border-stroke rounded-[1.5rem] p-6 flex flex-col gap-2 hover:border-primary/30 transition-all group">
+                                <div className="flex items-center justify-between">
+                                    <div className={`w-10 h-10 rounded-xl bg-bg-0 border border-stroke flex items-center justify-center ${stat.color} group-hover:scale-110 transition-transform`}>
+                                        <stat.icon size={20} />
+                                    </div>
+                                </div>
+                                <div className="mt-4 flex flex-col">
+                                    <span className="text-[10px] font-black text-text-3 uppercase tracking-widest">{stat.label}</span>
+                                    <span className="text-2xl font-black text-white tracking-tighter">{stat.value}</span>
+                                    <span className="text-[9px] font-bold text-text-3 uppercase mt-1">{stat.sub}</span>
                                 </div>
                             </div>
-                            <div className="mt-4 flex flex-col">
-                                <span className="text-[10px] font-black text-text-3 uppercase tracking-widest">{stat.label}</span>
-                                <span className="text-2xl font-black text-white tracking-tighter">{stat.value}</span>
-                                <span className="text-[9px] font-bold text-text-3 uppercase mt-1">{stat.sub}</span>
-                            </div>
+                        ))
+                    ) : (
+                        <div className="col-span-4 bg-bg-1 border border-dashed border-stroke rounded-[1.5rem] p-10 flex flex-col items-center gap-3">
+                            <Target size={28} className="text-text-3" />
+                            <p className="text-sm text-text-3">Nenhum dado de analytics disponível.</p>
                         </div>
-                    ))}
+                    )}
                 </div>
 
                 {/* Dynamic Analytics Layout */}

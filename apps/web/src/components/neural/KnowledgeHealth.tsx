@@ -1,24 +1,62 @@
-import React from 'react';
-import { Activity, Brain, AlertTriangle, CheckCircle2, TrendingUp, Search, Info, Shield } from 'lucide-react';
+'use client';
+import React, { useEffect, useState } from 'react';
+import { Activity, Brain, AlertTriangle, Search, Info, Shield, TrendingUp, Loader2 } from 'lucide-react';
+import { apiGet } from '@/lib/api';
+
+type HealthMetrics = {
+    vector_size: string;
+    chunks: number;
+    health_score: number;
+    hallucination_risk: number;
+    top_k_precision: number;
+    gaps: string[];
+    coverage: { topic: string; percentage: number }[];
+};
 
 export default function KnowledgeHealth() {
-    const gaps = [
-        "Informações sobre 'Plano Enterprise' estão inconsistentes",
-        "Falta documentação sobre integração com Shopify v2",
-        "Conversas recentes sobre 'Devoluções' indicam baixa confiança da IA"
+    const [health, setHealth] = useState<HealthMetrics | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        apiGet<HealthMetrics>('/neural/knowledge/health')
+            .then(setHealth)
+            .catch(() => {})
+            .finally(() => setLoading(false));
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <Loader2 size={32} className="text-primary animate-spin" />
+            </div>
+        );
+    }
+
+    if (!health) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20 gap-3 bg-bg-1 border border-dashed border-stroke rounded-3xl">
+                <Brain size={32} className="text-text-3" />
+                <p className="text-sm text-text-3">Nenhum dado de saúde do conhecimento disponível.</p>
+            </div>
+        );
+    }
+
+    const metrics = [
+        { label: 'Cérebro Vetorial', value: health.vector_size, sub: `${health.chunks.toLocaleString()} chunks`, icon: Brain, color: 'text-primary' },
+        { label: 'Score de Saúde', value: `${health.health_score}/100`, sub: health.health_score >= 80 ? 'Muito Alto' : 'Moderado', icon: Activity, color: 'text-success' },
+        { label: 'Hallucination Risk', value: `${(health.hallucination_risk * 100).toFixed(1)}%`, sub: health.hallucination_risk < 0.01 ? 'Mínimo' : 'Atenção', icon: Shield, color: 'text-secondary' },
+        { label: 'Top-k Precision', value: `${(health.top_k_precision * 100).toFixed(0)}%`, sub: 'Busca Semântica', icon: TrendingUp, color: 'text-ai-accent' },
     ];
+
+    const gaps = health.gaps ?? [];
+    const coverage = health.coverage ?? [];
 
     return (
         <div className="flex flex-col gap-8">
 
             {/* Metrics Row */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                {[
-                    { label: 'Cérebro Vetorial', value: '42.5 MB', sub: '12,400 chunks', icon: Brain, color: 'text-primary' },
-                    { label: 'Score de Saúde', value: '88/100', sub: 'Muito Alto', icon: Activity, color: 'text-success' },
-                    { label: 'Hallucination Risk', value: '0.2%', sub: 'Mínimo', icon: Shield, color: 'text-secondary' },
-                    { label: 'Top-k Precision', value: '94%', sub: 'Busca Semântica', icon: TrendingUp, color: 'text-ai-accent' },
-                ].map((m, i) => (
+                {metrics.map((m, i) => (
                     <div key={i} className="bg-bg-1 border border-stroke p-6 rounded-3xl flex flex-col gap-3 shadow-xl hover:border-white/10 transition-colors group">
                         <div className="flex items-center justify-between">
                             <m.icon size={18} className={`${m.color} opacity-70`} />
@@ -34,7 +72,7 @@ export default function KnowledgeHealth() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-                {/* Identification Gaps */}
+                {/* Knowledge Gaps */}
                 <div className="bg-bg-1 border border-stroke rounded-[2.5rem] p-8 flex flex-col gap-6 shadow-2xl overflow-hidden relative">
                     <div className="absolute top-0 right-0 w-40 h-40 bg-error/5 blur-3xl"></div>
                     <div className="flex items-center justify-between relative z-10">
@@ -44,19 +82,23 @@ export default function KnowledgeHealth() {
                         <span className="text-[9px] font-black text-text-3 uppercase">Detection Engine v2</span>
                     </div>
 
-                    <div className="flex flex-col gap-3 relative z-10">
-                        {gaps.map((gap, i) => (
-                            <div key={i} className="p-5 bg-bg-0 border border-stroke rounded-2xl flex items-center justify-between group cursor-help hover:border-error/30 transition-all">
-                                <p className="text-[11px] font-medium text-text-2 group-hover:text-white transition-colors">{gap}</p>
-                                <button className="flex items-center gap-2 px-3 py-1.5 bg-error/10 text-error rounded-lg text-[8px] font-black uppercase tracking-tighter hover:bg-error hover:text-white transition-all">
-                                    RESOLVER
-                                </button>
-                            </div>
-                        ))}
-                    </div>
+                    {gaps.length === 0 ? (
+                        <p className="text-sm text-text-3 text-center py-6">Nenhuma lacuna detectada.</p>
+                    ) : (
+                        <div className="flex flex-col gap-3 relative z-10">
+                            {gaps.map((gap, i) => (
+                                <div key={i} className="p-5 bg-bg-0 border border-stroke rounded-2xl flex items-center justify-between group cursor-help hover:border-error/30 transition-all">
+                                    <p className="text-[11px] font-medium text-text-2 group-hover:text-white transition-colors">{gap}</p>
+                                    <button className="flex items-center gap-2 px-3 py-1.5 bg-error/10 text-error rounded-lg text-[8px] font-black uppercase tracking-tighter hover:bg-error hover:text-white transition-all">
+                                        RESOLVER
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
-                {/* Knowledge Coverage Heatmap (Mocked) */}
+                {/* Knowledge Coverage */}
                 <div className="bg-bg-1 border border-stroke rounded-[2.5rem] p-8 flex flex-col gap-6 shadow-2xl relative">
                     <div className="flex items-center justify-between">
                         <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-3">
@@ -64,21 +106,23 @@ export default function KnowledgeHealth() {
                         </h3>
                         <Info size={14} className="text-text-3" />
                     </div>
-                    <div className="flex-1 grid grid-cols-3 gap-4 pt-4">
-                        {[
-                            { t: 'Preços', c: 'bg-success/40', s: '100%' },
-                            { t: 'Logística', c: 'bg-success/20', s: '85%' },
-                            { t: 'Devolução', c: 'bg-warning/20', s: '40%' },
-                            { t: 'Suporte Técnico', c: 'bg-success/30', s: '92%' },
-                            { t: 'Integrações', c: 'bg-error/20', s: '15%' },
-                            { t: 'Marketing', c: 'bg-success/10', s: '70%' },
-                        ].map((item, i) => (
-                            <div key={i} className={`rounded-2xl p-4 flex flex-col gap-3 justify-between border border-white/5 ${item.c}`}>
-                                <span className="text-[9px] font-black text-white uppercase tracking-tighter truncate">{item.t}</span>
-                                <span className="text-lg font-black text-white">{item.s}</span>
-                            </div>
-                        ))}
-                    </div>
+
+                    {coverage.length === 0 ? (
+                        <p className="text-sm text-text-3 text-center py-6">Nenhum dado de cobertura disponível.</p>
+                    ) : (
+                        <div className="flex-1 grid grid-cols-3 gap-4 pt-4">
+                            {coverage.map((item, i) => {
+                                const pct = item.percentage;
+                                const bgColor = pct >= 80 ? 'bg-success/40' : pct >= 50 ? 'bg-success/20' : pct >= 30 ? 'bg-warning/20' : 'bg-error/20';
+                                return (
+                                    <div key={i} className={`rounded-2xl p-4 flex flex-col gap-3 justify-between border border-white/5 ${bgColor}`}>
+                                        <span className="text-[9px] font-black text-white uppercase tracking-tighter truncate">{item.topic}</span>
+                                        <span className="text-lg font-black text-white">{pct}%</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
 
             </div>

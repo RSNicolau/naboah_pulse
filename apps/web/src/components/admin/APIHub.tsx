@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Code2, Key, Copy, Plus, Trash2, Check, Eye, EyeOff,
-    Webhook, Zap, Shield, BookOpen, RefreshCw,
+    Webhook, Zap, Shield, BookOpen, RefreshCw, Loader2,
 } from 'lucide-react';
+import { apiGet } from '@/lib/api';
 
 type ApiKey = {
     id: string;
@@ -15,29 +16,16 @@ type ApiKey = {
     scopes: string[];
 };
 
-const MOCK_KEYS: ApiKey[] = [
-    {
-        id: 'key_1',
-        name: 'Production',
-        key: 'npk_live_a7f3b2c9d1e4f8a2b5c8d1e4f7a0b3c6',
-        created_at: '2026-01-15',
-        last_used: '2026-03-04',
-        scopes: ['inbox:read', 'inbox:write', 'contacts:read', 'agents:read'],
-    },
-    {
-        id: 'key_2',
-        name: 'Staging',
-        key: 'npk_test_x9y2z5a8b1c4d7e0f3a6b9c2d5e8f1a4',
-        created_at: '2026-02-01',
-        last_used: '2026-03-03',
-        scopes: ['inbox:read', 'contacts:read'],
-    },
-];
+type WebhookEntry = {
+    event: string;
+    url: string;
+    active: boolean;
+};
 
-const WEBHOOKS = [
-    { event: 'message.created',     url: 'https://seu-dominio.com/webhooks/messages', active: true },
-    { event: 'conversation.closed', url: 'https://seu-dominio.com/webhooks/convs',    active: false },
-];
+type ApiHubData = {
+    keys: ApiKey[];
+    webhooks: WebhookEntry[];
+};
 
 const ALL_SCOPES = [
     'inbox:read', 'inbox:write', 'contacts:read', 'contacts:write',
@@ -50,13 +38,25 @@ function maskKey(key: string, visible: boolean): string {
 }
 
 export default function APIHub() {
-    const [keys, setKeys] = useState<ApiKey[]>(MOCK_KEYS);
+    const [keys, setKeys] = useState<ApiKey[]>([]);
+    const [webhooks, setWebhooks] = useState<WebhookEntry[]>([]);
+    const [loading, setLoading] = useState(true);
     const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set());
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const [showNewKey, setShowNewKey] = useState(false);
     const [newKeyName, setNewKeyName] = useState('');
     const [selectedScopes, setSelectedScopes] = useState<Set<string>>(new Set(['inbox:read', 'contacts:read']));
     const [generating, setGenerating] = useState(false);
+
+    useEffect(() => {
+        apiGet<ApiHubData>('/apihub/keys')
+            .then((data) => {
+                setKeys(data.keys ?? []);
+                setWebhooks(data.webhooks ?? []);
+            })
+            .catch(() => {})
+            .finally(() => setLoading(false));
+    }, []);
 
     function toggleVisible(id: string) {
         setVisibleKeys((prev) => {
@@ -141,6 +141,13 @@ export default function APIHub() {
                         <span className="text-[10px] font-black text-success uppercase tracking-widest">Operacional</span>
                     </div>
                 </div>
+
+                {loading ? (
+                    <div className="flex items-center justify-center py-16">
+                        <Loader2 size={28} className="text-primary animate-spin" />
+                    </div>
+                ) : (
+                <>
 
                 {/* API Keys */}
                 <div className="flex flex-col gap-4">
@@ -262,7 +269,7 @@ export default function APIHub() {
                         </button>
                     </div>
                     <div className="flex flex-col gap-3">
-                        {WEBHOOKS.map((wh, i) => (
+                        {webhooks.map((wh: WebhookEntry, i: number) => (
                             <div key={i} className="bg-bg-1 border border-stroke rounded-2xl p-5 flex items-center justify-between gap-4">
                                 <div className="flex items-center gap-4 min-w-0">
                                     <div className={`w-2 h-2 rounded-full flex-shrink-0 ${wh.active ? 'bg-success animate-pulse' : 'bg-text-3'}`} />
@@ -312,6 +319,9 @@ export default function APIHub() {
                         </span>
                     </div>
                 </div>
+
+                </>
+                )}
 
             </div>
         </div>

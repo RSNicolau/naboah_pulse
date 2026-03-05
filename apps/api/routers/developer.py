@@ -10,6 +10,8 @@ from datetime import datetime
 
 router = APIRouter(prefix="/developer", tags=["developer"])
 
+TENANT_ID = "naboah"
+
 class AppCreate(BaseModel):
     name: str
     description: Optional[str] = None
@@ -22,7 +24,7 @@ async def create_app(data: AppCreate, db: Session = Depends(get_session)):
     
     app = DeveloperApp(
         id=f"app_{uuid.uuid4().hex[:6]}",
-        tenant_id="t1", # Mock
+        tenant_id=TENANT_ID, # Mock
         name=data.name,
         description=data.description,
         client_id=client_id,
@@ -36,7 +38,7 @@ async def create_app(data: AppCreate, db: Session = Depends(get_session)):
 
 @router.get("/apps", response_model=List[DeveloperApp])
 async def list_apps(db: Session = Depends(get_session)):
-    return db.exec(select(DeveloperApp).where(DeveloperApp.tenant_id == "t1")).all()
+    return db.exec(select(DeveloperApp).where(DeveloperApp.tenant_id == TENANT_ID)).all()
 
 @router.get("/webhooks/logs/{app_id}", response_model=List[WebhookLog])
 async def get_webhook_logs(app_id: str, db: Session = Depends(get_session)):
