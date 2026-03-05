@@ -1,13 +1,65 @@
 "use client";
-import React, { useState } from 'react';
-import { ShieldAlert, Fingerprint, FileSearch, Trash2, Download, CheckCircle, AlertCircle, History, Lock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ShieldAlert, Fingerprint, FileSearch, Trash2, Download, CheckCircle, AlertCircle, History, Lock, Loader2 } from 'lucide-react';
+import { apiGet } from '@/lib/api';
+import { toast } from '@/lib/toast';
+
+// ---------------------------------------------------------------------------
+// Privacy preferences — stored in localStorage
+// ---------------------------------------------------------------------------
+const PRIVACY_PREFS_KEY = 'nb_privacy_prefs';
+
+type PrivacyPrefs = {
+    data_collection: boolean;
+    analytics_tracking: boolean;
+    third_party_sharing: boolean;
+};
+
+const DEFAULT_PREFS: PrivacyPrefs = {
+    data_collection: true,
+    analytics_tracking: true,
+    third_party_sharing: false,
+};
+
+function loadPrivacyPrefs(): PrivacyPrefs {
+    if (typeof window === 'undefined') return DEFAULT_PREFS;
+    try { return { ...DEFAULT_PREFS, ...JSON.parse(localStorage.getItem(PRIVACY_PREFS_KEY) ?? '{}') }; }
+    catch { return DEFAULT_PREFS; }
+}
+
+function savePrivacyPrefs(prefs: PrivacyPrefs) {
+    localStorage.setItem(PRIVACY_PREFS_KEY, JSON.stringify(prefs));
+}
+
+type AuditLog = { id: string; action: string; user: string; time: string; status: string };
 
 export default function PrivacyDashboard() {
-    const [auditLogs] = useState([
-        { id: '1', action: 'Delete Contact', user: 'Admin', time: '10 min atrás', status: 'VERIFIED' },
-        { id: '2', action: 'Export Reports', user: 'Finance', time: '1h atrás', status: 'VERIFIED' },
-        { id: '3', action: 'Change Permission', user: 'Security Bot', time: '5h atrás', status: 'VERIFIED' },
-    ]);
+    const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+    const [logsLoading, setLogsLoading] = useState(true);
+    const [privacyPrefs, setPrivacyPrefs] = useState<PrivacyPrefs>(DEFAULT_PREFS);
+
+    useEffect(() => {
+        setPrivacyPrefs(loadPrivacyPrefs());
+    }, []);
+
+    useEffect(() => {
+        apiGet('/privacy/audit-logs')
+            .then((data: any) => {
+                const logs = Array.isArray(data) ? data : data?.items ?? data?.logs ?? [];
+                setAuditLogs(logs);
+            })
+            .catch(() => {
+                // Silently fall back — audit logs may not be available yet
+            })
+            .finally(() => setLogsLoading(false));
+    }, []);
+
+    function togglePrivacyPref(key: keyof PrivacyPrefs) {
+        const next = { ...privacyPrefs, [key]: !privacyPrefs[key] };
+        setPrivacyPrefs(next);
+        savePrivacyPrefs(next);
+        toast.success('Preferência de privacidade atualizada');
+    }
 
     return (
         <div className="flex-1 flex flex-col h-full bg-bg-0">
@@ -37,24 +89,34 @@ export default function PrivacyDashboard() {
                                 </div>
                             </div>
                             <div className="divide-y divide-stroke">
-                                {auditLogs.map((log) => (
-                                    <div key={log.id} className="p-4 flex items-center justify-between hover:bg-surface-1/50 transition-colors">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-8 h-8 rounded-lg bg-surface-2 flex items-center justify-center">
-                                                <Fingerprint size={16} className="text-text-3" />
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-xs font-bold text-white">{log.action}</span>
-                                                <span className="text-[10px] text-text-3">Por <span className="text-text-2">{log.user}</span> • {log.time}</span>
-                                            </div>
-                                        </div>
-                                        <CheckCircle size={14} className="text-success opacity-50" />
+                                {logsLoading ? (
+                                    <div className="flex items-center justify-center py-10">
+                                        <Loader2 size={24} className="text-primary animate-spin" />
                                     </div>
-                                ))}
+                                ) : auditLogs.length > 0 ? (
+                                    auditLogs.map((log) => (
+                                        <div key={log.id} className="p-4 flex items-center justify-between hover:bg-surface-1/50 transition-colors">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-8 h-8 rounded-lg bg-surface-2 flex items-center justify-center">
+                                                    <Fingerprint size={16} className="text-text-3" />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs font-bold text-white">{log.action}</span>
+                                                    <span className="text-[10px] text-text-3">Por <span className="text-text-2">{log.user}</span> • {log.time}</span>
+                                                </div>
+                                            </div>
+                                            <CheckCircle size={14} className="text-success opacity-50" />
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-[10px] text-text-3 italic text-center py-6">Nenhum registro de auditoria disponível.</p>
+                                )}
                             </div>
+                            {auditLogs.length > 0 && (
                             <div className="p-4 bg-surface-1/20 border-t border-stroke text-center">
-                                <button className="text-[10px] font-bold text-primary hover:underline">Ver log completo de auditoria (3.421 registros)</button>
+                                <button className="text-[10px] font-bold text-primary hover:underline">Ver log completo de auditoria ({auditLogs.length} registros)</button>
                             </div>
+                            )}
                         </div>
 
                         {/* Subject Access Requests (SAR) */}
@@ -128,6 +190,44 @@ export default function PrivacyDashboard() {
                                 </div>
                             </div>
                             <button className="text-[10px] text-primary font-bold hover:underline text-left">Alterar Política Global</button>
+                        </div>
+
+                        {/* Privacy Preferences (localStorage-backed) */}
+                        <div className="bg-bg-1 border border-stroke rounded-2xl p-6 flex flex-col gap-4">
+                            <h3 className="text-xs font-bold text-white flex items-center gap-2">
+                                <ShieldAlert size={14} className="text-text-3" /> Preferências de Privacidade
+                            </h3>
+                            <div className="flex flex-col gap-3">
+                                {([
+                                    { key: 'data_collection' as const, label: 'Coleta de Dados', desc: 'Permitir coleta de dados de uso' },
+                                    { key: 'analytics_tracking' as const, label: 'Rastreamento Analítico', desc: 'Permitir analytics e métricas' },
+                                    { key: 'third_party_sharing' as const, label: 'Compartilhamento com Terceiros', desc: 'Compartilhar dados com parceiros' },
+                                ]).map(({ key, label, desc }) => (
+                                    <label
+                                        key={key}
+                                        className="flex items-center justify-between gap-4 p-3 bg-bg-0 border border-stroke rounded-xl cursor-pointer hover:border-primary/30 transition-colors group"
+                                    >
+                                        <div className="flex flex-col gap-0.5">
+                                            <span className="text-[11px] font-semibold text-text-1 group-hover:text-white transition-colors">{label}</span>
+                                            <span className="text-[9px] text-text-3">{desc}</span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => togglePrivacyPref(key)}
+                                            className={`relative w-10 h-6 rounded-full border transition-all flex-shrink-0 ${
+                                                privacyPrefs[key]
+                                                    ? 'bg-primary border-primary/60 shadow-lg shadow-primary/20'
+                                                    : 'bg-surface-2 border-stroke'
+                                            }`}
+                                        >
+                                            <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform ${
+                                                privacyPrefs[key] ? 'translate-x-[18px]' : 'translate-x-0.5'
+                                            }`} />
+                                        </button>
+                                    </label>
+                                ))}
+                            </div>
+                            <p className="text-[9px] text-text-3 italic">Preferências salvas localmente no navegador.</p>
                         </div>
                     </div>
                 </div>

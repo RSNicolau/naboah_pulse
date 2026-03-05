@@ -1,9 +1,41 @@
+'use client';
+
 import React from 'react';
 import SecurityDashboard from '@/components/settings/security/SecurityDashboard';
 import DLPSettings from '@/components/settings/security/DLPSettings';
 import { Shield, Lock, Fingerprint, History, Globe, HardDrive } from 'lucide-react';
+import { apiPost, apiGet } from '@/lib/api';
+import { toast } from '@/lib/toast';
 
 export default function SecurityPage() {
+
+    const handleReScan = async () => {
+        try {
+            await apiPost('/shield/alerts', {});
+            toast.success('Scan iniciado');
+        } catch {
+            toast.error('Erro ao iniciar scan');
+        }
+    };
+
+    const handleDownloadReport = async () => {
+        try {
+            const data = await apiGet('/shield/audit/sessions');
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'security-report.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            toast.success('Relatório baixado com sucesso');
+        } catch {
+            toast.error('Erro ao baixar relatório');
+        }
+    };
+
     return (
         <div className="flex-1 flex flex-col h-full bg-bg-0 overflow-y-auto custom-scrollbar">
             <div className="p-8 max-w-7xl mx-auto w-full flex flex-col gap-10 pb-20">
@@ -21,7 +53,10 @@ export default function SecurityPage() {
                     </div>
 
                     <div className="flex gap-3">
-                        <button className="px-6 py-3 bg-bg-1 border border-stroke rounded-2xl text-[10px] font-black text-white hover:border-error transition-all uppercase tracking-widest flex items-center gap-2">
+                        <button
+                            onClick={handleReScan}
+                            className="px-6 py-3 bg-bg-1 border border-stroke rounded-2xl text-[10px] font-black text-white hover:border-error transition-all uppercase tracking-widest flex items-center gap-2"
+                        >
                             <Lock size={14} /> RE-SCAN SYSTEMS
                         </button>
                     </div>
@@ -79,7 +114,10 @@ export default function SecurityPage() {
                                     <span className="text-[10px] font-black text-warning">In Progress</span>
                                 </div>
                             </div>
-                            <button className="w-full py-4 bg-bg-0 border border-stroke text-text-3 hover:text-white hover:border-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">
+                            <button
+                                onClick={handleDownloadReport}
+                                className="w-full py-4 bg-bg-0 border border-stroke text-text-3 hover:text-white hover:border-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
+                            >
                                 DOWNLOAD SECURITY REPORT
                             </button>
                         </div>

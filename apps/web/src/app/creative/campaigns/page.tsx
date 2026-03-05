@@ -1,10 +1,40 @@
-import React from 'react';
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import CampaignOrchestrator from '@/components/creative/CampaignOrchestrator';
 import ChannelManager from '@/components/creative/ChannelManager';
 import AssetLibrary from '@/components/creative/AssetLibrary';
-import { Rocket, Send, Sparkles, Filter, LayoutGrid, Zap, Timer } from 'lucide-react';
+import { Rocket, Send, Sparkles, Filter, LayoutGrid, Zap, Timer, Loader2 } from 'lucide-react';
+import { apiGet } from '@/lib/api';
+import { toast } from '@/lib/toast';
 
 export default function CampaignPage() {
+    const router = useRouter();
+    const [metrics, setMetrics] = useState({ triggers: '—', posts: '—', safety: '—' });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        apiGet('/content/assets')
+            .then((data: any) => {
+                const items = Array.isArray(data) ? data : data?.items ?? [];
+                const active = items.filter((a: any) => a.status === 'active' || a.status === 'published').length;
+                const today = items.filter((a: any) => {
+                    if (!a.created_at) return false;
+                    return new Date(a.created_at).toDateString() === new Date().toDateString();
+                }).length;
+                const safeCount = items.filter((a: any) => a.brand_safe !== false).length;
+                const safetyPct = items.length > 0 ? Math.round((safeCount / items.length) * 100) : 100;
+                setMetrics({
+                    triggers: String(active || items.length),
+                    posts: String(today).padStart(2, '0'),
+                    safety: `${safetyPct}%`,
+                });
+            })
+            .catch(() => toast.error('Erro ao carregar métricas de campanha'))
+            .finally(() => setLoading(false));
+    }, []);
+
     return (
         <div className="flex-1 flex flex-col h-full bg-bg-0 overflow-hidden text-white">
 
@@ -23,7 +53,7 @@ export default function CampaignPage() {
                 </div>
 
                 <div className="flex gap-4">
-                    <button className="px-8 py-4 bg-white text-black rounded-2xl text-[11px] font-black uppercase tracking-widest flex items-center gap-3 hover:scale-105 transition-all shadow-2xl">
+                    <button onClick={() => router.push('/creative/campaigns/new')} className="px-8 py-4 bg-white text-black rounded-2xl text-[11px] font-black uppercase tracking-widest flex items-center gap-3 hover:scale-105 transition-all shadow-2xl">
                         <Send size={16} /> BLITZ LAUNCH
                     </button>
                 </div>
@@ -32,27 +62,33 @@ export default function CampaignPage() {
             <div className="flex-1 p-10 grid grid-cols-1 lg:grid-cols-12 gap-10 overflow-y-auto custom-scrollbar pb-32">
 
                 <div className="lg:col-span-12 grid grid-cols-1 md:grid-cols-3 gap-10">
+                    {loading ? (
+                        <div className="col-span-3 flex items-center justify-center py-16">
+                            <Loader2 size={28} className="text-primary animate-spin" />
+                        </div>
+                    ) : (<>
                     <div className="p-10 bg-bg-1 border border-stroke rounded-[3rem] flex flex-col gap-4 shadow-xl">
                         <Zap size={24} className="text-primary" />
                         <div className="flex flex-col">
-                            <span className="text-3xl font-black text-white italic tracking-tighter uppercase">124</span>
+                            <span className="text-3xl font-black text-white italic tracking-tighter uppercase">{metrics.triggers}</span>
                             <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest">Active Triggers</span>
                         </div>
                     </div>
                     <div className="p-10 bg-bg-1 border border-stroke rounded-[3rem] flex flex-col gap-4 shadow-xl">
                         <Timer size={24} className="text-secondary" />
                         <div className="flex flex-col">
-                            <span className="text-3xl font-black text-white italic tracking-tighter uppercase">08</span>
+                            <span className="text-3xl font-black text-white italic tracking-tighter uppercase">{metrics.posts}</span>
                             <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest">Posts Today</span>
                         </div>
                     </div>
                     <div className="p-10 bg-bg-1 border border-stroke rounded-[3rem] flex flex-col gap-4 shadow-xl">
                         <Sparkles size={24} className="text-warning" />
                         <div className="flex flex-col">
-                            <span className="text-3xl font-black text-white italic tracking-tighter uppercase">98%</span>
+                            <span className="text-3xl font-black text-white italic tracking-tighter uppercase">{metrics.safety}</span>
                             <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest">Brand Safety Avg</span>
                         </div>
                     </div>
+                    </>)}
                 </div>
 
                 <div className="lg:col-span-8">

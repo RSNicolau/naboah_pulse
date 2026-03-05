@@ -82,11 +82,30 @@ async def get_stream_status(db: Session = Depends(get_session)):
     }
 
 @router.post("/failover/trigger")
-async def trigger_failover(target_region: str):
-    # Simulação de failover manual
+async def trigger_failover(target_region: str, db: Session = Depends(get_session)):
+    # Find the RegionHealth record for the target region
+    region = db.exec(
+        select(RegionHealth).where(RegionHealth.region_name == target_region)
+    ).first()
+
+    if not region:
+        raise HTTPException(status_code=404, detail=f"Region '{target_region}' not found")
+
+    # Update status to failover
+    region.status = "failover"
+    region.last_check_at = datetime.utcnow()
+    db.add(region)
+    db.commit()
+    db.refresh(region)
+
     return {
         "status": "initiated",
-        "target": target_region,
+        "target": region.region_name,
+        "region_id": region.id,
+        "previous_status": "operational",
+        "current_status": region.status,
+        "latency_ms": region.latency_ms,
+        "load_percentage": region.load_percentage,
         "estimated_rto": "45s",
-        "started_at": datetime.utcnow()
+        "started_at": datetime.utcnow(),
     }

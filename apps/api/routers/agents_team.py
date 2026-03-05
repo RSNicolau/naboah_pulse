@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 from db import get_session
-from models import Agent, Playbook
+from models import Agent, Playbook, AgentTask, AgentCollaboration
 from pydantic import BaseModel
 from typing import List, Optional
 import uuid
-from datetime import datetime
+from datetime import datetime, date, timedelta
+from sqlmodel import func
 
 router = APIRouter(prefix="/agents/team", tags=["agents-team"])
 
@@ -188,14 +189,56 @@ async def get_team_performance(db: Session = Depends(get_session)):
     active = sum(1 for a in agents if a.status in ("acting", "thinking"))
     paused = sum(1 for a in agents if a.status == "paused")
     idle = sum(1 for a in agents if a.status == "idle")
+
+    # Real handoffs today from AgentCollaboration
+    today_start = datetime.combine(date.today(), datetime.min.time())
+    handoffs_today = db.exec(
+        select(func.count(AgentCollaboration.id)).where(
+            AgentCollaboration.tenant_id == TENANT_ID,
+            AgentCollaboration.created_at >= today_start,
+        )
+    ).one()
+
+    # Real resolution rate from AgentTask
+    total_tasks = db.exec(
+        select(func.count(AgentTask.id)).where(
+            AgentTask.tenant_id == TENANT_ID,
+        )
+    ).one()
+    completed_tasks = db.exec(
+        select(func.count(AgentTask.id)).where(
+            AgentTask.tenant_id == TENANT_ID,
+            AgentTask.status == "completed",
+        )
+    ).one()
+    resolution_rate = round((completed_tasks / total_tasks) * 100) if total_tasks > 0 else 0
+
+    # Avg collaboration time (from tasks that have both started_at and completed_at)
+    finished_tasks = db.exec(
+        select(AgentTask).where(
+            AgentTask.tenant_id == TENANT_ID,
+            AgentTask.status == "completed",
+            AgentTask.started_at != None,
+            AgentTask.completed_at != None,
+        )
+    ).all()
+    if finished_tasks:
+        total_seconds = sum(
+            (t.completed_at - t.started_at).total_seconds() for t in finished_tasks
+        )
+        avg_seconds = round(total_seconds / len(finished_tasks), 1)
+        avg_collab_time = f"{avg_seconds}s"
+    else:
+        avg_collab_time = "0s"
+
     return {
         "total_agents": len(agents),
         "active_agents": active,
         "idle_agents": idle,
         "paused_agents": paused,
-        "handoffs_today": 14,      # simulated
-        "resolution_rate_ai": "82%",
-        "avg_collaboration_time": "1.2s",
+        "handoffs_today": handoffs_today,
+        "resolution_rate_ai": f"{resolution_rate}%",
+        "avg_collaboration_time": avg_collab_time,
     }
 
 

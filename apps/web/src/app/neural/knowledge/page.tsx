@@ -1,9 +1,33 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import KnowledgeHealth from '@/components/neural/KnowledgeHealth';
 import SourceManager from '@/components/neural/SourceManager';
-import { Brain, Sparkles, MessageSquare, Zap, Target, Search } from 'lucide-react';
+import { Brain, Sparkles, MessageSquare, Zap, Target, Search, Send } from 'lucide-react';
+import { apiPost } from '@/lib/api';
+import { toast } from '@/lib/toast';
 
 export default function NeuralKnowledgePage() {
+    const [question, setQuestion] = useState('');
+    const [answer, setAnswer] = useState<string | null>(null);
+    const [asking, setAsking] = useState(false);
+
+    const handleAsk = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!question.trim()) return;
+        setAsking(true);
+        setAnswer(null);
+        try {
+            const data = await apiPost('/neural/knowledge/ask', { question: question.trim() });
+            setAnswer(typeof data === 'string' ? data : data?.answer ?? data?.response ?? JSON.stringify(data));
+            toast.success('Resposta recebida');
+        } catch {
+            toast.error('Erro ao consultar o Neural');
+        } finally {
+            setAsking(false);
+        }
+    };
+
     return (
         <div className="flex-1 flex flex-col h-full bg-bg-0 overflow-hidden">
 
@@ -59,32 +83,54 @@ export default function NeuralKnowledgePage() {
             </div>
 
             {/* Neural AI Command Bar */}
-            <div className="h-16 px-10 border-t border-stroke bg-bg-1 flex items-center justify-between relative">
+            <div className="px-10 border-t border-stroke bg-bg-1 flex flex-col relative">
                 <div className="absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
-                <div className="flex items-center gap-8">
-                    <div className="flex items-center gap-3">
-                        <Search size={16} className="text-text-3" />
-                        <span className="text-[10px] font-black text-text-2 uppercase tracking-widest">Testar Cérebro:</span>
-                        <input
-                            type="text"
-                            placeholder="Faça uma pergunta difícil para testar o conhecimento do Pulse AI..."
-                            className="w-[400px] bg-transparent border-none text-[10px] font-bold text-white focus:ring-0 outline-none placeholder:text-text-3"
-                        />
-                    </div>
-                </div>
-                <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-2 text-text-3">
-                        <Zap size={14} className="text-secondary" />
-                        <span className="text-[9px] font-black uppercase tracking-widest">Model: Pulse-Neural-Large</span>
-                    </div>
-                    <div className="h-8 w-px bg-stroke"></div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-[9px] font-black text-text-3 uppercase tracking-widest">Confidence:</span>
-                        <div className="w-24 h-1.5 bg-bg-0 rounded-full overflow-hidden">
-                            <div className="w-[94%] h-full bg-primary shadow-[0_0_10px_rgba(124,58,237,0.5)]"></div>
+
+                {/* Answer display */}
+                {answer && (
+                    <div className="pt-3 pb-2 border-b border-stroke/50">
+                        <div className="flex items-start gap-3">
+                            <Brain size={14} className="text-primary mt-0.5 shrink-0" />
+                            <p className="text-[11px] font-medium text-white leading-relaxed">{answer}</p>
                         </div>
                     </div>
-                </div>
+                )}
+
+                <form onSubmit={handleAsk} className="h-16 flex items-center justify-between">
+                    <div className="flex items-center gap-8 flex-1">
+                        <div className="flex items-center gap-3 flex-1">
+                            <Search size={16} className="text-text-3" />
+                            <span className="text-[10px] font-black text-text-2 uppercase tracking-widest">Testar Cérebro:</span>
+                            <input
+                                type="text"
+                                value={question}
+                                onChange={(e) => setQuestion(e.target.value)}
+                                placeholder="Faça uma pergunta difícil para testar o conhecimento do Pulse AI..."
+                                className="flex-1 bg-transparent border-none text-[10px] font-bold text-white focus:ring-0 outline-none placeholder:text-text-3"
+                            />
+                            <button
+                                type="submit"
+                                disabled={asking || !question.trim()}
+                                className="px-3 py-1.5 bg-primary/20 text-primary rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-primary/30 transition-all disabled:opacity-40"
+                            >
+                                {asking ? '...' : <Send size={12} />}
+                            </button>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-6 ml-6">
+                        <div className="flex items-center gap-2 text-text-3">
+                            <Zap size={14} className="text-secondary" />
+                            <span className="text-[9px] font-black uppercase tracking-widest">Model: Pulse-Neural-Large</span>
+                        </div>
+                        <div className="h-8 w-px bg-stroke"></div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-[9px] font-black text-text-3 uppercase tracking-widest">Confidence:</span>
+                            <div className="w-24 h-1.5 bg-bg-0 rounded-full overflow-hidden">
+                                <div className="w-[94%] h-full bg-primary shadow-[0_0_10px_rgba(124,58,237,0.5)]"></div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
 
         </div>

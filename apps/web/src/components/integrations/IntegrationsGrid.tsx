@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Share2, CheckCircle2, AlertCircle, RefreshCw, Wifi } from 'lucide-react';
-import { apiGet } from '@/lib/api';
+import { apiGet, apiPost } from '@/lib/api';
 import { toast } from '@/lib/toast';
 
 type ChannelAccount = {
@@ -39,6 +39,7 @@ function formatDate(iso: string): string {
 export default function IntegrationsGrid() {
     const [channels, setChannels] = useState<ChannelAccount[]>([]);
     const [loading, setLoading] = useState(true);
+    const [syncingId, setSyncingId] = useState<string | null>(null);
 
     useEffect(() => {
         apiGet<ChannelAccount[]>('/integrations/channels')
@@ -136,8 +137,22 @@ export default function IntegrationsGrid() {
                                             }`}>
                                                 {isActive ? 'Ativo' : ch.status}
                                             </span>
-                                            <button className="text-[10px] text-text-3 hover:text-white transition-colors flex items-center gap-1">
-                                                <RefreshCw size={10} /> Sincronizar
+                                            <button
+                                                disabled={syncingId === ch.id}
+                                                onClick={async () => {
+                                                    setSyncingId(ch.id);
+                                                    try {
+                                                        await apiPost('/integrations/channels/' + ch.id + '/sync', {});
+                                                        toast.success('Sincronização iniciada');
+                                                    } catch {
+                                                        toast.error('Erro ao sincronizar');
+                                                    } finally {
+                                                        setSyncingId(null);
+                                                    }
+                                                }}
+                                                className="text-[10px] text-text-3 hover:text-white transition-colors flex items-center gap-1 disabled:opacity-50"
+                                            >
+                                                <RefreshCw size={10} className={syncingId === ch.id ? 'animate-spin' : ''} /> {syncingId === ch.id ? 'A sincronizar...' : 'Sincronizar'}
                                             </button>
                                         </div>
                                     </div>

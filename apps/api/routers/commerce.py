@@ -114,6 +114,46 @@ async def get_order_status(order_id: str, db: Session = Depends(get_session)):
     }
 
 @router.post("/webhooks/payment")
-async def handle_payment_webhook(payload: dict):
-    # Simulação de processamento de webhook de pagamento
-    return {"status": "received"}
+async def handle_payment_webhook(payload: dict, db: Session = Depends(get_session)):
+    order_id = payload.get("order_id")
+    if not order_id:
+        raise HTTPException(status_code=400, detail="Missing order_id in payload")
+
+    order = db.get(Order, order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail=f"Order '{order_id}' not found")
+
+    # Update order status based on payment event
+    payment_status = payload.get("payment_status", "succeeded")
+    if payment_status == "succeeded":
+        order.status = "paid"
+    elif payment_status == "failed":
+        order.status = "pending_payment"
+    elif payment_status == "refunded":
+        order.status = "canceled"
+    else:
+        order.status = payment_status
+
+    order.updated_at = datetime.utcnow()
+    db.add(order)
+
+    # Create a PaymentTransaction record
+    tx = PaymentTransaction(
+        id=f"tx_{uuid.uuid4().hex[:8]}",
+        tenant_id=order.tenant_id,
+        order_id=order.id,
+        provider=payload.get("provider", "unknown"),
+        amount=payload.get("amount", order.total_amount),
+        status=payment_status,
+        provider_tx_id=payload.get("provider_tx_id", f"ext_{uuid.uuid4().hex[:8]}"),
+    )
+    db.add(tx)
+    db.commit()
+    db.refresh(order)
+
+    return {
+        "status": "processed",
+        "order_id": order.id,
+        "order_status": order.status,
+        "transaction_id": tx.id,
+    }

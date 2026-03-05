@@ -17,17 +17,9 @@ class SearchRequest(BaseModel):
 
 @router.get("/sources", response_model=List[KnowledgeSource])
 async def list_sources(db: Session = Depends(get_session)):
-    sources = db.exec(select(KnowledgeSource)).all()
-    if not sources:
-        return [
-            KnowledgeSource(
-                id="ks_1", 
-                tenant_id=TENANT_ID,
-                name="Documentação de API", 
-                source_type="url", 
-                status="active"
-            )
-        ]
+    sources = db.exec(
+        select(KnowledgeSource).where(KnowledgeSource.tenant_id == TENANT_ID)
+    ).all()
     return sources
 
 @router.post("/upload")

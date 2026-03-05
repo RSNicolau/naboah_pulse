@@ -44,8 +44,19 @@ async def list_dlp_policies(db: Session = Depends(get_session)):
     return policies
 
 @router.post("/policies")
-async def create_dlp_policy(policy: dict, db: Session = Depends(get_session)):
-    return {"status": "policy_created", "id": f"pol_{uuid.uuid4().hex[:6]}"}
+async def create_dlp_policy(data: dict, db: Session = Depends(get_session)):
+    policy = DLPPolicy(
+        id=str(uuid.uuid4()),
+        tenant_id=TENANT_ID,
+        name=data.get("name", "Untitled Policy"),
+        pattern_type=data.get("pattern_type", "regex"),
+        action=data.get("action", "mask"),
+        is_enabled=data.get("is_enabled", True),
+    )
+    db.add(policy)
+    db.commit()
+    db.refresh(policy)
+    return policy
 
 @router.get("/audit/sessions")
 async def get_audit_sessions(db: Session = Depends(get_session)):

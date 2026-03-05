@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import InventoryManager from '@/components/commerce/InventoryManager';
 import ConversationalPOS from '@/components/commerce/ConversationalPOS';
 import { ShoppingCart, Truck, TrendingUp, Boxes, Zap, ArrowRight } from 'lucide-react';
@@ -18,6 +19,7 @@ type ShippingOrder = {
 };
 
 export default function CommerceV2Dashboard() {
+    const router = useRouter();
     const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
     const [shipping, setShipping] = useState<ShippingOrder[]>([]);
     const [loading, setLoading] = useState(true);
@@ -111,11 +113,11 @@ export default function CommerceV2Dashboard() {
                         </div>
 
                         <div className="flex flex-col gap-3 pt-6 border-t border-white/5">
-                            <button className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all">
+                            <button onClick={() => router.push('/commerce/v2/shipping')} className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all">
                                 <span className="text-[10px] font-black text-white uppercase tracking-widest">SHIPMENT TRACKER</span>
                                 <ArrowRight size={14} className="text-indigo-400" />
                             </button>
-                            <button className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all">
+                            <button onClick={() => router.push('/integrations')} className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all">
                                 <span className="text-[10px] font-black text-white uppercase tracking-widest">CARRIER WEBHOOKS</span>
                                 <ArrowRight size={14} className="text-indigo-400" />
                             </button>

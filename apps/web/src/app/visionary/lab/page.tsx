@@ -3,9 +3,27 @@ import React, { useState } from 'react';
 import { Sparkles, Command, Send, RefreshCw, Layout, Smartphone, Monitor, Code, Plus } from 'lucide-react';
 import GenerativeWidget from '@/components/visionary/GenerativeWidget';
 import AdaptiveSidebar from '@/components/visionary/AdaptiveSidebar';
+import { apiPost } from '@/lib/api';
+import { toast } from '@/lib/toast';
 
 export default function VisionaryLabPage() {
     const [prompt, setPrompt] = useState('');
+    const [activeMode, setActiveMode] = useState<'design' | 'preview' | 'code'>('design');
+    const [submitting, setSubmitting] = useState(false);
+
+    const handlePromptSubmit = async () => {
+        if (!prompt.trim() || submitting) return;
+        setSubmitting(true);
+        try {
+            await apiPost('/visionary/generate-component', { prompt, context_key: 'lab' });
+            toast.success('Componente gerado com sucesso!');
+            setPrompt('');
+        } catch {
+            toast.error('Erro ao gerar componente.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
     return (
         <div className="flex-1 flex flex-col h-full bg-bg-0 overflow-hidden">
@@ -26,9 +44,9 @@ export default function VisionaryLabPage() {
 
                 <div className="flex items-center gap-4">
                     <div className="flex bg-bg-0 border border-stroke rounded-2xl p-1">
-                        <button className="p-3 bg-surface-2 text-white rounded-xl"><Monitor size={18} /></button>
-                        <button className="p-3 text-text-3 hover:text-white transition-colors"><Smartphone size={18} /></button>
-                        <button className="p-3 text-text-3 hover:text-white transition-colors"><Code size={18} /></button>
+                        <button onClick={() => setActiveMode('design')} className={`p-3 rounded-xl ${activeMode === 'design' ? 'bg-surface-2 text-white' : 'text-text-3 hover:text-white transition-colors'}`}><Monitor size={18} /></button>
+                        <button onClick={() => setActiveMode('preview')} className={`p-3 rounded-xl ${activeMode === 'preview' ? 'bg-surface-2 text-white' : 'text-text-3 hover:text-white transition-colors'}`}><Smartphone size={18} /></button>
+                        <button onClick={() => setActiveMode('code')} className={`p-3 rounded-xl ${activeMode === 'code' ? 'bg-surface-2 text-white' : 'text-text-3 hover:text-white transition-colors'}`}><Code size={18} /></button>
                     </div>
                 </div>
             </div>
@@ -51,14 +69,15 @@ export default function VisionaryLabPage() {
                                 className="flex-1 bg-transparent border-none text-white font-bold placeholder:text-text-3 text-lg focus:ring-0 outline-none px-2"
                                 value={prompt}
                                 onChange={(e) => setPrompt(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handlePromptSubmit(); } }}
                             />
-                            <button className="w-12 h-12 rounded-full bg-surface-2 text-white flex items-center justify-center hover:bg-ai-accent transition-all group">
+                            <button onClick={handlePromptSubmit} disabled={submitting} className="w-12 h-12 rounded-full bg-surface-2 text-white flex items-center justify-center hover:bg-ai-accent transition-all group disabled:opacity-50">
                                 <Send size={20} className="group-hover:translate-x-1 transition-transform" />
                             </button>
                         </div>
                         <div className="flex items-center justify-center gap-8 mt-6">
                             {['Modo Foco', 'Visão Estratégica', 'Operação Crítica', 'Análise de Churn'].map((tag) => (
-                                <button key={tag} className="text-[10px] font-black text-text-3 uppercase tracking-widest hover:text-ai-accent transition-colors">
+                                <button key={tag} onClick={() => setPrompt(tag)} className="text-[10px] font-black text-text-3 uppercase tracking-widest hover:text-ai-accent transition-colors">
                                     # {tag}
                                 </button>
                             ))}

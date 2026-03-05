@@ -1,7 +1,9 @@
+'use client';
 import React from 'react';
 import GlobalShortcutManager from '@/components/desktop/GlobalShortcutManager';
 import SystemTrayPreview from '@/components/desktop/SystemTrayPreview';
 import { Monitor, Download, Apple, Wind, Layers, ShieldCheck, Zap } from 'lucide-react';
+import { toast } from '@/lib/toast';
 
 export default function DesktopLandingPage() {
     return (
@@ -25,10 +27,10 @@ export default function DesktopLandingPage() {
                 </div>
 
                 <div className="flex gap-4">
-                    <button className="flex items-center gap-4 px-10 py-5 bg-primary text-white rounded-[2rem] text-xs font-black uppercase tracking-widest shadow-2xl shadow-primary/30 hover:scale-105 transition-transform active:scale-95">
+                    <button onClick={() => toast.info('Desktop app em breve! Acompanhe o roadmap.')} className="flex items-center gap-4 px-10 py-5 bg-primary text-white rounded-[2rem] text-xs font-black uppercase tracking-widest shadow-2xl shadow-primary/30 hover:scale-105 transition-transform active:scale-95">
                         <Download size={20} /> BAIXAR PARA MACOS
                     </button>
-                    <button className="flex items-center gap-4 px-10 py-5 bg-bg-1 border border-stroke text-white rounded-[2rem] text-xs font-black uppercase tracking-widest">
+                    <button onClick={() => toast.info('Windows app em breve!')} className="flex items-center gap-4 px-10 py-5 bg-bg-1 border border-stroke text-white rounded-[2rem] text-xs font-black uppercase tracking-widest">
                         <Wind size={20} /> WINDOWS APP
                     </button>
                 </div>

@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import DisasterRecoveryDash from '@/components/enterprise/DisasterRecoveryDash';
 import ITPolicyManager from '@/components/enterprise/ITPolicyManager';
 import { Building2, ShieldCheck, Activity, Terminal, Database, Send, Users, ChevronRight, Loader2 } from 'lucide-react';
-import { apiGet } from '@/lib/api';
+import { apiGet, apiPost } from '@/lib/api';
+import { toast } from '@/lib/toast';
 
 type DataRegion = {
     region: string;
@@ -130,7 +131,14 @@ export default function EnterpriseAdminPage() {
                                 Transmissao ativa para: **{audit.siem_url}**.
                                 Filtros ativos: {audit.filters.length > 0 ? audit.filters.join(', ') : 'Nenhum'}.
                             </p>
-                            <button className="w-full py-4 bg-white/5 border border-white/10 rounded-2xl text-[9px] font-black text-white uppercase tracking-widest hover:bg-white/10 transition-all">
+                            <button onClick={async () => {
+                                try {
+                                    await apiPost('/enterprise/audit-stream/config', { siem_url: audit.siem_url, filters: audit.filters });
+                                    toast.success('Stream config atualizado com sucesso!');
+                                } catch {
+                                    toast.error('Erro ao atualizar stream config.');
+                                }
+                            }} className="w-full py-4 bg-white/5 border border-white/10 rounded-2xl text-[9px] font-black text-white uppercase tracking-widest hover:bg-white/10 transition-all">
                                 UPDATE STREAM CONFIG
                             </button>
                         </div>
