@@ -1,6 +1,16 @@
 import { supabase } from './supabase'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://naboah-pulse-api-production.up.railway.app'
+const PRODUCTION_API = 'https://naboah-pulse-api-production.up.railway.app';
+const LOCAL_API = 'http://localhost:8000';
+
+function getApiUrl(): string {
+    if (typeof window !== 'undefined') {
+        return window.location.hostname === 'localhost' ? LOCAL_API : PRODUCTION_API;
+    }
+    return PRODUCTION_API;
+}
+
+const API_URL = getApiUrl();
 
 async function getHeaders(): Promise<HeadersInit> {
     const { data: { session } } = await supabase.auth.getSession()
