@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 from db import get_session
-from models import ForumTopic, FORUM_TOPIC_RESPONSE, FeatureRequest
+from models import ForumTopic, FeatureRequest
 from pydantic import BaseModel
 from typing import List, Optional
 import uuid
