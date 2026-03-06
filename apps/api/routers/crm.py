@@ -19,6 +19,7 @@ from models import PersonaProfile, KnowledgePack, VoiceProfile
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
+import os
 import uuid
 import hashlib
 from services.webhook_emitter import emit_event
@@ -963,6 +964,75 @@ async def update_ai_center(data: AICenterUpdate, db: Session = Depends(get_sessi
 
 
 # ─────────────────────────────────────────────
+# AUTONOMY POLICIES
+# ─────────────────────────────────────────────
+
+@router.get("/settings/autonomy", tags=["ai-center"])
+async def list_autonomy_policies(db: Session = Depends(get_session)):
+    return db.exec(
+        select(AutonomyPolicy).where(AutonomyPolicy.tenant_id == TENANT_ID)
+    ).all()
+
+
+class AutonomyPolicyUpdate(BaseModel):
+    mode: str  # auto | semi | manual
+    conditions_json: Optional[dict] = None
+
+
+@router.put("/settings/autonomy/{policy_id}", tags=["ai-center"])
+async def update_autonomy_policy(
+    policy_id: str, data: AutonomyPolicyUpdate, db: Session = Depends(get_session)
+):
+    policy = db.get(AutonomyPolicy, policy_id)
+    if not policy or policy.tenant_id != TENANT_ID:
+        raise HTTPException(status_code=404, detail="Policy not found")
+    before = {"mode": policy.mode, "conditions_json": policy.conditions_json}
+    policy.mode = data.mode
+    if data.conditions_json is not None:
+        policy.conditions_json = data.conditions_json
+    db.add(policy)
+    _audit(db, "update", "autonomy_policy", policy.id, before=before, after=data.model_dump(exclude_none=True))
+    db.commit()
+    db.refresh(policy)
+    return policy
+
+
+# ─────────────────────────────────────────────
+# COST BUDGETS
+# ─────────────────────────────────────────────
+
+@router.get("/settings/budgets", tags=["ai-center"])
+async def list_cost_budgets(db: Session = Depends(get_session)):
+    return db.exec(
+        select(CostBudget).where(CostBudget.tenant_id == TENANT_ID)
+    ).all()
+
+
+class CostBudgetUpdate(BaseModel):
+    monthly_limit_usd: Optional[float] = None
+    current_spend_usd: Optional[float] = None
+
+
+@router.put("/settings/budgets/{budget_id}", tags=["ai-center"])
+async def update_cost_budget(
+    budget_id: str, data: CostBudgetUpdate, db: Session = Depends(get_session)
+):
+    budget = db.get(CostBudget, budget_id)
+    if not budget or budget.tenant_id != TENANT_ID:
+        raise HTTPException(status_code=404, detail="Budget not found")
+    before = {"monthly_limit_usd": budget.monthly_limit_usd, "current_spend_usd": budget.current_spend_usd}
+    if data.monthly_limit_usd is not None:
+        budget.monthly_limit_usd = data.monthly_limit_usd
+    if data.current_spend_usd is not None:
+        budget.current_spend_usd = data.current_spend_usd
+    db.add(budget)
+    _audit(db, "update", "cost_budget", budget.id, before=before, after=data.model_dump(exclude_none=True))
+    db.commit()
+    db.refresh(budget)
+    return budget
+
+
+# ─────────────────────────────────────────────
 # CAMPAIGNS
 # ─────────────────────────────────────────────
 
@@ -1032,6 +1102,9 @@ class N8NDispatchRequest(BaseModel):
     idempotency_key: Optional[str] = None
 
 
+N8N_WEBHOOK_BASE = os.getenv("N8N_WEBHOOK_URL", "http://localhost:5678/webhook")
+
+
 @router.post("/n8n/dispatch", tags=["n8n"])
 async def dispatch_n8n(data: N8NDispatchRequest, db: Session = Depends(get_session)):
     if data.idempotency_key:
@@ -1050,13 +1123,33 @@ async def dispatch_n8n(data: N8NDispatchRequest, db: Session = Depends(get_sessi
         workflow_key=data.workflow_key,
         payload_json=data.payload,
         idempotency_key=data.idempotency_key,
-        status="dispatched",
+        status="pending",
     )
     db.add(dispatch)
     db.commit()
     db.refresh(dispatch)
-    # In production: trigger n8n webhook here
-    return {"status": "dispatched", "dispatch_id": dispatch.id}
+
+    # Fire real HTTP POST to n8n webhook
+    import httpx
+    target_url = f"{N8N_WEBHOOK_BASE}/{data.workflow_key}"
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.post(target_url, json={
+                "dispatch_id": dispatch.id,
+                "workflow_key": data.workflow_key,
+                "tenant_id": TENANT_ID,
+                **data.payload,
+            })
+        dispatch.status = "dispatched"
+        dispatch.response_json = {"status_code": resp.status_code, "body": resp.text[:500]}
+    except Exception as e:
+        dispatch.status = "failed"
+        dispatch.response_json = {"error": str(e)[:500]}
+        dispatch.retries += 1
+
+    db.add(dispatch)
+    db.commit()
+    return {"status": dispatch.status, "dispatch_id": dispatch.id}
 
 
 @router.get("/n8n/health", tags=["n8n"])

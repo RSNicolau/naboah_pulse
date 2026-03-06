@@ -13,6 +13,9 @@ import {
   Mic,
   BookOpen,
   Check,
+  Brain,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 import { apiGet, apiPut } from '@/lib/api';
 
@@ -101,6 +104,9 @@ export default function AiCenterPage() {
   const [tools, setTools] = useState<string[]>([]);
   const [enabledTools, setEnabledTools] = useState<Set<string>>(new Set());
 
+  /* OmniMind connection */
+  const [omniStatus, setOmniStatus] = useState<{ status: string; agents?: number; pending_tasks?: number } | null>(null);
+
   const fetchData = useCallback(async () => {
     try {
       const result = await apiGet<AiCenterData>('/crm/settings/ai-center');
@@ -114,6 +120,9 @@ export default function AiCenterPage() {
     } finally {
       setLoading(false);
     }
+    apiGet<{ status: string; agents?: number; pending_tasks?: number }>('/omnimind/status')
+      .then(setOmniStatus)
+      .catch(() => setOmniStatus(null));
   }, []);
 
   useEffect(() => {
@@ -397,6 +406,44 @@ export default function AiCenterPage() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* ------------------------------------------------------------ */}
+      {/*  OmniMind Connection                                          */}
+      {/* ------------------------------------------------------------ */}
+      <div className="bg-bg-1 border border-stroke rounded-2xl p-5 space-y-4">
+        <h2 className="text-white font-semibold flex items-center gap-2">
+          <Brain size={16} className="text-primary" />
+          OmniMind Connection
+        </h2>
+
+        <div className="flex items-center gap-4 p-4 rounded-xl bg-surface-1 border border-stroke">
+          <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+            <Brain size={24} className="text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <p className="text-white text-sm font-semibold">OmniMind AI — Intelligence Layer</p>
+              {omniStatus?.status === 'ok' ? (
+                <CheckCircle2 size={14} className="text-success shrink-0" />
+              ) : (
+                <AlertCircle size={14} className="text-warning shrink-0" />
+              )}
+            </div>
+            <p className="text-text-3 text-xs">
+              {omniStatus?.status === 'ok'
+                ? `Connected — ${omniStatus.agents ?? 0} agents active, ${omniStatus.pending_tasks ?? 0} pending tasks`
+                : 'Offline — OmniMind service not reachable'}
+            </p>
+          </div>
+          <span className={`text-[9px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider shrink-0 ${
+            omniStatus?.status === 'ok'
+              ? 'bg-success/10 text-success'
+              : 'bg-warning/10 text-warning'
+          }`}>
+            {omniStatus?.status === 'ok' ? 'Connected' : 'Offline'}
+          </span>
+        </div>
       </div>
 
       {/* Bottom save bar (sticky) */}

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Share2, CheckCircle2, AlertCircle, RefreshCw, Wifi } from 'lucide-react';
+import { Share2, CheckCircle2, AlertCircle, RefreshCw, Wifi, Brain, Loader2 } from 'lucide-react';
 import { apiGet, apiPost } from '@/lib/api';
 import { toast } from '@/lib/toast';
 
@@ -40,12 +40,18 @@ export default function IntegrationsGrid() {
     const [channels, setChannels] = useState<ChannelAccount[]>([]);
     const [loading, setLoading] = useState(true);
     const [syncingId, setSyncingId] = useState<string | null>(null);
+    const [omniStatus, setOmniStatus] = useState<{ status: string; agents?: number; pending_tasks?: number } | null>(null);
+    const [omniLoading, setOmniLoading] = useState(true);
 
     useEffect(() => {
         apiGet<ChannelAccount[]>('/integrations/channels')
             .then(setChannels)
             .catch(() => toast.error('Erro ao carregar integrações'))
             .finally(() => setLoading(false));
+        apiGet<{ status: string; agents?: number; pending_tasks?: number }>('/omnimind/status')
+            .then(setOmniStatus)
+            .catch(() => setOmniStatus(null))
+            .finally(() => setOmniLoading(false));
     }, []);
 
     const activeCount = channels.filter((c) => c.status === 'active').length;
@@ -160,6 +166,58 @@ export default function IntegrationsGrid() {
                             })}
                         </div>
                     )}
+                </div>
+
+                {/* AI & Intelligence */}
+                <div className="flex flex-col gap-4">
+                    <h3 className="text-[10px] font-bold text-text-3 uppercase tracking-widest flex items-center gap-2">
+                        <Brain size={11} className="text-primary" /> AI &amp; Intelligence
+                    </h3>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="bg-bg-1 border border-stroke rounded-2xl p-5 flex flex-col gap-4 hover:border-primary/30 transition-all group">
+                            <div className="flex items-start justify-between">
+                                <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-primary/10 border border-primary/20 shadow-sm">
+                                    <Brain size={22} className="text-primary" />
+                                </div>
+                                {omniLoading ? (
+                                    <Loader2 size={16} className="animate-spin text-text-3" />
+                                ) : omniStatus?.status === 'ok' ? (
+                                    <CheckCircle2 size={16} className="text-success" />
+                                ) : (
+                                    <AlertCircle size={16} className="text-warning" />
+                                )}
+                            </div>
+
+                            <div>
+                                <h4 className="text-sm font-bold text-white group-hover:text-primary transition-colors mb-0.5">
+                                    OmniMind AI
+                                </h4>
+                                <p className="text-[10px] text-text-3">Intelligence Layer</p>
+                            </div>
+
+                            <div className="flex flex-col gap-1.5 text-[10px] text-text-3">
+                                <div className="flex items-center justify-between">
+                                    <span>Agents</span>
+                                    <span className="text-text-2 font-mono">{omniStatus?.agents ?? '—'}</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span>Pending Tasks</span>
+                                    <span className="text-text-2 font-mono">{omniStatus?.pending_tasks ?? '—'}</span>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between pt-2 border-t border-stroke">
+                                <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                                    omniStatus?.status === 'ok'
+                                        ? 'bg-success/10 text-success'
+                                        : 'bg-warning/10 text-warning'
+                                }`}>
+                                    {omniStatus?.status === 'ok' ? 'Connected' : 'Offline'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Upcoming integrations */}

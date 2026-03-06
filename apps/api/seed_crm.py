@@ -16,7 +16,9 @@ from models_crm import (
     AutonomyPolicy, CostBudget,
     CRMCampaign,
 )
+from models import Integration, WebhookSubscription, ServiceToken
 from datetime import datetime, timedelta
+import hashlib
 import uuid
 
 TENANT = "naboah"
@@ -197,6 +199,34 @@ def seed():
             events_failed=3,
         ))
 
+        # ── OMNIMIND INTEGRATION ──
+        db.add(Integration(
+            id="int_omnimind", tenant_id=TENANT,
+            provider="omnimind", type="ai", status="connected",
+            config_json_encrypted="{}",
+        ))
+
+        # Service token for OmniMind → Pulse (dev token, all scopes)
+        dev_token = "omnimind_dev_token_naboah_2026"
+        db.add(ServiceToken(
+            id="stk_omnimind_dev", tenant_id=TENANT,
+            integration_id="int_omnimind",
+            token_hash=hashlib.sha256(dev_token.encode()).hexdigest(),
+            name="OmniMind Dev Token",
+            scopes_json=["*"],
+            is_active=True,
+        ))
+
+        # Webhook: Pulse → OmniMind (localhost for dev)
+        db.add(WebhookSubscription(
+            id="whs_omnimind", tenant_id=TENANT,
+            integration_id="int_omnimind",
+            target_url="http://localhost:8001/webhooks/pulse",
+            secret_key="omnimind_webhook_secret_dev",
+            events_json=["lead.captured", "deal.created", "deal.updated", "ticket.created", "campaign.activated"],
+            is_active=True,
+        ))
+
         db.commit()
         print("CRM seed complete!")
         print(f"  - {len(contacts)} contacts")
@@ -210,6 +240,7 @@ def seed():
         print(f"  - {len(rfm_data)} RFM snapshots")
         print(f"  - {len(campaigns)} campaigns")
         print(f"  - Roles, AI Center, Policies, Budgets, Repediu connection")
+        print(f"  - OmniMind integration + service token + webhook subscription")
 
 
 if __name__ == "__main__":

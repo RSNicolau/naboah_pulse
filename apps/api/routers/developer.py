@@ -6,7 +6,11 @@ from pydantic import BaseModel
 from typing import List, Optional
 import uuid
 import secrets
-from datetime import datetime
+import hashlib
+import hmac
+import json
+import base64
+from datetime import datetime, timedelta
 
 router = APIRouter(prefix="/developer", tags=["developer"])
 
@@ -53,3 +57,60 @@ async def submit_app(app_id: str, db: Session = Depends(get_session)):
     db.add(app)
     db.commit()
     return app
+
+
+# ─────────────────────────────────────────────
+# OAuth2 Client Credentials → JWT
+# ─────────────────────────────────────────────
+
+JWT_SECRET = secrets.token_urlsafe(32)  # In prod: load from env
+JWT_TTL_HOURS = 1
+
+
+def _b64url(data: bytes) -> str:
+    return base64.urlsafe_b64encode(data).rstrip(b"=").decode()
+
+
+def _create_jwt(payload: dict) -> str:
+    header = _b64url(json.dumps({"alg": "HS256", "typ": "JWT"}).encode())
+    body = _b64url(json.dumps(payload).encode())
+    sig = hmac.new(JWT_SECRET.encode(), f"{header}.{body}".encode(), hashlib.sha256).digest()
+    return f"{header}.{body}.{_b64url(sig)}"
+
+
+class TokenRequest(BaseModel):
+    client_id: str
+    client_secret: str
+    grant_type: str = "client_credentials"
+
+
+@router.post("/oauth/token", tags=["oauth"])
+async def oauth_token(data: TokenRequest, db: Session = Depends(get_session)):
+    if data.grant_type != "client_credentials":
+        raise HTTPException(status_code=400, detail="Unsupported grant_type")
+
+    app = db.exec(
+        select(DeveloperApp).where(
+            DeveloperApp.client_id == data.client_id,
+            DeveloperApp.tenant_id == TENANT_ID,
+        )
+    ).first()
+
+    if not app or app.client_secret_hash != data.client_secret:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    now = int(datetime.utcnow().timestamp())
+    token = _create_jwt({
+        "sub": app.id,
+        "tenant_id": app.tenant_id,
+        "app_id": app.id,
+        "scopes": ["crm.read", "crm.write", "content.read"],
+        "iat": now,
+        "exp": now + (JWT_TTL_HOURS * 3600),
+    })
+
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "expires_in": JWT_TTL_HOURS * 3600,
+    }
