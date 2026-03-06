@@ -968,3 +968,48 @@ class AssetBackupConfig(SQLModel, table=True):
     replication_enabled: bool = True
     retention_days: int = 365
     last_backup_at: Optional[datetime] = None
+
+
+# ─────────────────────────────────────────────
+# OMNIMIND INTEGRATION MODELS
+# ─────────────────────────────────────────────
+
+class WebhookSubscription(SQLModel, table=True):
+    """Outbound webhook subscriptions — Pulse sends events to registered URLs."""
+    id: str = Field(primary_key=True)
+    tenant_id: str = Field(foreign_key="tenant.id", index=True)
+    integration_id: str = Field(foreign_key="integration.id", index=True)
+    target_url: str
+    secret_key: str  # Used for HMAC-SHA256 signing
+    events_json: List[str] = Field(default=[], sa_column=Column(JSON))
+    is_active: bool = True
+    last_delivery_at: Optional[datetime] = None
+    failure_count: int = 0
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class WebhookDispatchLog(SQLModel, table=True):
+    """Log of every outbound webhook delivery attempt."""
+    id: str = Field(primary_key=True)
+    tenant_id: str = Field(foreign_key="tenant.id", index=True)
+    subscription_id: str = Field(foreign_key="webhooksubscription.id", index=True)
+    event_type: str
+    payload_json: dict = Field(default={}, sa_column=Column(JSON))
+    response_code: Optional[int] = None
+    response_body: Optional[str] = None
+    attempt: int = 1
+    status: str = "pending"  # pending, delivered, failed
+    error_message: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class ServiceToken(SQLModel, table=True):
+    """Service-to-service API key for machine clients like OmniMind."""
+    id: str = Field(primary_key=True)
+    tenant_id: str = Field(foreign_key="tenant.id", index=True)
+    integration_id: str = Field(foreign_key="integration.id", index=True)
+    token_hash: str = Field(index=True)  # SHA-256 hash of the raw token
+    name: str  # "OmniMind Production", "OmniMind Staging"
+    scopes_json: List[str] = Field(default=[], sa_column=Column(JSON))
+    is_active: bool = True
+    last_used_at: Optional[datetime] = None
+    expires_at: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)

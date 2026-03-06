@@ -21,6 +21,7 @@ from typing import Optional, List
 from datetime import datetime
 import uuid
 import hashlib
+from services.webhook_emitter import emit_event
 
 router = APIRouter(prefix="/crm", tags=["crm"])
 
@@ -145,6 +146,11 @@ async def upsert_contact(data: ContactCreate, db: Session = Depends(get_session)
     _audit(db, "create", "contact", contact.id, after=data.model_dump())
     db.commit()
     db.refresh(contact)
+    await emit_event(TENANT_ID, "lead.captured", {
+        "contact_id": contact.id, "first_name": contact.first_name,
+        "last_name": contact.last_name, "email": contact.email,
+        "phone_e164": contact.phone_e164, "lifecycle_stage": contact.lifecycle_stage,
+    })
     return contact
 
 
@@ -409,6 +415,10 @@ async def create_deal(data: DealCreate, db: Session = Depends(get_session)):
     _audit(db, "create", "deal", deal.id, after=data.model_dump())
     db.commit()
     db.refresh(deal)
+    await emit_event(TENANT_ID, "deal.created", {
+        "deal_id": deal.id, "title": deal.title, "value": deal.value,
+        "stage_id": deal.stage_id, "contact_id": deal.contact_id,
+    })
     return deal
 
 
@@ -449,6 +459,10 @@ async def move_deal_stage(deal_id: str, stage_id: str = Query(...), db: Session 
            before={"stage_id": before_stage}, after={"stage_id": stage_id})
     db.commit()
     db.refresh(d)
+    await emit_event(TENANT_ID, "deal.updated", {
+        "deal_id": d.id, "title": d.title, "stage_id": d.stage_id,
+        "previous_stage_id": before_stage, "status": d.status, "value": d.value,
+    })
     return d
 
 
@@ -571,6 +585,10 @@ async def create_ticket(data: TicketCreate, db: Session = Depends(get_session)):
     _audit(db, "create", "ticket", ticket.id, after=data.model_dump())
     db.commit()
     db.refresh(ticket)
+    await emit_event(TENANT_ID, "ticket.created", {
+        "ticket_id": ticket.id, "subject": ticket.subject,
+        "priority": ticket.priority, "contact_id": ticket.contact_id,
+    })
     return ticket
 
 
@@ -986,6 +1004,9 @@ async def activate_campaign(campaign_id: str, db: Session = Depends(get_session)
     db.add(c)
     _audit(db, "send_campaign", "campaign", c.id, after={"status": "active"})
     db.commit()
+    await emit_event(TENANT_ID, "campaign.activated", {
+        "campaign_id": c.id, "name": c.name, "channel": c.channel, "type": c.type,
+    })
     return c
 
 
