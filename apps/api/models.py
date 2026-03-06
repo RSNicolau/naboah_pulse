@@ -238,9 +238,17 @@ class Agent(SQLModel, table=True):
     capabilities_json: List[str] = Field(default=[], sa_column=Column(JSON))
     llm_node_id: str = "pulse-central-v1"
     # AI Team Fields
-    skills_json: List[str] = Field(default=[], sa_column=Column(JSON)) # Ex: ["crm_access", "billing_read", "ticket_resolve"]
-    memory_context_id: Optional[str] = None # ID para partição de memória RAG
-    handoff_rules_json: dict = Field(default={}, sa_column=Column(JSON)) # Regras de para quem transferir
+    skills_json: List[str] = Field(default=[], sa_column=Column(JSON))
+    memory_context_id: Optional[str] = None
+    handoff_rules_json: dict = Field(default={}, sa_column=Column(JSON))
+    # Enterprise 2.0 Fields
+    department_id: Optional[str] = Field(default=None, index=True)
+    role_id: Optional[str] = Field(default=None, index=True)
+    autonomy_level: str = "semi"  # auto, semi, manual
+    max_executions_day: int = 100
+    external_api_allowed: bool = False
+    skill_override_json: List[str] = Field(default=[], sa_column=Column(JSON))
+    advanced_prompt_config: dict = Field(default={}, sa_column=Column(JSON))
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class AgentCollaboration(SQLModel, table=True):
@@ -1012,4 +1020,84 @@ class ServiceToken(SQLModel, table=True):
     is_active: bool = True
     last_used_at: Optional[datetime] = None
     expires_at: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+# ─── AI Engine Enterprise 2.0 ──────────────────────────────────────
+
+class AIDepartment(SQLModel, table=True):
+    __tablename__ = "ai_department"
+    id: str = Field(primary_key=True)
+    tenant_id: str = Field(foreign_key="tenant.id", index=True)
+    name: str
+    description: Optional[str] = None
+    head_agent_id: Optional[str] = None
+    settings_json: dict = Field(default={}, sa_column=Column(JSON))
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class AIRole(SQLModel, table=True):
+    __tablename__ = "ai_role"
+    id: str = Field(primary_key=True)
+    tenant_id: str = Field(foreign_key="tenant.id", index=True)
+    department_id: str = Field(index=True)
+    name: str
+    description: Optional[str] = None
+    permissions_json: List[str] = Field(default=[], sa_column=Column(JSON))
+    default_skills_json: List[str] = Field(default=[], sa_column=Column(JSON))
+    autonomy_level: str = "semi"  # auto, semi, manual
+    max_executions_day: int = 100
+    external_api_allowed: bool = False
+    is_system: bool = False
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class AISkillPackage(SQLModel, table=True):
+    __tablename__ = "ai_skill_package"
+    id: str = Field(primary_key=True)
+    tenant_id: str = Field(foreign_key="tenant.id", index=True)
+    name: str
+    version: int = 1
+    description: Optional[str] = None
+    author: Optional[str] = None
+    status: str = "pending"  # pending, validating, active, inactive, error
+    validation_report_json: dict = Field(default={}, sa_column=Column(JSON))
+    skills_count: int = 0
+    file_url: Optional[str] = None
+    metadata_json: dict = Field(default={}, sa_column=Column(JSON))
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class AISkill(SQLModel, table=True):
+    __tablename__ = "ai_skill"
+    id: str = Field(primary_key=True)
+    tenant_id: str = Field(foreign_key="tenant.id", index=True)
+    package_id: str = Field(foreign_key="ai_skill_package.id", index=True)
+    name: str
+    description: Optional[str] = None
+    input_schema_json: dict = Field(default={}, sa_column=Column(JSON))
+    output_schema_json: dict = Field(default={}, sa_column=Column(JSON))
+    category: str = "general"  # general, crm, support, sales, marketing, security, analytics
+    is_active: bool = True
+    execution_count: int = 0
+    last_executed_at: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class AIAgentExecution(SQLModel, table=True):
+    __tablename__ = "ai_agent_execution"
+    id: str = Field(primary_key=True)
+    tenant_id: str = Field(foreign_key="tenant.id", index=True)
+    agent_id: str = Field(foreign_key="agent.id", index=True)
+    skill_id: str = Field(foreign_key="ai_skill.id", index=True)
+    triggered_by: str = "system"
+    status: str = "pending"  # pending, running, completed, failed, blocked
+    input_json: dict = Field(default={}, sa_column=Column(JSON))
+    output_json: Optional[dict] = Field(default=None, sa_column=Column(JSON))
+    error_message: Optional[str] = None
+    permission_check_json: dict = Field(default={}, sa_column=Column(JSON))
+    execution_time_ms: Optional[int] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)

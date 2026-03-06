@@ -9,7 +9,7 @@ import {
     BarChart3, Users, Share2, Settings, Palette, UserCircle, FileText,
     Shield, Code2, GitBranch, Bot, Kanban, LifeBuoy, Puzzle, Target,
     UserSquare2, Rocket, DollarSign, ShieldCheck, Brain, Sparkles,
-    ShoppingBag, Building2, Terminal, Globe, Monitor, BookUser, Activity,
+    ShoppingBag, Building2, Terminal, Globe, Monitor, BookUser, Activity, Cpu,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -71,6 +71,7 @@ const navSections: NavSection[] = [
         title: 'AI & Automation',
         items: [
             { icon: Bot,       label: 'AI Squad',    href: '/agents/team' },
+            { icon: Cpu,       label: 'AI Engine',   href: '/ai-engine' },
             { icon: Brain,     label: 'Neural Mind', href: '/neural/knowledge' },
             { icon: GitBranch, label: 'Automations', href: '/automation' },
             { icon: GitBranch, label: 'Pulse Flow',  href: '/automation/canvas' },

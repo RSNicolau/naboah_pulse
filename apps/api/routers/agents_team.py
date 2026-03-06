@@ -125,6 +125,12 @@ class AgentCreate(BaseModel):
     intelligence_level: str = "standard"
     skills: List[str] = []
     department: str = "support"
+    # Enterprise 2.0 fields
+    department_id: Optional[str] = None
+    role_id: Optional[str] = None
+    autonomy_level: str = "semi"
+    max_executions_day: int = 100
+    external_api_allowed: bool = False
 
 
 @router.get("/squad")
@@ -161,6 +167,11 @@ async def create_agent(data: AgentCreate, db: Session = Depends(get_session)):
         status="idle",
         intelligence_level=data.intelligence_level,
         skills_json=data.skills,
+        department_id=data.department_id,
+        role_id=data.role_id,
+        autonomy_level=data.autonomy_level,
+        max_executions_day=data.max_executions_day,
+        external_api_allowed=data.external_api_allowed,
     )
     db.add(agent)
     db.commit()

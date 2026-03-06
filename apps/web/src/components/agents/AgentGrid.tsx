@@ -42,7 +42,14 @@ const DEPT_MAP: Record<string, string> = {
 const DEPARTMENTS = ['support', 'sales', 'security', 'marketing'];
 const IQ_LEVELS = ['standard', 'high', 'genius'];
 
-type NewAgentForm = { name: string; role: string; intelligence_level: string; department: string };
+type AIDept = { id: string; name: string };
+type AIRoleOption = { id: string; name: string; department_id: string };
+
+type NewAgentForm = {
+    name: string; role: string; intelligence_level: string; department: string;
+    department_id: string; role_id: string; autonomy_level: string;
+    max_executions_day: number; external_api_allowed: boolean;
+};
 
 export default function AgentGrid() {
     const [agents, setAgents] = useState<Agent[]>([]);
@@ -50,9 +57,14 @@ export default function AgentGrid() {
     const [toggling, setToggling] = useState<string | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [saving, setSaving] = useState(false);
-    const [form, setForm] = useState<NewAgentForm>({
+    const [aiDepts, setAiDepts] = useState<AIDept[]>([]);
+    const [aiRoles, setAiRoles] = useState<AIRoleOption[]>([]);
+    const defaultForm: NewAgentForm = {
         name: '', role: '', intelligence_level: 'standard', department: 'support',
-    });
+        department_id: '', role_id: '', autonomy_level: 'semi',
+        max_executions_day: 100, external_api_allowed: false,
+    };
+    const [form, setForm] = useState<NewAgentForm>(defaultForm);
 
     async function load() {
         setLoading(true);
@@ -63,7 +75,11 @@ export default function AgentGrid() {
         finally { setLoading(false); }
     }
 
-    useEffect(() => { load(); }, []);
+    useEffect(() => {
+        load();
+        apiGet<AIDept[]>('/ai-engine/departments').then(setAiDepts).catch(() => {});
+        apiGet<AIRoleOption[]>('/ai-engine/roles').then(setAiRoles).catch(() => {});
+    }, []);
 
     async function toggleStatus(agent: Agent) {
         setToggling(agent.id);
@@ -82,9 +98,14 @@ export default function AgentGrid() {
                 name: form.name.trim(), role: form.role.trim(),
                 intelligence_level: form.intelligence_level,
                 department: form.department, skills: [],
+                department_id: form.department_id || undefined,
+                role_id: form.role_id || undefined,
+                autonomy_level: form.autonomy_level,
+                max_executions_day: form.max_executions_day,
+                external_api_allowed: form.external_api_allowed,
             });
             setAgents(prev => [...prev, created]);
-            setForm({ name: '', role: '', intelligence_level: 'standard', department: 'support' });
+            setForm(defaultForm);
             setShowModal(false);
         } catch (e) { toast.error('Erro ao criar agente'); }
         finally { setSaving(false); }
@@ -278,6 +299,38 @@ export default function AgentGrid() {
                                     {IQ_LEVELS.map(lvl => (
                                         <button key={lvl} onClick={() => setForm(f => ({ ...f, intelligence_level: lvl }))}
                                             className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase border transition-all ${form.intelligence_level === lvl ? 'bg-primary/10 text-primary border-primary/30' : 'bg-surface-1 text-text-3 border-stroke hover:border-stroke/80'}`}>
+                                            {lvl}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            {/* Enterprise 2.0 Fields */}
+                            {aiDepts.length > 0 && (
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-[10px] font-bold text-text-3 uppercase tracking-widest">AI Department</label>
+                                    <select value={form.department_id} onChange={e => setForm(f => ({ ...f, department_id: e.target.value }))}
+                                        className="bg-surface-1 border border-stroke rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors">
+                                        <option value="">None</option>
+                                        {aiDepts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                                    </select>
+                                </div>
+                            )}
+                            {aiRoles.length > 0 && (
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-[10px] font-bold text-text-3 uppercase tracking-widest">AI Role</label>
+                                    <select value={form.role_id} onChange={e => setForm(f => ({ ...f, role_id: e.target.value }))}
+                                        className="bg-surface-1 border border-stroke rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors">
+                                        <option value="">None</option>
+                                        {aiRoles.filter(r => !form.department_id || r.department_id === form.department_id).map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+                                    </select>
+                                </div>
+                            )}
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-[10px] font-bold text-text-3 uppercase tracking-widest">Autonomy</label>
+                                <div className="flex gap-2">
+                                    {(['manual', 'semi', 'auto'] as const).map(lvl => (
+                                        <button key={lvl} onClick={() => setForm(f => ({ ...f, autonomy_level: lvl }))}
+                                            className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase border transition-all ${form.autonomy_level === lvl ? 'bg-primary/10 text-primary border-primary/30' : 'bg-surface-1 text-text-3 border-stroke hover:border-stroke/80'}`}>
                                             {lvl}
                                         </button>
                                     ))}
