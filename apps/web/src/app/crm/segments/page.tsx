@@ -14,6 +14,7 @@ import {
   BarChart3,
 } from 'lucide-react';
 import { apiGet, apiPost } from '@/lib/api';
+import { toast } from '@/lib/toast';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                             */
@@ -113,7 +114,7 @@ export default function SegmentsPage() {
       const data = await apiGet<Segment[]>('/crm/segments');
       setSegments(data);
     } catch (e) {
-      console.error(e);
+      toast.error('Erro na operação de segmentos');
     } finally {
       setLoading(false);
     }
@@ -124,7 +125,7 @@ export default function SegmentsPage() {
       const data = await apiGet<RfmSummary>('/crm/rfm/summary');
       setRfm(data);
     } catch (e) {
-      console.error(e);
+      toast.error('Erro na operação de segmentos');
     } finally {
       setRfmLoading(false);
     }
@@ -153,7 +154,7 @@ export default function SegmentsPage() {
       setForm({ name: '', rules_json: '{}', is_dynamic: true });
       fetchSegments();
     } catch (e) {
-      console.error(e);
+      toast.error('Erro na operação de segmentos');
     } finally {
       setCreating(false);
     }
@@ -169,7 +170,7 @@ export default function SegmentsPage() {
       setSampleResult(result);
       fetchSegments();
     } catch (e) {
-      console.error(e);
+      toast.error('Erro na operação de segmentos');
     } finally {
       setRecomputing(null);
     }

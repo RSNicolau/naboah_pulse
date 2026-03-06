@@ -9,7 +9,7 @@ function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 const hours = ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'];
 
 type CalendarEvent = {
@@ -25,6 +25,7 @@ export default function CalendarView() {
     const [items, setItems] = useState<CalendarEvent[]>([]);
     const [loading, setLoading] = useState(true);
     const [weekOffset, setWeekOffset] = useState(0);
+    const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
 
     const now = new Date();
     const startOfWeek = new Date(now);
@@ -43,7 +44,7 @@ export default function CalendarView() {
         return d;
     });
 
-    const monthLabel = weekDates[0].toLocaleDateString('en-US', { month: 'long' });
+    const monthLabel = weekDates[0].toLocaleDateString('pt-BR', { month: 'long' });
     const dateRange = `${monthLabel} ${weekDates[0].getDate()} - ${weekDates[6].getDate()}, ${weekDates[0].getFullYear()}`;
 
     function getItemsForSlot(dayIndex: number, hour: string) {
@@ -74,10 +75,10 @@ export default function CalendarView() {
         <div className="flex-1 flex flex-col h-full bg-bg-0">
             <div className="p-6 border-b border-stroke flex items-center justify-between bg-bg-1/50 backdrop-blur-md">
                 <div className="flex items-center gap-6">
-                    <h2 className="text-xl font-bold text-white">Calendar</h2>
+                    <h2 className="text-xl font-bold text-white">Calendário</h2>
                     <div className="flex items-center gap-2 bg-surface-2 border border-stroke rounded-lg p-1">
-                        <button className="p-1 px-3 text-xs font-bold text-white bg-bg-1 rounded-md shadow-sm">Week</button>
-                        <button className="p-1 px-3 text-xs font-bold text-text-3 hover:text-text-1">Month</button>
+                        <button onClick={() => setViewMode('week')} className={`p-1 px-3 text-xs font-bold rounded-md transition-all ${viewMode === 'week' ? 'text-white bg-bg-1 shadow-sm' : 'text-text-3 hover:text-text-1'}`}>Semana</button>
+                        <button onClick={() => setViewMode('month')} className={`p-1 px-3 text-xs font-bold rounded-md transition-all ${viewMode === 'month' ? 'text-white bg-bg-1 shadow-sm' : 'text-text-3 hover:text-text-1'}`}>Mês</button>
                     </div>
                 </div>
 
@@ -91,8 +92,8 @@ export default function CalendarView() {
                             <ChevronRight size={18} />
                         </button>
                     </div>
-                    <button className="jarvis-gradient px-4 py-2 rounded-xl text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-primary/20">
-                        <Plus size={16} /> New Post
+                    <button onClick={() => window.location.href = '/creative/campaigns'} className="jarvis-gradient px-4 py-2 rounded-xl text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-primary/20">
+                        <Plus size={16} /> Novo Post
                     </button>
                 </div>
             </div>

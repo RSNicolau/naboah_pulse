@@ -14,6 +14,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { apiGet, apiPost } from '@/lib/api';
+import { toast } from '@/lib/toast';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                             */
@@ -54,7 +55,7 @@ export default function RepediuPage() {
       const data = await apiGet<HealthData>('/crm/integrations/repediu/health');
       setHealth(data);
     } catch (e) {
-      console.error(e);
+      toast.error('Erro na operação do Repediu');
     } finally {
       setLoading(false);
     }
@@ -75,7 +76,7 @@ export default function RepediuPage() {
       setReconcileResult(result);
       fetchHealth();
     } catch (e) {
-      console.error(e);
+      toast.error('Erro na operação do Repediu');
     } finally {
       setReconciling(false);
     }

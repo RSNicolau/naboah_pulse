@@ -15,16 +15,17 @@ class DeviceRegister(BaseModel):
     device_name: str
     os_type: str
     app_version: str
+    user_id: Optional[str] = None
 
 @router.post("/register")
 async def register_device(data: DeviceRegister, db: Session = Depends(get_session)):
     device = UserDevice(
         id=f"dev_{uuid.uuid4().hex[:6]}",
-        user_id="u1", # Mock
-        tenant_id=TENANT_ID, # Mock
+        user_id=data.user_id if hasattr(data, 'user_id') and data.user_id else TENANT_ID,
+        tenant_id=TENANT_ID,
         device_name=data.device_name,
         os_type=data.os_type,
-        app_version=data.app_version
+        app_version=data.app_version,
     )
     db.add(device)
     db.commit()

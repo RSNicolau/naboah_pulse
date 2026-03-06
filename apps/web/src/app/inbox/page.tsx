@@ -19,6 +19,7 @@ export default function InboxPage() {
     const [intakeItems, setIntakeItems] = useState<any[]>([]);
     const [intakeLoading, setIntakeLoading] = useState(true);
     const [activePersona, setActivePersona] = useState('Brand Default');
+    const [personas, setPersonas] = useState<string[]>(['Brand Default']);
 
     const handleSelect = (id: string, conv: ConversationSummary) => {
         setSelectedId(id);
@@ -30,6 +31,9 @@ export default function InboxPage() {
             .then(setIntakeItems)
             .catch(() => toast.error('Erro ao carregar itens de intake'))
             .finally(() => setIntakeLoading(false));
+        apiGet<{ name: string }[]>('/creative/personas')
+            .then(list => { if (list.length > 0) setPersonas(list.map(p => p.name)); })
+            .catch(() => {});
     }, []);
 
     return (
@@ -88,7 +92,7 @@ export default function InboxPage() {
                             <div className="p-10 bg-bg-1 border border-stroke rounded-[3rem] flex flex-col gap-6">
                                 <h4 className="text-[9px] font-black text-text-3 uppercase tracking-[0.3em]">Quick Persona Switcher</h4>
                                 <div className="flex flex-col gap-4">
-                                    {['Brand Default', 'Luxury Persona', 'Street Style'].map(p => (
+                                    {personas.map(p => (
                                         <div key={p} onClick={() => setActivePersona(p)} className={`px-6 py-4 bg-bg-0 border rounded-2xl flex items-center justify-between group hover:border-primary/30 transition-all cursor-pointer ${activePersona === p ? 'border-primary/40' : 'border-white/5'}`}>
                                             <span className="text-xs font-black text-white uppercase tracking-tighter">{p}</span>
                                             <div className={`w-2 h-2 rounded-full bg-primary transition-all ${activePersona === p ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />

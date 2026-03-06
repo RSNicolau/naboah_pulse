@@ -218,7 +218,11 @@ export default function AgentGrid() {
                                     )}
 
                                     <div className="flex items-center justify-between pt-3 border-t border-stroke/50">
-                                        <button className="p-2 hover:bg-surface-2 rounded-lg text-text-3 hover:text-white transition-colors">
+                                        <button
+                                            onClick={() => window.location.href = '/ai-engine'}
+                                            className="p-2 hover:bg-surface-2 rounded-lg text-text-3 hover:text-white transition-colors"
+                                            title="Configurar no AI Engine"
+                                        >
                                             <Settings size={16} />
                                         </button>
                                         <button

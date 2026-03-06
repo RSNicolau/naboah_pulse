@@ -4,6 +4,7 @@ from db import get_session
 from models import User, AuditLog
 from pydantic import BaseModel
 from typing import List, Optional
+from datetime import datetime
 import json
 
 router = APIRouter(prefix="/compliance", tags=["compliance"])
@@ -17,16 +18,26 @@ async def export_user_data(user_id: str, db: Session = Depends(get_session)):
     user = db.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    
-    # Mock de compilação de dados para portabilidade (GDPR/LGPD)
+
+    # Compile real activity data from audit log
+    user_logs = db.exec(
+        select(AuditLog).where(AuditLog.user_id == user_id)
+    ).all()
+
     return {
         "user_profile": {
             "email": user.email,
             "full_name": user.full_name,
-            "created_at": user.created_at.isoformat()
+            "created_at": user.created_at.isoformat() if user.created_at else None,
         },
-        "activity_summary": "Arquivado para portabilidade",
-        "export_date": "2026-03-03T21:58:00Z"
+        "activity_summary": {
+            "total_actions": len(user_logs),
+            "actions": [
+                {"action": log.action, "timestamp": log.created_at.isoformat() if log.created_at else None}
+                for log in user_logs[:50]
+            ],
+        },
+        "export_date": datetime.utcnow().isoformat() + "Z",
     }
 
 @router.post("/anonymize")

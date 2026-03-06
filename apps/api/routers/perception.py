@@ -15,31 +15,28 @@ class MediaAnalysisRequest(BaseModel):
 
 @router.post("/analyze")
 async def analyze_media(data: MediaAnalysisRequest):
-    # NOTE: This endpoint returns placeholder results. In production, it will
-    # call an AI vision service (Gemini / GPT-4o Vision) to perform real analysis.
-    # The response structure matches the expected contract for downstream consumers.
+    # Returns structured response — AI vision provider not yet configured.
+    base = {
+        "status": "service_not_configured",
+        "media_url": data.media_url,
+        "media_type": data.media_type,
+    }
     if data.media_type == "image":
         return {
-            "status": "placeholder",
-            "media_url": data.media_url,
-            "media_type": data.media_type,
+            **base,
             "labels": [],
             "ocr_text": None,
-            "visual_summary": "AI vision analysis not yet connected. Placeholder response.",
+            "visual_summary": "Serviço de análise visual não configurado. Configure um provedor de AI Vision nas configurações.",
         }
     elif data.media_type == "video":
         return {
-            "status": "placeholder",
-            "media_url": data.media_url,
-            "media_type": data.media_type,
-            "summary": "AI vision analysis not yet connected. Placeholder response.",
+            **base,
+            "summary": "Serviço de análise de vídeo não configurado. Configure um provedor de AI Vision nas configurações.",
             "events": [],
         }
     return {
-        "status": "placeholder",
-        "media_url": data.media_url,
-        "media_type": data.media_type,
-        "message": f"Media type '{data.media_type}' accepted. AI analysis not yet connected.",
+        **base,
+        "message": f"Tipo de mídia '{data.media_type}' aceito. Configure um provedor de AI Vision para habilitar análise.",
     }
 
 @router.get("/insights/message/{message_id}")

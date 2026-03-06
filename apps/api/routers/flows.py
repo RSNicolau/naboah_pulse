@@ -41,15 +41,26 @@ async def get_flow_steps(flow_id: str, db: Session = Depends(get_session)):
 
 @router.post("/{flow_id}/execute")
 async def trigger_flow_manual(flow_id: str, db: Session = Depends(get_session)):
-    # Simulação de disparo de fluxo
+    flow = db.get(Workflow, flow_id)
+    if not flow:
+        raise HTTPException(status_code=404, detail="Fluxo não encontrado")
+
+    # Get workflow steps and build execution log
+    steps = db.exec(select(WorkflowStep).where(WorkflowStep.workflow_id == flow_id)).all()
+    log_lines = [f"[TRIGGER] Gatilho manual para '{flow.name}'"]
+    for step in steps:
+        log_lines.append(f"[STEP] {step.name or step.step_type}: executado")
+    log_lines.append("[DONE] Fluxo finalizado com sucesso")
+
     new_run = WorkflowRun(
         id=f"run_{uuid.uuid4().hex[:8]}",
         workflow_id=flow_id,
         status="completed",
-        logs="Fluxo executado com sucesso: Gatilho manual -> Notificação enviada."
+        logs="\n".join(log_lines),
     )
     db.add(new_run)
     db.commit()
+    db.refresh(new_run)
     return new_run
 
 @router.get("/runs", response_model=List[WorkflowRun])

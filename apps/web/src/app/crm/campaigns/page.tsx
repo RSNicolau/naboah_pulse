@@ -14,6 +14,7 @@ import {
   X,
 } from 'lucide-react';
 import { apiGet, apiPost } from '@/lib/api';
+import { toast } from '@/lib/toast';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                             */
@@ -99,7 +100,7 @@ export default function CampaignsPage() {
       const data = await apiGet<Campaign[]>('/crm/campaigns');
       setCampaigns(data);
     } catch (e) {
-      console.error(e);
+      toast.error('Erro na operação de campanhas');
     } finally {
       setLoading(false);
     }
@@ -122,7 +123,7 @@ export default function CampaignsPage() {
       setForm({ name: '', type: 'promotional', channel: 'email', segment_id: '' });
       fetchCampaigns();
     } catch (e) {
-      console.error(e);
+      toast.error('Erro na operação de campanhas');
     } finally {
       setCreating(false);
     }
@@ -134,7 +135,7 @@ export default function CampaignsPage() {
       await apiPost(`/crm/campaigns/${id}/activate`, {});
       fetchCampaigns();
     } catch (e) {
-      console.error(e);
+      toast.error('Erro na operação de campanhas');
     } finally {
       setActionLoading(null);
     }
@@ -146,7 +147,7 @@ export default function CampaignsPage() {
       await apiPost(`/crm/campaigns/${id}/pause`, {});
       fetchCampaigns();
     } catch (e) {
-      console.error(e);
+      toast.error('Erro na operação de campanhas');
     } finally {
       setActionLoading(null);
     }

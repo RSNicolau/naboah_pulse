@@ -13,6 +13,7 @@ import {
   Filter,
 } from 'lucide-react';
 import { apiGet, apiPost } from '@/lib/api';
+import { toast } from '@/lib/toast';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                             */
@@ -107,7 +108,7 @@ function StatusDropdown({
       await apiPost(`/crm/tickets/${ticketId}/status?status=${status}`, {});
       onChanged();
     } catch (e) {
-      console.error(e);
+      toast.error('Erro na operação de tickets');
     } finally {
       setLoading(false);
       setOpen(false);
@@ -167,7 +168,7 @@ export default function TicketsPage() {
       const data = await apiGet<TicketItem[]>('/crm/tickets');
       setTickets(data);
     } catch (e) {
-      console.error(e);
+      toast.error('Erro na operação de tickets');
     } finally {
       setLoading(false);
     }
@@ -185,7 +186,7 @@ export default function TicketsPage() {
       setForm({ summary: '', category: 'general', priority: 'medium', details: '' });
       fetchTickets();
     } catch (e) {
-      console.error(e);
+      toast.error('Erro na operação de tickets');
     } finally {
       setCreating(false);
     }

@@ -196,9 +196,11 @@ export default function BillingDashboard() {
                                                 ))}
                                             </div>
                                             <button
+                                                disabled={isCurrent}
+                                                onClick={() => !isCurrent && toast.info(`Para fazer upgrade para o plano ${plan.name}, entre em contato com o suporte.`)}
                                                 className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all mt-auto ${
                                                     isCurrent
-                                                        ? 'bg-surface-2 text-text-3 cursor-default'
+                                                        ? 'bg-surface-2 text-text-3 cursor-not-allowed'
                                                         : 'bg-primary/10 text-primary hover:bg-primary hover:text-white'
                                                 }`}
                                             >
@@ -232,7 +234,10 @@ export default function BillingDashboard() {
                                         </div>
                                     </div>
                                 )}
-                                <button className="jarvis-gradient py-3 rounded-xl text-white font-bold text-xs shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+                                <button
+                                    onClick={() => toast.info('Recarregamento de créditos disponível em breve. Entre em contato com o suporte.')}
+                                    className="jarvis-gradient py-3 rounded-xl text-white font-bold text-xs shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+                                >
                                     Recarregar Créditos <ArrowUpRight size={14} />
                                 </button>
                             </div>

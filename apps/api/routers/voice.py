@@ -46,10 +46,30 @@ async def initiate_call(data: CallCreate, db: Session = Depends(get_session)):
 
 @router.post("/webhook/event")
 async def call_event_webhook(event: dict, db: Session = Depends(get_session)):
-    # Recebe eventos da Twilio/Vonage (simulado)
-    # Ex: call.completed, recording.available, transcription.completed
-    print(f"Call Event Received: {event.get('type')}")
-    return {"status": "ok"}
+    # Process call events from Twilio/Vonage
+    event_type = event.get("type", "unknown")
+    call_id = event.get("call_id")
+
+    if call_id:
+        call = db.get(CallRecord, call_id)
+        if call:
+            if event_type == "call.completed":
+                call.status = "completed"
+                call.duration_seconds = event.get("duration", 0)
+            elif event_type == "call.failed":
+                call.status = "failed"
+            elif event_type == "call.ringing":
+                call.status = "ringing"
+            elif event_type == "call.answered":
+                call.status = "in_progress"
+            elif event_type == "recording.available":
+                call.recording_url = event.get("recording_url")
+            elif event_type == "transcription.completed":
+                call.transcription = event.get("transcription")
+            db.add(call)
+            db.commit()
+
+    return {"status": "processed", "event_type": event_type, "call_id": call_id}
 
 @router.get("/voicemails", response_model=List[Voicemail])
 async def list_voicemails(db: Session = Depends(get_session)):

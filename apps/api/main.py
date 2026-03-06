@@ -106,13 +106,49 @@ async def root():
 async def health():
     return {"status": "healthy"}
 
-# Auth & Tenant Placeholder Routes
 @app.post("/auth/register")
 async def register(user_data: dict, db: Session = Depends(get_session)):
-    # Simple register logic
-    return {"message": "User registered"}
+    from sqlmodel import select
+    import uuid
+
+    email = user_data.get("email")
+    password = user_data.get("password")
+    full_name = user_data.get("full_name", "")
+
+    if not email or not password:
+        raise HTTPException(status_code=400, detail="Email e senha são obrigatórios")
+
+    existing = db.exec(select(User).where(User.email == email)).first()
+    if existing:
+        raise HTTPException(status_code=409, detail="Usuário já existe com este email")
+
+    user = User(
+        id=f"usr_{uuid.uuid4().hex[:8]}",
+        email=email,
+        hashed_password=get_password_hash(password),
+        full_name=full_name,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    token = create_access_token(data={"sub": user.email})
+    return {"access_token": token, "token_type": "bearer", "user_id": user.id}
 
 @app.post("/auth/login")
 async def login(login_data: dict, db: Session = Depends(get_session)):
-    # Simple login logic
-    return {"access_token": "token", "token_type": "bearer"}
+    from sqlmodel import select
+    from auth_utils import verify_password
+
+    email = login_data.get("email")
+    password = login_data.get("password")
+
+    if not email or not password:
+        raise HTTPException(status_code=400, detail="Email e senha são obrigatórios")
+
+    user = db.exec(select(User).where(User.email == email)).first()
+    if not user or not verify_password(password, user.hashed_password or ""):
+        raise HTTPException(status_code=401, detail="Credenciais inválidas")
+
+    token = create_access_token(data={"sub": user.email})
+    return {"access_token": token, "token_type": "bearer", "user_id": user.id}

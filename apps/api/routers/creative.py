@@ -30,10 +30,20 @@ async def generate_prompt(req: PromptGenRequest, db: Session = Depends(get_sessi
     
     synthesized_prompt = f"[STYLIZED] {system_directive}. {knowledge_context}. Input: {req.user_input}. Output specialized for {req.job_type}."
     
+    # Map job_type to prompt_type
+    prompt_type_map = {
+        "image": "text_to_image",
+        "video": "text_to_video",
+        "text": "text_generation",
+        "audio": "text_to_audio",
+        "copy": "text_generation",
+    }
+    prompt_type = prompt_type_map.get(req.job_type, req.job_type)
+
     artifact = PromptArtifact(
         id=f"prm_{uuid.uuid4().hex[:6]}",
         tenant_id=TENANT_ID,
-        prompt_type="text_to_image", # Fixed for mock
+        prompt_type=prompt_type,
         model_provider="Midjourney",
         model_name="v6.1",
         prompt_text=synthesized_prompt,

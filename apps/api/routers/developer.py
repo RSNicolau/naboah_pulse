@@ -26,18 +26,21 @@ async def create_app(data: AppCreate, db: Session = Depends(get_session)):
     client_id = f"pub_{uuid.uuid4().hex[:12]}"
     client_secret = secrets.token_urlsafe(32)
     
+    secret_hash = hashlib.sha256(client_secret.encode()).hexdigest()
+
     app = DeveloperApp(
         id=f"app_{uuid.uuid4().hex[:6]}",
-        tenant_id=TENANT_ID, # Mock
+        tenant_id=TENANT_ID,
         name=data.name,
         description=data.description,
         client_id=client_id,
-        client_secret_hash=client_secret, # Em prod: hash it
-        redirect_uris=data.redirect_uris
+        client_secret_hash=secret_hash,
+        redirect_uris=data.redirect_uris,
     )
     db.add(app)
     db.commit()
     db.refresh(app)
+    # Return plain secret only once at creation time
     return {**app.dict(), "client_secret": client_secret}
 
 @router.get("/apps", response_model=List[DeveloperApp])
@@ -96,7 +99,8 @@ async def oauth_token(data: TokenRequest, db: Session = Depends(get_session)):
         )
     ).first()
 
-    if not app or app.client_secret_hash != data.client_secret:
+    secret_hash = hashlib.sha256(data.client_secret.encode()).hexdigest()
+    if not app or app.client_secret_hash != secret_hash:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     now = int(datetime.utcnow().timestamp())
